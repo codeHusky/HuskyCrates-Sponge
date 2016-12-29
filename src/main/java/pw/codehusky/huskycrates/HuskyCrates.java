@@ -31,6 +31,7 @@ import pw.codehusky.huskycrates.crate.CrateUtilities;
 /**
  * Created by lokio on 12/28/2016.
  */
+@SuppressWarnings("deprecation")
 @Plugin(id="huskycrates", name = "HuskyCrates", version = "0.1.0", description = "hey whats up guys its scarce here")
 public class HuskyCrates {
     @Inject
@@ -41,7 +42,7 @@ public class HuskyCrates {
 
     @Inject
     @DefaultConfig(sharedRoot = false)
-    private ConfigurationLoader<CommentedConfigurationNode> crateConfig;
+    public ConfigurationLoader<CommentedConfigurationNode> crateConfig;
 
     public Cause genericCause;
     public Scheduler scheduler;
@@ -77,10 +78,12 @@ public class HuskyCrates {
         if(blk.getBlock().getType() == BlockTypes.CHEST) {
             TileEntity te = blk.getTileEntity().get();
             Inventory inv = ((TileEntityCarrier) te).getInventory();
-            if(inv.getName().get().contains("§1§2§3HUSKYCRATE-")){
+            String name = inv.getName().get();
+            System.out.println(name);
+            if(name.contains("☼1☼2☼3HUSKYCRATE-")){
                 event.setCancelled(true);
                 Task.Builder upcoming = scheduler.createTaskBuilder();
-                String crateType = inv.getName().get().replace("§1§2§3HUSKYCRATE-","");
+                String crateType = name.replace("☼1☼2☼3HUSKYCRATE-","");
                 upcoming.execute(() ->{
                     crateUtilities.launchCrateForPlayer(crateType,(Player)event.getCause().root(),this);
                 }).delayTicks(1).submit(this);

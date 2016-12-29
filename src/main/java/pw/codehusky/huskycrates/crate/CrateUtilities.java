@@ -5,7 +5,7 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import pw.codehusky.huskycrates.HuskyCrates;
-import pw.codehusky.huskycrates.crate.views.CSGOCrateView;
+import pw.codehusky.huskycrates.crate.views.NullCrateView;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -22,15 +22,27 @@ public class CrateUtilities {
         this.plugin = plugin;
     }
     public void launchCrateForPlayer(String crateType, Player target,HuskyCrates plugin){
-        CSGOCrateView view = new CSGOCrateView(plugin,target);
-        target.openInventory(view.getInventory(),plugin.genericCause);
+        crateType = crateType.toLowerCase();
+        if(!crateTypes.containsKey(crateType)) {
+            System.out.println(crateType);
+            target.openInventory(new NullCrateView(plugin,target,null).getInventory(), plugin.genericCause);
+        }else{
+            target.openInventory(crateTypes.get(crateType).generateViewForCrate(plugin, target).getInventory(), plugin.genericCause);
+        }
     }
     public ItemStack getCrateItemStack(String crateType){
+        return null;
+    }
+    public VirtualCrate getVirtualCrate(String id){
+        if(crateTypes.containsKey(id)){
+            return crateTypes.get(id);
+        }
         return null;
     }
     public void generateVirtualCrates(ConfigurationLoader<CommentedConfigurationNode> config){
         try {
             CommentedConfigurationNode configRoot = config.load();
+            crateTypes = new HashMap<>();
             Map<Object,? extends CommentedConfigurationNode> b = configRoot.getNode("crates").getChildrenMap();
             for(Object prekey: b.keySet()){
                 String key = (String) prekey;
