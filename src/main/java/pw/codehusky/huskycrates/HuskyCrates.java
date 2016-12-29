@@ -11,6 +11,7 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.DefaultConfig;
+import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -29,6 +30,8 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import pw.codehusky.huskycrates.commands.Crate;
 import pw.codehusky.huskycrates.crate.CrateUtilities;
+
+import java.util.HashMap;
 
 /**
  * Created by lokio on 12/28/2016.
@@ -50,6 +53,8 @@ public class HuskyCrates {
     public Scheduler scheduler;
     public CrateUtilities crateUtilities = new CrateUtilities(this);
     public String huskyCrateIdentifier = "☼1☼2☼3HUSKYCRATE-";
+
+    public HashMap<ArmorStand,String> effecters = new HashMap<>();
 
     @Listener
     public void gameStarted(GameStartedServerEvent event){
