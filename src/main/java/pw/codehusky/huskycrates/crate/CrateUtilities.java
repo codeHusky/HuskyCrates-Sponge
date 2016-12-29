@@ -2,8 +2,11 @@ package pw.codehusky.huskycrates.crate;
 
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.views.NullCrateView;
 
@@ -51,6 +54,25 @@ public class CrateUtilities {
             config.save(configRoot);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+    public void recognizeChest(Location<World> location){
+        if(location.getTileEntity().isPresent()){
+            TileEntityCarrier te = (TileEntityCarrier) location.getTileEntity().get();
+            if(te.getInventory().getName().get().contains(plugin.huskyCrateIdentifier)){
+                try {
+                    CommentedConfigurationNode root = plugin.crateConfig.load();
+                    CommentedConfigurationNode cacher = root.getNode("cachedCrates").getAppendedNode();
+                    cacher.getNode("worldUUID").setValue(location.getExtent().getUniqueId().toString());
+                    CommentedConfigurationNode pos = cacher.getNode("position");
+                    pos.getNode("x").setValue(location.getBlockX());
+                    pos.getNode("y").setValue(location.getBlockY());
+                    pos.getNode("z").setValue(location.getBlockZ());
+                    plugin.crateConfig.save(root);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

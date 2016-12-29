@@ -5,6 +5,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
@@ -12,6 +13,7 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -47,6 +49,7 @@ public class HuskyCrates {
     public Cause genericCause;
     public Scheduler scheduler;
     public CrateUtilities crateUtilities = new CrateUtilities(this);
+    public String huskyCrateIdentifier = "☼1☼2☼3HUSKYCRATE-";
 
     @Listener
     public void gameStarted(GameStartedServerEvent event){
@@ -65,8 +68,19 @@ public class HuskyCrates {
     public void gameReloaded(GameReloadEvent event){
         crateUtilities.generateVirtualCrates(crateConfig);
     }
-    public void updateCrates() {
-
+    private boolean blockCanBeCrate(BlockType type){
+        return type==BlockTypes.CHEST ||
+                type==BlockTypes.TRAPPED_CHEST ||
+                type==BlockTypes.ENDER_CHEST;
+    }
+    @Listener
+    public void placeBlock(ChangeBlockEvent event){
+        if(event instanceof ChangeBlockEvent.Place || event instanceof ChangeBlockEvent.Break) {
+            BlockType t = event.getTransactions().get(0).getOriginal().getLocation().get().getBlock().getType();
+            if (blockCanBeCrate(t)) {
+                crateUtilities.recognizeChest(event.getTransactions().get(0).getOriginal().getLocation().get());
+            }
+        }
     }
 
     @Listener
@@ -79,10 +93,10 @@ public class HuskyCrates {
             TileEntity te = blk.getTileEntity().get();
             Inventory inv = ((TileEntityCarrier) te).getInventory();
             String name = inv.getName().get();
-            if(name.contains("☼1☼2☼3HUSKYCRATE-")){
+            if(name.contains(huskyCrateIdentifier)){
                 event.setCancelled(true);
                 Task.Builder upcoming = scheduler.createTaskBuilder();
-                String crateType = name.replace("☼1☼2☼3HUSKYCRATE-","");
+                String crateType = name.replace(huskyCrateIdentifier,"");
                 upcoming.execute(() ->{
                     crateUtilities.launchCrateForPlayer(crateType,(Player)event.getCause().root(),this);
                 }).delayTicks(1).submit(this);
