@@ -8,6 +8,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.views.CSGOCrateView;
 import pw.codehusky.huskycrates.crate.views.CrateView;
@@ -19,6 +20,7 @@ import java.util.List;
 /**
  * Created by lokio on 12/29/2016.
  */
+@SuppressWarnings("deprecation")
 public class VirtualCrate {
     private ArrayList<Object[]> itemSet;
     public String displayName;
@@ -33,21 +35,22 @@ public class VirtualCrate {
         itemSet = new ArrayList<>();
         for(CommentedConfigurationNode e : items){
 
-            String name = e.getNode("name").getString();
-            String itemID = e.getNode("id").getString().toUpperCase();
+            String name = e.getNode("name").getString("");
+            String itemID = e.getNode("id").getString("").toUpperCase();
             int amount = e.getNode("amount").getInt(1);
             if(Sponge.getRegistry().getType(ItemType.class,itemID).isPresent()) {
                 ItemStack ourChild = ItemStack.builder()
                         .itemType(Sponge.getRegistry().getType(ItemType.class,itemID).get())
                         .quantity(amount)
                         .build();
-                ourChild.offer(Keys.DISPLAY_NAME, Text.of(name));
+                if(name.length() > 0)
+                    ourChild.offer(Keys.DISPLAY_NAME, TextSerializers.LEGACY_FORMATTING_CODE.deserialize(name));
                 EnchantmentData ed = ourChild.getOrCreate(EnchantmentData.class).get();
                 //ed.addElement()
-                String lore = e.getNode("lore").getString();
+                String lore = e.getNode("lore").getString("");
                 if(lore.length() > 0) {
                     ArrayList<Text> bb = new ArrayList<>();
-                    bb.add(Text.of(lore));
+                    bb.add(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(lore));
                     ourChild.offer(Keys.ITEM_LORE,bb);
                 }
                 ourChild.offer(ed);

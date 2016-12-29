@@ -63,7 +63,7 @@ public class HuskyCrates {
     }
     @Listener
     public void gameReloaded(GameReloadEvent event){
-
+        crateUtilities.generateVirtualCrates(crateConfig);
     }
     public void updateCrates() {
 
@@ -79,7 +79,6 @@ public class HuskyCrates {
             TileEntity te = blk.getTileEntity().get();
             Inventory inv = ((TileEntityCarrier) te).getInventory();
             String name = inv.getName().get();
-            System.out.println(name);
             if(name.contains("☼1☼2☼3HUSKYCRATE-")){
                 event.setCancelled(true);
                 Task.Builder upcoming = scheduler.createTaskBuilder();

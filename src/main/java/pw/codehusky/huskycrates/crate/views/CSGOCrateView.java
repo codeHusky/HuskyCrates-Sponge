@@ -16,6 +16,7 @@ import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 
@@ -25,6 +26,7 @@ import java.util.Random;
 /**
  * Created by lokio on 12/28/2016.
  */
+@SuppressWarnings("deprecation")
 public class CSGOCrateView implements CrateView {
     private HuskyCrates plugin;
 
@@ -33,34 +35,18 @@ public class CSGOCrateView implements CrateView {
     private Inventory disp;
     private Task updater;
     private Player ourplr;
+    private VirtualCrate vc;
+    private int revCount;
     public CSGOCrateView(HuskyCrates plugin,Player runner, VirtualCrate virtualCrate){
+        this.vc = virtualCrate;
         ourplr = runner;
         this.plugin = plugin;
-        //temp static item list
-        /*
-        waitCurrent++;
-
-        if (waitCurrent == Math.round(updateMax) && updateMax < waitStopper) {
-            offset++;
-            waitCurrent = 0;
-            updateMax *= dampening;
-            updateInv(-1);
-            ourplr.playSound(SoundTypes.UI_BUTTON_CLICK,ourplr.getLocation().getPosition(),0.25);
-            ticks++;
-        }else if(Math.round(updateMax) == waitStopper){
-            ourplr.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH,ourplr.getLocation().getPosition(),1);
-            updateMax = 100;
-            waitCurrent = 0;
-            System.out.println(ticks);
-            System.out.println(offsetBase);
-        }
-         */
 
         items = virtualCrate.getItemSet();
+        revCount = Math.round(15 * (3f/(float)items.size()));
         //offsetBase = (int)Math.floor(gg);
         float random = new Random().nextFloat()*100;
         float cummProb = 0;
-        int offsetAdjust = 2;
         int target = 0;
         for(int i = 0; i < items.size(); i++){
             cummProb += (float)items.get(i)[0];
@@ -70,7 +56,6 @@ public class CSGOCrateView implements CrateView {
             }
         }
 
-        System.out.println(((ItemStack)items.get(target)[1]).get(Keys.DISPLAY_NAME));
         disp = Inventory.builder()
                 .of(InventoryArchetypes.CHEST)
                 .listener(ClickInventoryEvent.class,evt -> evt.setCancelled(true))
@@ -124,30 +109,43 @@ public class CSGOCrateView implements CrateView {
     float updateMax = 1;
     int waitCurrent = 0;
     private double dampening = 1.05;
-    private int revCount = 10;
+    private int revModeRevCount = 15;
+    private double revDampening;
+    private boolean revMode = true;
     private int clicks = 0;
+    private int tickerState = 0;
     private void updateTick() {
+        revDampening = 1.15;
         waitCurrent++;
         int revolutions = (int) Math.floor(clicks / items.size());
-        if (waitCurrent == Math.round(updateMax) && revolutions < revCount) {
+        if (waitCurrent == Math.round(updateMax) && (revMode && revolutions < revModeRevCount || !revMode && revolutions < revCount) && tickerState == 0) {
             offset++;
             waitCurrent = 0;
-            updateMax *= dampening;
+            if (revMode) {
+                if(clicks % items.size() == items.size() - 1)
+                    updateMax *= revDampening;
+            } else {
+                updateMax *= dampening;
+            }
             updateInv(-1);
             ourplr.playSound(SoundTypes.UI_BUTTON_CLICK,ourplr.getLocation().getPosition(),0.25);
             clicks++;
-        }else if(revolutions == revCount && updateMax != 100){
+        }else if((revMode && revolutions >= revModeRevCount || !revMode && revolutions >= revCount) && updateMax != 100 && tickerState == 0){
+            tickerState = 1;
             ourplr.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH,ourplr.getLocation().getPosition(),1);
             updateMax = 100;
             waitCurrent = 0;
-            System.out.println(revolutions);
-            System.out.println(revCount);
-        }else{
+            if(revMode){
+                System.out.println(revModeRevCount + " | " + revolutions);
+            }else {
+                System.out.println(revCount + " | " + revolutions);
+            }
+        }else if(tickerState == 1){
             if (waitCurrent == Math.round(updateMax)) {
                 updater.cancel();
                 ourplr.closeInventory(plugin.genericCause);
                 String name = giveToPlayer.createSnapshot().getType().getTranslation().get();
-                ourplr.sendMessage(Text.of("You won ", TextColors.YELLOW, giveToPlayer.getQuantity() + " " + name, TextColors.RESET, " from a ",TextColors.BLUE,"Diamond Crate",TextColors.RESET,"!"));
+                ourplr.sendMessage(Text.of("You won ", TextColors.YELLOW, giveToPlayer.getQuantity() + " " + name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName),TextColors.RESET,"!"));
                 ourplr.getInventory().offer(giveToPlayer);
                 ourplr.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP,ourplr.getLocation().getPosition(),1);
 
