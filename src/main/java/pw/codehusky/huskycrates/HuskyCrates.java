@@ -1,17 +1,21 @@
 package pw.codehusky.huskycrates;
 
 import com.google.inject.Inject;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.plugin.Plugin;
@@ -31,10 +35,17 @@ import pw.codehusky.huskycrates.crate.CrateUtilities;
 public class HuskyCrates {
     @Inject
     public Logger logger;
+
     @Inject
     private PluginContainer pC;
+
+    @Inject
+    @DefaultConfig(sharedRoot = false)
+    private ConfigurationLoader<CommentedConfigurationNode> crateConfig;
+
     public Cause genericCause;
     public Scheduler scheduler;
+    public CrateUtilities crateUtilities = new CrateUtilities(this);
 
     @Listener
     public void gameStarted(GameStartedServerEvent event){
@@ -46,7 +57,15 @@ public class HuskyCrates {
         scheduler = Sponge.getScheduler();
         genericCause = Cause.of(NamedCause.of("PluginContainer",pC));
         Sponge.getCommandManager().register(this, crateSpec, "crate");
+        crateUtilities.generateVirtualCrates(crateConfig);
         logger.info("Crates has been started.");
+    }
+    @Listener
+    public void gameReloaded(GameReloadEvent event){
+
+    }
+    public void updateCrates() {
+
     }
 
     @Listener
@@ -63,7 +82,7 @@ public class HuskyCrates {
                 Task.Builder upcoming = scheduler.createTaskBuilder();
                 String crateType = inv.getName().get().replace("§1§2§3HUSKYCRATE-","");
                 upcoming.execute(() ->{
-                    CrateUtilities.launchCrateForPlayer(crateType,(Player)event.getCause().root(),this);
+                    crateUtilities.launchCrateForPlayer(crateType,(Player)event.getCause().root(),this);
                 }).delayTicks(1).submit(this);
 
             }
