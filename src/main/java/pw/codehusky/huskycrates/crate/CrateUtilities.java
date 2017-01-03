@@ -127,6 +127,8 @@ public class CrateUtilities {
     public String getTypeFromLocation(Location<World> location) {
         if(!location.getTileEntity().isPresent()) {
             plugin.logger.info("not present");
+            plugin.logger.info(location.getX() + "," + location.getY() + "," + location.getZ());
+            plugin.logger.info(location.getBlockType().getName());
             return null;
         }
         String prego = ((TileEntityCarrier) location.getTileEntity().get()).getInventory().getName().get();
