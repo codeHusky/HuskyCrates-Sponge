@@ -4,26 +4,19 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.effect.particle.ParticleEffect;
-import org.spongepowered.api.effect.particle.ParticleOptions;
-import org.spongepowered.api.effect.particle.ParticleTypes;
-import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.api.util.Color;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.views.NullCrateView;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by lokio on 12/28/2016.
@@ -31,6 +24,7 @@ import java.util.Map;
 @SuppressWarnings("deprecation")
 public class CrateUtilities {
     private HashMap<String,VirtualCrate> crateTypes;
+    private HashMap<Location<World>,PhysicalCrate> physicalCrates;
     private HashMap<String,ItemStack> keys;
     private HuskyCrates plugin;
     public CrateUtilities(HuskyCrates plugin){
@@ -67,25 +61,90 @@ public class CrateUtilities {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        populatePhysicalCrates();
     }
-    private Task runner;
-    public void spawnCrateEffecters(){
-        for(ArmorStand as : plugin.effecters.keySet() ){
-            String type = plugin.effecters.get(as);
-            as.getWorld().spawnEntity(as,plugin.genericCause);
+    private Task runner = null;
+    public void populatePhysicalCrates() {
+        physicalCrates = new HashMap<>();
+        try {
+            CommentedConfigurationNode root = plugin.crateConfig.load();
+            List<? extends CommentedConfigurationNode> cacher = root.getNode("cachedCrates").getChildrenList();
+            for(CommentedConfigurationNode i : cacher){
+                int x = 0;
+                int y = 0;
+                int z = 0;
+                String worldName = "";
+                if(!i.getNode("position").isVirtual()){
+                    x = i.getNode("position","x").getInt();
+                    y = i.getNode("position","y").getInt();
+                    z = i.getNode("position","z").getInt();
+                }
+                if(!i.getNode("worldName").isVirtual()){
+                    worldName = i.getNode("worldName").getString();
+                }
+                Location<World> newloco = new Location<>(Sponge.getServer().getWorld(worldName).get(),x,y,z);
+                String id = getTypeFromLocation(newloco);
+                if(id != null) {
+                    physicalCrates.put(newloco, new PhysicalCrate(newloco, id, plugin));
+                }else{
+                    i.setValue(null);
+                    plugin.crateConfig.save(root);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        startParticleEffects();
+    }
+    public void startParticleEffects(){
+        ArrayList<World> worldsChecked = new ArrayList<>();
+        for(Location<World> e : physicalCrates.keySet()){
+            World b = e.getExtent();
+            if(!worldsChecked.contains(b)){
+                worldsChecked.add(b);
+                for(Entity ent : b.getEntities()){
+                    if(ent instanceof ArmorStand){
+                        ArmorStand arm = (ArmorStand) ent;
+                        arm.remove();
+                        if(arm.getCreator().isPresent()){
+                            if(arm.getCreator().get().toString().equals(plugin.armorStandIdentifier)){
+                                arm.remove();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for(PhysicalCrate e : physicalCrates.values()) e.initParticles();
+
+        if(runner != null){
+            runner.cancel();
         }
         Scheduler scheduler = Sponge.getScheduler();
         Task.Builder taskBuilder = scheduler.createTaskBuilder();
         runner = taskBuilder.execute(this::particleRunner).intervalTicks(1).submit(plugin);
     }
+    public String getTypeFromLocation(Location<World> location) {
+        if(!location.getTileEntity().isPresent()) {
+            plugin.logger.info("not present");
+            return null;
+        }
+        String prego = ((TileEntityCarrier) location.getTileEntity().get()).getInventory().getName().get();
+        if(!prego.contains(plugin.huskyCrateIdentifier))
+            return null;
+        return prego.replace(plugin.huskyCrateIdentifier,"");
+    }
     public void recognizeChest(Location<World> location){
         if(location.getTileEntity().isPresent()){
-            TileEntityCarrier te = (TileEntityCarrier) location.getTileEntity().get();
-            if(te.getInventory().getName().get().contains(plugin.huskyCrateIdentifier)){
+            String id = null;
+            try {
+                id = getTypeFromLocation(location);
+            } catch (Exception e) {}
+            if(id != null){
                 try {
                     CommentedConfigurationNode root = plugin.crateConfig.load();
                     CommentedConfigurationNode cacher = root.getNode("cachedCrates").getAppendedNode();
-                    cacher.getNode("worldUUID").setValue(location.getExtent().getUniqueId().toString());
+                    cacher.getNode("worldName").setValue(location.getExtent().getProperties().getWorldName());
                     CommentedConfigurationNode pos = cacher.getNode("position");
                     pos.getNode("x").setValue(location.getBlockX());
                     pos.getNode("y").setValue(location.getBlockY());
@@ -94,48 +153,13 @@ public class CrateUtilities {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                String id = te.getInventory().getName().get().replace(plugin.huskyCrateIdentifier,"");
-                ArmorStand g = (ArmorStand) te.getWorld().createEntity(EntityTypes.ARMOR_STAND,te.getLocation().getPosition().add(0.5,1,0.5));
-                g.offer(Keys.DISPLAY_NAME, TextSerializers.LEGACY_FORMATTING_CODE.deserialize(crateTypes.get(id).displayName));
-                g.offer(Keys.INVISIBLE,true);
-                g.offer(Keys.CUSTOM_NAME_VISIBLE,true);
-                g.offer(Keys.HAS_GRAVITY,false);
-                g.offer(Keys.ARMOR_STAND_MARKER, true);
-                te.getWorld().spawnEntity(g,plugin.genericCause);
-                plugin.effecters.put(g,id);
-                spawnCrateEffecters();
+                populatePhysicalCrates();
             }
         }
     }
     private void particleRunner(){
-        for(ArmorStand as : plugin.effecters.keySet() ){
-            String type = plugin.effecters.get(as);
-            double time = Sponge.getServer().getRunningTimeTicks()*0.25;
-            double size = 0.8;
-
-            double x = Math.sin(time) * size;
-            double y = Math.sin(time*2) * 0.2 - 0.45;
-            double z = Math.cos(time) * size;
-            as.getWorld().spawnParticles(
-                    ParticleEffect.builder()
-                            .type(ParticleTypes.REDSTONE_DUST)
-                            .option(ParticleOptions.COLOR, Color.ofRgb(100,100,100))
-                            .build(),
-                    as.getLocation()
-                            .getPosition()
-                            .add(x,y,z));
-
-            x = Math.cos(time + 10) * size;
-            y = Math.sin(time*2 + 10) * 0.2  - 0.55;
-            z = Math.sin(time + 10) * size;
-            as.getWorld().spawnParticles(
-                    ParticleEffect.builder()
-                            .type(ParticleTypes.REDSTONE_DUST)
-                            .option(ParticleOptions.COLOR, Color.ofRgb(255,0,0))
-                            .build(),
-                    as.getLocation()
-                            .getPosition()
-                            .add(x,y,z));
+        for(PhysicalCrate c : physicalCrates.values()){
+            c.runParticles();
         }
     }
 }
