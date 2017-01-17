@@ -6,8 +6,11 @@ A simple, straightforward crate system for Sponge!
 
 # Config
 HuskyCrates might not create a config automatically for itself, so make sure to make one if it doesn't.
+
 **config > huskycrates > huskycrates.conf**
+
 To configure crates, here's a basic crate to get you started.
+
 ```
 crates {
     commandcrate {
