@@ -33,6 +33,7 @@ public class CSGOCrateView implements CrateView {
     private HuskyCrates plugin;
 
     Integer offset = null;
+    int itemNum = -1;
     private ArrayList<Object[]> items;
     private Inventory disp;
     private Task updater;
@@ -53,6 +54,7 @@ public class CSGOCrateView implements CrateView {
             cummProb += (float)items.get(i)[0];
             if(random <= cummProb && offset == null){
                 offset = i;
+                itemNum = i;
             }
         }
 
@@ -151,10 +153,10 @@ public class CSGOCrateView implements CrateView {
                 }
                 String command = "";
                 boolean hasCmd = false;
-                if(vc.getItemSet().get(offset).length == 3){
+                if(vc.getItemSet().get(itemNum).length == 3){
                     hasCmd = true;
                     System.out.println("a");
-                    command = (String) vc.getItemSet().get(offset)[2];
+                    command = (String) vc.getItemSet().get(itemNum)[2];
                 }
                 if(giveToPlayer.getQuantity() != 1 && !hasCmd){
                     ourplr.sendMessage(Text.of("You won ",TextColors.YELLOW, giveToPlayer.getQuantity() + " ",  name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName),TextColors.RESET,"!"));
