@@ -49,12 +49,10 @@ public class CSGOCrateView implements CrateView {
         //offsetBase = (int)Math.floor(gg);
         float random = new Random().nextFloat()*100;
         float cummProb = 0;
-        int target = 0;
         for(int i = 0; i < items.size(); i++){
             cummProb += (float)items.get(i)[0];
             if(random <= cummProb && offset == null){
                 offset = i;
-                target = i;
             }
         }
 
@@ -153,10 +151,10 @@ public class CSGOCrateView implements CrateView {
                 }
                 String command = "";
                 boolean hasCmd = false;
-                if(vc.getCommandSet().containsKey(giveToPlayer)){
+                if(vc.getItemSet().get(offset).length == 3){
                     hasCmd = true;
                     System.out.println("a");
-                    command = vc.getCommandSet().get(giveToPlayer);
+                    command = (String) vc.getItemSet().get(offset)[2];
                 }
                 if(giveToPlayer.getQuantity() != 1 && !hasCmd){
                     ourplr.sendMessage(Text.of("You won ",TextColors.YELLOW, giveToPlayer.getQuantity() + " ",  name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName),TextColors.RESET,"!"));
