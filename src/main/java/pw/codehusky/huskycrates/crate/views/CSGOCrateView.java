@@ -19,6 +19,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
+import pw.codehusky.huskycrates.crate.CrateCommandSource;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 
 import java.util.ArrayList;
@@ -137,11 +138,6 @@ public class CSGOCrateView implements CrateView {
             ourplr.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH,ourplr.getLocation().getPosition(),1);
             updateMax = 100;
             waitCurrent = 0;
-            if(revMode){
-                System.out.println(revModeRevCount + " | " + revolutions);
-            }else {
-                System.out.println(revCount + " | " + revolutions);
-            }
         }else if(tickerState == 1){
             if (waitCurrent == Math.round(updateMax)) {
                 updater.cancel();
@@ -155,9 +151,9 @@ public class CSGOCrateView implements CrateView {
                 boolean hasCmd = false;
                 if(vc.getItemSet().get(itemNum).length == 3){
                     hasCmd = true;
-                    System.out.println("a");
                     command = (String) vc.getItemSet().get(itemNum)[2];
                 }
+                Sponge.getCommandManager().process(new CrateCommandSource(),command.replace("%p",ourplr.getName()));
                 if(giveToPlayer.getQuantity() != 1 && !hasCmd){
                     ourplr.sendMessage(Text.of("You won ",TextColors.YELLOW, giveToPlayer.getQuantity() + " ",  name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName),TextColors.RESET,"!"));
                 }else{
