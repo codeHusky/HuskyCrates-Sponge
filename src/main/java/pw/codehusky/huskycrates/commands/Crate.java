@@ -28,20 +28,28 @@ public class Crate implements CommandExecutor {
     }
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-        if(src instanceof Player){
-            Player plr = (Player) src;
+
             if(args.getOne(Text.of("param1")).isPresent()) {
                 if(!args.getOne(Text.of("param2")).isPresent()) {
+                    if(src instanceof Player) {
+                        Player plr = (Player) src;
 
-                    ItemStack poss = getCrateItem(args.getOne(Text.of("param1")).get().toString());
-                    if (poss != null) {
-                        plr.getInventory().offer(poss);
-                    } else {
-                        plr.sendMessage(Text.of("Invalid crate id. Please check your config."));
+                        ItemStack poss = getCrateItem(args.getOne(Text.of("param1")).get().toString());
+                        if (poss != null) {
+                            plr.getInventory().offer(poss);
+                        } else {
+                            plr.sendMessage(Text.of("Invalid crate id. Please check your config."));
+                        }
                     }
                 }else{
                     if(args.getOne(Text.of("param1")).get().toString().equalsIgnoreCase("key")){
+                        Player plr = null;
+                        if(src instanceof Player)
+                            plr = (Player) src;
                         ItemStack poss = getCrateKey(args.getOne(Text.of("param2")).get().toString());
+                        if(args.getOne(Text.of("player")).isPresent()){
+                            plr = (Player) args.getOne(Text.of("player")).get();
+                        }
                         if (poss != null) {
                             plr.getInventory().offer(poss);
                         } else {
@@ -50,7 +58,7 @@ public class Crate implements CommandExecutor {
                     }
                 }
             }
-        }
+
         return CommandResult.success();
     }
     public ItemStack getCrateItem(String id){

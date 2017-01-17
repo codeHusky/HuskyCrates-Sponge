@@ -14,6 +14,7 @@ import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.event.Listener;
@@ -66,7 +67,7 @@ public class HuskyCrates {
         CommandSpec crateSpec = CommandSpec.builder()
                 .description(Text.of("Main crates command"))
                 .permission("huskycrates")
-                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("param1"))),GenericArguments.optional(GenericArguments.string(Text.of("param2"))))
+                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("param1"))),GenericArguments.optional(GenericArguments.string(Text.of("param2"))),GenericArguments.optional(GenericArguments.player(Text.of("player"))))
                 .executor(new Crate(this))
                 .build();
         scheduler = Sponge.getScheduler();
@@ -116,8 +117,14 @@ public class HuskyCrates {
                             String idline = lore.get(1).toPlain();
                             if(idline.contains("crate_")) {
                                 if(idline.replace("crate_","").equalsIgnoreCase(crateType)) {
-                                    if(plr.getGameModeData().get(Keys.GAME_MODE).get() != GameModes.CREATIVE){
-                                        plr.setItemInHand(HandTypes.MAIN_HAND,null);
+                                    if(plr.getGameModeData().get(Keys.GAME_MODE).get() != GameModes.CREATIVE && plr.hasPermission("huskycrates.tester")){
+                                        if(inhand.getQuantity() == 1)
+                                            plr.setItemInHand(HandTypes.MAIN_HAND,null);
+                                        else{
+                                            ItemStack tobe = inhand.copy();
+                                            tobe.setQuantity(tobe.getQuantity()-1);
+                                            plr.setItemInHand(HandTypes.MAIN_HAND,tobe);
+                                        }
                                     }
                                     Task.Builder upcoming = scheduler.createTaskBuilder();
 
@@ -132,6 +139,7 @@ public class HuskyCrates {
 
                 }
                 VirtualCrate vc = crateUtilities.getVirtualCrate(crateType);
+                plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,plr.getLocation().getPosition(),1.0);
                 plr.sendMessage(Text.of("You need a ",TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName + " Key")," to open this crate."));
             }
 

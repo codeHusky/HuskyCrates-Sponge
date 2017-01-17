@@ -115,7 +115,7 @@ public class CSGOCrateView implements CrateView {
     private int revModeRevCount = 15;
     private double revDampening;
     private boolean revMode = true;
-    private int clicks = 0;
+    private int clicks = -1;
     private int tickerState = 0;
     private void updateTick() {
         revDampening = 1.15;
@@ -164,7 +164,8 @@ public class CSGOCrateView implements CrateView {
                         ourplr.sendMessage(Text.of("You won a ", name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
                     }
                 }
-                ourplr.getInventory().offer(giveToPlayer);
+                if(!hasCmd)
+                    ourplr.getInventory().offer(giveToPlayer);
                 ourplr.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP,ourplr.getLocation().getPosition(),1);
 
             }else if(waitCurrent % 5 == 0){
