@@ -1,6 +1,7 @@
 package pw.codehusky.huskycrates.crate;
 
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import org.apache.commons.lang3.ArrayUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
@@ -15,6 +16,7 @@ import pw.codehusky.huskycrates.crate.views.CrateView;
 import pw.codehusky.huskycrates.crate.views.NullCrateView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -23,6 +25,7 @@ import java.util.List;
 @SuppressWarnings("deprecation")
 public class VirtualCrate {
     private ArrayList<Object[]> itemSet;
+    private HashMap<ItemStack, String> commandSet;
     public String displayName;
     public String crateType;
     public boolean invalidCrate = false;
@@ -30,9 +33,10 @@ public class VirtualCrate {
         displayName = node.getNode("name").getString();
         crateType = node.getNode("type").getString();
         List<? extends CommentedConfigurationNode> items = node.getNode("items").getChildrenList();
-        ArrayList<ItemStack> equality = new ArrayList<>();
+        ArrayList<Object[]> equality = new ArrayList<>();
         float currentProb = 0;
         itemSet = new ArrayList<>();
+        commandSet = new HashMap<>();
         for(CommentedConfigurationNode e : items){
 
             String name = e.getNode("name").getString("");
@@ -46,21 +50,40 @@ public class VirtualCrate {
                 if(name.length() > 0)
                     ourChild.offer(Keys.DISPLAY_NAME, TextSerializers.LEGACY_FORMATTING_CODE.deserialize(name));
                 EnchantmentData ed = ourChild.getOrCreate(EnchantmentData.class).get();
+                if(false){
+                    ourChild.offer(ed);
+                }
                 //ed.addElement()
                 String lore = e.getNode("lore").getString("");
+                ArrayList<Text> bb = new ArrayList<>();
                 if(lore.length() > 0) {
-                    ArrayList<Text> bb = new ArrayList<>();
                     bb.add(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(lore));
-                    ourChild.offer(Keys.ITEM_LORE,bb);
                 }
-                ourChild.offer(ed);
+
+                ourChild.offer(Keys.ITEM_LORE,bb);
+                ourChild.offer(Keys.HIDE_ENCHANTMENTS,true);
+                String potentialCommand = e.getNode("command").getString("");
                 if(e.getNode("chance").isVirtual()){
-                    equality.add(ourChild);
+                    Object[] t = {ourChild};
+                    if(potentialCommand.length() > 0){
+                        Object[] add = {potentialCommand};
+                        Object[] g = ArrayUtils.addAll(t,add);
+                        equality.add(g);
+                    }else {
+                        equality.add(t);
+                    }
                 }else{
-                    Object[] t = {e.getNode("chance").getFloat(),ourChild};
+                    Object[] t = {e.getNode("chance").getFloat(), ourChild};
                     currentProb += e.getNode("chance").getFloat();
-                    itemSet.add(t);
+                    if(potentialCommand.length() > 0){
+                        Object[] add = {potentialCommand};
+                        Object[] g = ArrayUtils.addAll(t,add);
+                        itemSet.add(g);
+                    }else {
+                        itemSet.add(t);
+                    }
                 }
+
             }
         }
         if(currentProb >= 100){
@@ -70,16 +93,20 @@ public class VirtualCrate {
         }else{
             int remaining =(int) (100 - currentProb);
             float equalProb = (float)remaining / (float)equality.size();
-            for(ItemStack item : equality){
-                Object[] t = {equalProb,item};
+            for(Object[] item : equality){
+                Object[] hj = {equalProb};
+                Object[] fin = ArrayUtils.addAll(hj,item);
                 currentProb += equalProb;
-                itemSet.add(t);
+                itemSet.add(fin);
             }
         }
         //Self resolving crate
     }
     public ArrayList<Object[]> getItemSet(){
         return itemSet;
+    }
+    public HashMap<ItemStack,String> getCommandSet(){
+        return commandSet;
     }
     public CrateView generateViewForCrate(HuskyCrates plugin,Player plr){
         if(invalidCrate)

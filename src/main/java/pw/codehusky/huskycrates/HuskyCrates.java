@@ -9,9 +9,13 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
+import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.DefaultConfig;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
@@ -19,16 +23,22 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import pw.codehusky.huskycrates.commands.Crate;
 import pw.codehusky.huskycrates.crate.CrateUtilities;
+import pw.codehusky.huskycrates.crate.VirtualCrate;
+
+import java.util.List;
 
 /**
  * Created by lokio on 12/28/2016.
@@ -41,7 +51,6 @@ public class HuskyCrates {
 
     @Inject
     private PluginContainer pC;
-
     @Inject
     @DefaultConfig(sharedRoot = false)
     public ConfigurationLoader<CommentedConfigurationNode> crateConfig;
@@ -57,6 +66,7 @@ public class HuskyCrates {
         CommandSpec crateSpec = CommandSpec.builder()
                 .description(Text.of("Main crates command"))
                 .permission("huskycrates")
+                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("param1"))),GenericArguments.optional(GenericArguments.string(Text.of("param2"))))
                 .executor(new Crate(this))
                 .build();
         scheduler = Sponge.getScheduler();
@@ -85,24 +95,47 @@ public class HuskyCrates {
     }
 
     @Listener
-    public void geocacheInteract(InteractBlockEvent.Secondary.MainHand event){
+    public void crateInteract(InteractBlockEvent.Secondary.MainHand event){
         if(!event.getTargetBlock().getLocation().isPresent())
             return;
 
         Location<World> blk = event.getTargetBlock().getLocation().get();
         if(blk.getBlock().getType() == BlockTypes.CHEST) {
+            Player plr = (Player)event.getCause().root();
             TileEntity te = blk.getTileEntity().get();
             Inventory inv = ((TileEntityCarrier) te).getInventory();
             String name = inv.getName().get();
             if(name.contains(huskyCrateIdentifier)){
                 event.setCancelled(true);
-                Task.Builder upcoming = scheduler.createTaskBuilder();
-                String crateType = name.replace(huskyCrateIdentifier,"");
-                upcoming.execute(() ->{
-                    crateUtilities.launchCrateForPlayer(crateType,(Player)event.getCause().root(),this);
-                }).delayTicks(1).submit(this);
+                String crateType = name.replace(huskyCrateIdentifier, "");
+                if(plr.getItemInHand(HandTypes.MAIN_HAND).isPresent()) {
+                    ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
+                    if(inhand.getItem() == ItemTypes.NETHER_STAR && inhand.get(Keys.ITEM_LORE).isPresent()) {
+                        List<Text> lore = inhand.get(Keys.ITEM_LORE).get();
+                        if(lore.size() > 1) {
+                            String idline = lore.get(1).toPlain();
+                            if(idline.contains("crate_")) {
+                                if(idline.replace("crate_","").equalsIgnoreCase(crateType)) {
+                                    if(plr.getGameModeData().get(Keys.GAME_MODE).get() != GameModes.CREATIVE){
+                                        plr.setItemInHand(HandTypes.MAIN_HAND,null);
+                                    }
+                                    Task.Builder upcoming = scheduler.createTaskBuilder();
 
+                                    upcoming.execute(() -> {
+                                        crateUtilities.launchCrateForPlayer(crateType, plr, this);
+                                    }).delayTicks(1).submit(this);
+                                    return;
+                                }
+                            }
+                        }
+                    }
+
+                }
+                VirtualCrate vc = crateUtilities.getVirtualCrate(crateType);
+                plr.sendMessage(Text.of("You need a ",TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName + " Key")," to open this crate."));
             }
+
+
         }
     }
 }

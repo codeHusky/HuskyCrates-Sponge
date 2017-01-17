@@ -42,31 +42,35 @@ public class PhysicalCrate {
         location.spawnEntity(as,huskyCrates.genericCause);
     }
     public void runParticles() {
-        double time = Sponge.getServer().getRunningTimeTicks()*0.25;
-        double size = 0.8;
+        try {
+            double time = Sponge.getServer().getRunningTimeTicks() * 0.25;
+            double size = 0.8;
 
-        double x = Math.sin(time) * size;
-        double y = Math.sin(time*2) * 0.2 - 0.45;
-        double z = Math.cos(time) * size;
-        as.getWorld().spawnParticles(
-                ParticleEffect.builder()
-                        .type(ParticleTypes.REDSTONE_DUST)
-                        .option(ParticleOptions.COLOR, Color.ofRgb(100,100,100))
-                        .build(),
-                as.getLocation()
-                        .getPosition()
-                        .add(x,y,z));
+            double x = Math.sin(time) * size;
+            double y = Math.sin(time * 2) * 0.2 - 0.45;
+            double z = Math.cos(time) * size;
+            as.getWorld().spawnParticles(
+                    ParticleEffect.builder()
+                            .type(ParticleTypes.REDSTONE_DUST)
+                            .option(ParticleOptions.COLOR, Color.ofRgb(100, 100, 100))
+                            .build(),
+                    as.getLocation()
+                            .getPosition()
+                            .add(x, y, z));
 
-        x = Math.cos(time + 10) * size;
-        y = Math.sin(time*2 + 10) * 0.2  - 0.55;
-        z = Math.sin(time + 10) * size;
-        as.getWorld().spawnParticles(
-                ParticleEffect.builder()
-                        .type(ParticleTypes.REDSTONE_DUST)
-                        .option(ParticleOptions.COLOR, Color.ofRgb(255,0,0))
-                        .build(),
-                as.getLocation()
-                        .getPosition()
-                        .add(x,y,z));
+            x = Math.cos(time + 10) * size;
+            y = Math.sin(time * 2 + 10) * 0.2 - 0.55;
+            z = Math.sin(time + 10) * size;
+            as.getWorld().spawnParticles(
+                    ParticleEffect.builder()
+                            .type(ParticleTypes.REDSTONE_DUST)
+                            .option(ParticleOptions.COLOR, Color.ofRgb(255, 0, 0))
+                            .build(),
+                    as.getLocation()
+                            .getPosition()
+                            .add(x, y, z));
+        }catch (Exception e){
+
+        }
     }
 }

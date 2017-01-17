@@ -16,11 +16,13 @@ import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -59,7 +61,7 @@ public class CSGOCrateView implements CrateView {
         disp = Inventory.builder()
                 .of(InventoryArchetypes.CHEST)
                 .listener(ClickInventoryEvent.class,evt -> evt.setCancelled(true))
-                .property(InventoryTitle.PROPERTY_NAME,InventoryTitle.of(Text.of(TextColors.BLACK,"Mining Crate")))
+                .property(InventoryTitle.PROPERTY_NAME,InventoryTitle.of(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(virtualCrate.displayName)))
                 .build(plugin);
         updateInv(0);
         Scheduler scheduler = Sponge.getScheduler();
@@ -144,8 +146,28 @@ public class CSGOCrateView implements CrateView {
             if (waitCurrent == Math.round(updateMax)) {
                 updater.cancel();
                 ourplr.closeInventory(plugin.genericCause);
-                String name = giveToPlayer.createSnapshot().getType().getTranslation().get();
-                ourplr.sendMessage(Text.of("You won ", TextColors.YELLOW, giveToPlayer.getQuantity() + " " + name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName),TextColors.RESET,"!"));
+
+                Text name = Text.of(TextColors.YELLOW, giveToPlayer.createSnapshot().getType().getTranslation().get());
+                if(giveToPlayer.get(Keys.DISPLAY_NAME).isPresent()){
+                    name = Text.of(TextStyles.ITALIC,giveToPlayer.get(Keys.DISPLAY_NAME).get());
+                }
+                String command = "";
+                boolean hasCmd = false;
+                if(vc.getCommandSet().containsKey(giveToPlayer)){
+                    hasCmd = true;
+                    System.out.println("a");
+                    command = vc.getCommandSet().get(giveToPlayer);
+                }
+                if(giveToPlayer.getQuantity() != 1 && !hasCmd){
+                    ourplr.sendMessage(Text.of("You won ",TextColors.YELLOW, giveToPlayer.getQuantity() + " ",  name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName),TextColors.RESET,"!"));
+                }else{
+                    String[] vowels = {"a","e","i","o","u"};
+                    if(Arrays.asList(vowels).contains(name.toPlain().substring(0,1).toLowerCase())){
+                        ourplr.sendMessage(Text.of("You won an ", name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
+                    }else {
+                        ourplr.sendMessage(Text.of("You won a ", name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
+                    }
+                }
                 ourplr.getInventory().offer(giveToPlayer);
                 ourplr.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP,ourplr.getLocation().getPosition(),1);
 
