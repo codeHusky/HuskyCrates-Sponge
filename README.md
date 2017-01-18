@@ -13,8 +13,8 @@ To configure crates, here's a basic crate to get you started.
 
 ```
 crates {
-    commandcrate {
-        items=[
+    commandcrate { # This line represents the crate id.
+        items=[
             {
                 amount=1 # The amount of an item.
                 chance=50 # The chance, out of 100, that this item will be drawn.
