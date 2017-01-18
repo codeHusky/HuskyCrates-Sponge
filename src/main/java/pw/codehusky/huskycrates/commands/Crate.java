@@ -42,11 +42,11 @@ public class Crate implements CommandExecutor {
                         }
                     }
                 }else{
-                    if(args.getOne(Text.of("param1")).get().toString().equalsIgnoreCase("key")){
+                    if(args.getOne(Text.of("param2")).get().toString().equalsIgnoreCase("key")){
                         Player plr = null;
                         if(src instanceof Player)
                             plr = (Player) src;
-                        ItemStack poss = getCrateKey(args.getOne(Text.of("param2")).get().toString());
+                        ItemStack poss = getCrateKey(args.getOne(Text.of("param1")).get().toString());
                         if(args.getOne(Text.of("player")).isPresent()){
                             plr = (Player) args.getOne(Text.of("player")).get();
                         }

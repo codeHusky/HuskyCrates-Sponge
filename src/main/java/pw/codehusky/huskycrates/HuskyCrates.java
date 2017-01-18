@@ -45,7 +45,7 @@ import java.util.List;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "0.1.0", description = "hey whats up guys its scarce here")
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "0.8.1", description = "Stuff.")
 public class HuskyCrates {
     @Inject
     public Logger logger;

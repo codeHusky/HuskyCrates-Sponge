@@ -49,7 +49,7 @@ public class CSGOCrateView implements CrateView {
         items = virtualCrate.getItemSet();
         revCount = Math.round(15 * (3f/(float)items.size()));
         //offsetBase = (int)Math.floor(gg);
-        float random = new Random().nextFloat()*100;
+        float random = new Random().nextFloat()*vc.getMaxProb();
         float cummProb = 0;
         for(int i = 0; i < items.size(); i++){
             cummProb += (float)items.get(i)[0];
@@ -58,7 +58,13 @@ public class CSGOCrateView implements CrateView {
                 itemNum = i;
             }
         }
-
+        if(offset == null){
+            System.out.println("--------------------------------");
+            System.out.println("--------------------------------");
+            System.out.println("ERROR WHEN INITING PROBABILITY FOR " + vc.displayName);
+            System.out.println("--------------------------------");
+            System.out.println("--------------------------------");
+        }
         disp = Inventory.builder()
                 .of(InventoryArchetypes.CHEST)
                 .listener(ClickInventoryEvent.class,evt -> evt.setCancelled(true))

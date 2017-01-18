@@ -28,6 +28,7 @@ public class VirtualCrate {
     private HashMap<ItemStack, String> commandSet;
     public String displayName;
     public String crateType;
+    private float maxProb = 100;
     public boolean invalidCrate = false;
     public VirtualCrate(String id, CommentedConfigurationNode node){
         displayName = node.getNode("name").getString();
@@ -78,6 +79,7 @@ public class VirtualCrate {
                     if(potentialCommand.length() > 0){
                         Object[] add = {potentialCommand};
                         Object[] g = ArrayUtils.addAll(t,add);
+                        //System.out.println((float)g[0]);
                         itemSet.add(g);
                     }else {
                         itemSet.add(t);
@@ -86,19 +88,23 @@ public class VirtualCrate {
 
             }
         }
-        if(currentProb >= 100){
-            if(equality.size() > 0){
-                System.out.println("You have an invalid chance configuration! " + id);
-            }
-        }else{
+        if(equality.size() > 0){
             int remaining =(int) (100 - currentProb);
             float equalProb = (float)remaining / (float)equality.size();
             for(Object[] item : equality){
                 Object[] hj = {equalProb};
                 Object[] fin = ArrayUtils.addAll(hj,item);
                 currentProb += equalProb;
+                //System.out.println((float)fin[0]);
                 itemSet.add(fin);
             }
+        }else{
+            maxProb = currentProb;
+        }
+        if(currentProb != maxProb){
+            System.out.println("You have too big of a chance! " + id + " (" + currentProb + ")");
+            System.out.println("This only fires if you have assumed probability. If you remove assumed chance, this error will be fixed.");
+            System.out.println("If everything looks right in your config, contact @codeHusky on Sponge Forums.");
         }
         //Self resolving crate
     }
@@ -107,6 +113,9 @@ public class VirtualCrate {
     }
     public HashMap<ItemStack,String> getCommandSet(){
         return commandSet;
+    }
+    public float getMaxProb(){
+        return maxProb;
     }
     public CrateView generateViewForCrate(HuskyCrates plugin,Player plr){
         if(invalidCrate)
