@@ -36,5 +36,6 @@ crates {
         type=Spinner # Types will be added in the future, but keeping this as a Spinner will keep your config future proof.
     }
     #Keys will also be configurable in the future, so keep your eye out.
+}
 ```
 
