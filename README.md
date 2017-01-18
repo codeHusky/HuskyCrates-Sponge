@@ -41,6 +41,6 @@ crates {
 Please note that if you want a chance maximum other than 100 right now, you cannot have any assumed chances. Make sure your numbers work out in the end.
 
 # Commands
-- /crate - does nothing
-- /crate < crate id > - Gives you a placeable crate block. Will look weird but trust me, it's the right thing.
-- /crate < crate id > key [player] - Give you, or someone you choose, a crate key.
+- `/crate` - does nothing
+- `/crate <crate id>` - Gives you a placeable crate block. Will look weird but trust me, it's the right thing.
+- `/crate <crate id> key [player]` - Give you, or someone you choose, a crate key.
