@@ -77,6 +77,8 @@ public class CSGOCrateView implements CrateView {
 
 
     }
+    private String commandToRun = "";
+    private boolean runCmd = false;
     private void updateInv(int state) {
         ItemStack border = ItemStack.builder().itemType(ItemTypes.STAINED_GLASS_PANE).add(Keys.DYE_COLOR,DyeColors.BLACK).build();
         border.offer(Keys.DISPLAY_NAME,Text.of(""));
@@ -91,6 +93,10 @@ public class CSGOCrateView implements CrateView {
                 e.set((ItemStack)items.get(itemNum)[1]);
                 if(slotnum == 13) {
                     giveToPlayer = ((ItemStack)items.get(itemNum)[1]).copy();
+                    if(items.get(itemNum).length == 3){
+                        runCmd = true;
+                        commandToRun = items.get(itemNum)[2].toString();
+                    }
                 }
             }else if(slotnum != 13){
                 if(state == 2 ){
@@ -153,14 +159,11 @@ public class CSGOCrateView implements CrateView {
                 if(giveToPlayer.get(Keys.DISPLAY_NAME).isPresent()){
                     name = Text.of(TextStyles.ITALIC,giveToPlayer.get(Keys.DISPLAY_NAME).get());
                 }
-                String command = "";
-                boolean hasCmd = false;
-                if(vc.getItemSet().get(itemNum).length == 3){
-                    hasCmd = true;
-                    command = (String) vc.getItemSet().get(itemNum)[2];
-                }
-                Sponge.getCommandManager().process(new CrateCommandSource(),command.replace("%p",ourplr.getName()));
-                if(giveToPlayer.getQuantity() != 1 && !hasCmd){
+                
+                if(runCmd)
+                    Sponge.getCommandManager().process(new CrateCommandSource(),commandToRun.replace("%p",ourplr.getName()));
+
+                if(giveToPlayer.getQuantity() != 1 && !runCmd){
                     ourplr.sendMessage(Text.of("You won ",TextColors.YELLOW, giveToPlayer.getQuantity() + " ",  name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName),TextColors.RESET,"!"));
                 }else{
                     String[] vowels = {"a","e","i","o","u"};
@@ -170,7 +173,7 @@ public class CSGOCrateView implements CrateView {
                         ourplr.sendMessage(Text.of("You won a ", name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
                     }
                 }
-                if(!hasCmd)
+                if(!runCmd)
                     ourplr.getInventory().offer(giveToPlayer);
                 ourplr.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP,ourplr.getLocation().getPosition(),1);
 
