@@ -111,7 +111,7 @@ public class HuskyCrates {
                 String crateType = name.replace(huskyCrateIdentifier, "");
                 if(plr.getItemInHand(HandTypes.MAIN_HAND).isPresent()) {
                     ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
-                    if(inhand.getItem() == ItemTypes.NETHER_STAR && inhand.get(Keys.ITEM_LORE).isPresent()) {
+                    if(inhand.getItem() == ItemTypes.RED_FLOWER && inhand.get(Keys.ITEM_LORE).isPresent()) {
                         List<Text> lore = inhand.get(Keys.ITEM_LORE).get();
                         if(lore.size() > 1) {
                             String idline = lore.get(1).toPlain();
