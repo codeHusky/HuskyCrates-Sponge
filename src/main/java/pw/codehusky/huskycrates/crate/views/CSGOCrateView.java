@@ -123,8 +123,8 @@ public class CSGOCrateView implements CrateView {
     private ItemStack giveToPlayer;
     float updateMax = 1;
     int waitCurrent = 0;
-    private double dampening = 1.05;
-    private int revModeRevCount = 15;
+    private double dampening = 1.1;
+    private int revModeRevCount = 5;
     private double revDampening;
     private boolean revMode = true;
     private int clicks = -1;

@@ -11,6 +11,7 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.extent.Extent;
 import pw.codehusky.huskycrates.HuskyCrates;
 
 import java.util.UUID;
@@ -30,7 +31,8 @@ public class PhysicalCrate {
         this.huskyCrates = huskyCrates;
     }
     public void initParticles() {
-        as = (ArmorStand)  location.createEntity(EntityTypes.ARMOR_STAND);
+        Extent extent = location.getExtent();
+        as = (ArmorStand)  extent.createEntity(EntityTypes.ARMOR_STAND,location.getPosition());
         as.setCreator(UUID.fromString(huskyCrates.armorStandIdentifier));
         as.offer(Keys.HAS_GRAVITY,false);
         as.offer(Keys.INVISIBLE,true);
@@ -39,7 +41,7 @@ public class PhysicalCrate {
         String name = huskyCrates.crateUtilities.getVirtualCrate(crateId).displayName;
         as.offer(Keys.DISPLAY_NAME, TextSerializers.LEGACY_FORMATTING_CODE.deserialize(name));
         as.setLocation(location.copy().add(0.5,1,0.5));
-        location.spawnEntity(as,huskyCrates.genericCause);
+        extent.spawnEntity(as,huskyCrates.genericCause);
     }
     public void runParticles() {
         try {
@@ -52,7 +54,7 @@ public class PhysicalCrate {
             as.getWorld().spawnParticles(
                     ParticleEffect.builder()
                             .type(ParticleTypes.REDSTONE_DUST)
-                            .option(ParticleOptions.COLOR, Color.ofRgb(100, 100, 100))
+                            .option(ParticleOptions.COLOR, Color.ofRgb(255, 139, 41))
                             .build(),
                     as.getLocation()
                             .getPosition()
@@ -64,7 +66,7 @@ public class PhysicalCrate {
             as.getWorld().spawnParticles(
                     ParticleEffect.builder()
                             .type(ParticleTypes.REDSTONE_DUST)
-                            .option(ParticleOptions.COLOR, Color.ofRgb(255, 0, 0))
+                            .option(ParticleOptions.COLOR, Color.ofRgb(49, 49, 49))
                             .build(),
                     as.getLocation()
                             .getPosition()
