@@ -49,3 +49,8 @@ Crate IDs are the values you put first inside of the crates{} in the config. So 
 
 # Permissions
 - `huskycrates.tester` - Allows a user to override the key removal in the inventory.
+- `huskycrates` - Gives access to the `/crate` command.
+- **Permissions To Be Implemented**
+  - `huskycrates.<crate id>.use` - Allows a user to use a certain crate
+  - `huskycrates.<crate id>.create` - Allows a user to get a certain crate's item
+  - `huskycrates.<crate id>.key` - Allows a user to spawn a certain key for themselves
