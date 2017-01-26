@@ -6,7 +6,7 @@
 
     <groupId>pw.codehusky</groupId>
     <artifactId>HuskyCrates</artifactId>
-    <version>0.8.1</version>
+    <version>0.8.6</version>
     <repositories>
         <repository>
             <id>sponge</id>

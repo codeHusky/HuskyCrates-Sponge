@@ -16,7 +16,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
@@ -45,7 +44,7 @@ import java.util.List;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "0.8.1", description = "Stuff.")
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "0.8.6", description = "A CratesReloaded Replacement for Sponge? lol")
 public class HuskyCrates {
     @Inject
     public Logger logger;
@@ -117,7 +116,7 @@ public class HuskyCrates {
                             String idline = lore.get(1).toPlain();
                             if(idline.contains("crate_")) {
                                 if(idline.replace("crate_","").equalsIgnoreCase(crateType)) {
-                                    if(plr.getGameModeData().get(Keys.GAME_MODE).get() != GameModes.CREATIVE && plr.hasPermission("huskycrates.tester")){
+                                    if(!plr.hasPermission("huskycrates.tester")){
                                         if(inhand.getQuantity() == 1)
                                             plr.setItemInHand(HandTypes.MAIN_HAND,null);
                                         else{
