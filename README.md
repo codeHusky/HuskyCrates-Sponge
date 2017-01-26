@@ -46,3 +46,6 @@ Please note that if you want a chance maximum other than 100 right now, you cann
 - `/crate <crate id> key [player]` - Give you, or someone you choose, a crate key.
 
 Crate IDs are the values you put first inside of the crates{} in the config. So like, command in the example would be the crate id.
+
+# Permissions
+- `huskycrates.tester` - Allows a user to override the key removal in the inventory.
