@@ -23,6 +23,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.world.chunk.PopulateChunkEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -83,6 +84,12 @@ public class HuskyCrates {
         return type==BlockTypes.CHEST ||
                 type==BlockTypes.TRAPPED_CHEST ||
                 type==BlockTypes.ENDER_CHEST;
+    }
+
+    @Listener
+    public void onChunkLoad(PopulateChunkEvent.Post event){
+        event.getTargetChunk().containsBlock()
+
     }
     @Listener
     public void placeBlock(ChangeBlockEvent event){

@@ -1,10 +1,12 @@
 package pw.codehusky.huskycrates.crate;
 
+import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOptions;
 import org.spongepowered.api.effect.particle.ParticleTypes;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -22,15 +24,37 @@ import java.util.UUID;
 public class PhysicalCrate {
     private Location<World> location;
     private String crateId;
-    private ArmorStand as;
+    private ArmorStand as = null;
     private HuskyCrates huskyCrates;
     public PhysicalCrate(Location<World> crateLocation, String crateId, HuskyCrates huskyCrates){
         this.location = crateLocation;
         this.crateId = crateId;
         this.huskyCrates = huskyCrates;
+        initParticles();
     }
     public void initParticles() {
-        as = (ArmorStand)  location.createEntity(EntityTypes.ARMOR_STAND);
+        Vector3d offset = new Vector3d(0.5,1,0.5);
+        for(Entity e: location.getExtent().getEntities()){
+            if(e instanceof ArmorStand) {
+                Vector3d newpos = e.getLocation().copy().sub(offset).getPosition();
+                if(e.getLocation().copy().sub(offset).getPosition().equals(location.getPosition())){
+                    ArmorStand ass = (ArmorStand)e;
+                    if(ass.getCreator().isPresent()){
+                        if(ass.getCreator().get().equals(UUID.fromString(huskyCrates.armorStandIdentifier))){
+                            System.out.println("Found an armor stand");
+                            System.out.println(location);
+                            as = ass;
+                        }
+                    }
+                }
+            }
+        }
+
+        if(as == null) {
+            as = (ArmorStand)  location.createEntity(EntityTypes.ARMOR_STAND);
+            as.setLocation(location.copy().add(offset));
+            location.spawnEntity(as,huskyCrates.genericCause);
+        }
         as.setCreator(UUID.fromString(huskyCrates.armorStandIdentifier));
         as.offer(Keys.HAS_GRAVITY,false);
         as.offer(Keys.INVISIBLE,true);
@@ -38,8 +62,7 @@ public class PhysicalCrate {
         as.offer(Keys.CUSTOM_NAME_VISIBLE,true);
         String name = huskyCrates.crateUtilities.getVirtualCrate(crateId).displayName;
         as.offer(Keys.DISPLAY_NAME, TextSerializers.LEGACY_FORMATTING_CODE.deserialize(name));
-        as.setLocation(location.copy().add(0.5,1,0.5));
-        location.spawnEntity(as,huskyCrates.genericCause);
+
     }
     public void runParticles() {
         try {

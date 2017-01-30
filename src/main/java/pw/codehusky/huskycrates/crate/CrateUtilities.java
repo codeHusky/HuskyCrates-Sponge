@@ -1,7 +1,9 @@
 package pw.codehusky.huskycrates.crate;
 
+import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.entity.Entity;
@@ -16,7 +18,10 @@ import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.views.NullCrateView;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Created by lokio on 12/28/2016.
@@ -65,24 +70,31 @@ public class CrateUtilities {
     }
     private Task runner = null;
     public void populatePhysicalCrates() {
+        for(World e : Sponge.getGame().getServer().getWorlds()){
+            for(Entity ent : e.getEntities()){
+                if(ent instanceof ArmorStand){
+                    ArmorStand arm = (ArmorStand) ent;
+                    if(arm.getCreator().isPresent()){
+                        if(arm.getCreator().get().equals(UUID.fromString(plugin.armorStandIdentifier))){
+                            arm.remove();
+                        }
+                    }
+                }
+            }
+        }
         physicalCrates = new HashMap<>();
         try {
             CommentedConfigurationNode root = plugin.crateConfig.load();
             List<? extends CommentedConfigurationNode> cacher = root.getNode("cachedCrates").getChildrenList();
             for(CommentedConfigurationNode i : cacher){
-                int x = 0;
-                int y = 0;
-                int z = 0;
-                String worldName = "";
-                if(!i.getNode("position").isVirtual()){
-                    x = i.getNode("position","x").getInt();
-                    y = i.getNode("position","y").getInt();
-                    z = i.getNode("position","z").getInt();
+                Location<World> newloco = null;
+                try {
+                    newloco = i.getValue(TypeToken.of(Location.class));
+                } catch (ObjectMappingException e) {
+                    e.printStackTrace();
+                    i.setValue(null);
+                    continue;
                 }
-                if(!i.getNode("worldName").isVirtual()){
-                    worldName = i.getNode("worldName").getString();
-                }
-                Location<World> newloco = new Location<>(Sponge.getServer().getWorld(worldName).get(),x,y,z);
                 String id = getTypeFromLocation(newloco);
                 if(id != null) {
                     physicalCrates.put(newloco, new PhysicalCrate(newloco, id, plugin));
@@ -97,26 +109,6 @@ public class CrateUtilities {
         startParticleEffects();
     }
     public void startParticleEffects(){
-        ArrayList<World> worldsChecked = new ArrayList<>();
-        for(Location<World> e : physicalCrates.keySet()){
-            World b = e.getExtent();
-            if(!worldsChecked.contains(b)){
-                worldsChecked.add(b);
-                for(Entity ent : b.getEntities()){
-                    if(ent instanceof ArmorStand){
-                        ArmorStand arm = (ArmorStand) ent;
-                        arm.remove();
-                        if(arm.getCreator().isPresent()){
-                            if(arm.getCreator().get().toString().equals(plugin.armorStandIdentifier)){
-                                arm.remove();
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        for(PhysicalCrate e : physicalCrates.values()) e.initParticles();
-
         if(runner != null){
             runner.cancel();
         }
@@ -144,13 +136,13 @@ public class CrateUtilities {
             } catch (Exception e) {}
             if(id != null){
                 try {
+
                     CommentedConfigurationNode root = plugin.crateConfig.load();
-                    CommentedConfigurationNode cacher = root.getNode("cachedCrates").getAppendedNode();
-                    cacher.getNode("worldName").setValue(location.getExtent().getProperties().getWorldName());
-                    CommentedConfigurationNode pos = cacher.getNode("position");
-                    pos.getNode("x").setValue(location.getBlockX());
-                    pos.getNode("y").setValue(location.getBlockY());
-                    pos.getNode("z").setValue(location.getBlockZ());
+                    try {
+                        root.getNode("cachedCrates").getAppendedNode().setValue(TypeToken.of(Location.class),location);
+                    } catch (ObjectMappingException e) {
+                        e.printStackTrace();
+                    }
                     plugin.crateConfig.save(root);
                 } catch (IOException e) {
                     e.printStackTrace();
