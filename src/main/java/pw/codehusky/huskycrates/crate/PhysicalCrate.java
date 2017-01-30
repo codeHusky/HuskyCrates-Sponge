@@ -13,6 +13,7 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.extent.Extent;
 import pw.codehusky.huskycrates.HuskyCrates;
 
 import java.util.UUID;
@@ -33,6 +34,7 @@ public class PhysicalCrate {
         initParticles();
     }
     public void initParticles() {
+
         Vector3d offset = new Vector3d(0.5,1,0.5);
         for(Entity e: location.getExtent().getEntities()){
             if(e instanceof ArmorStand) {
@@ -55,6 +57,7 @@ public class PhysicalCrate {
             as.setLocation(location.copy().add(offset));
             location.spawnEntity(as,huskyCrates.genericCause);
         }
+
         as.setCreator(UUID.fromString(huskyCrates.armorStandIdentifier));
         as.offer(Keys.HAS_GRAVITY,false);
         as.offer(Keys.INVISIBLE,true);
@@ -62,7 +65,6 @@ public class PhysicalCrate {
         as.offer(Keys.CUSTOM_NAME_VISIBLE,true);
         String name = huskyCrates.crateUtilities.getVirtualCrate(crateId).displayName;
         as.offer(Keys.DISPLAY_NAME, TextSerializers.LEGACY_FORMATTING_CODE.deserialize(name));
-
     }
     public void runParticles() {
         try {
@@ -75,7 +77,7 @@ public class PhysicalCrate {
             as.getWorld().spawnParticles(
                     ParticleEffect.builder()
                             .type(ParticleTypes.REDSTONE_DUST)
-                            .option(ParticleOptions.COLOR, Color.ofRgb(100, 100, 100))
+                            .option(ParticleOptions.COLOR, Color.ofRgb(255, 139, 41))
                             .build(),
                     as.getLocation()
                             .getPosition()
@@ -87,7 +89,7 @@ public class PhysicalCrate {
             as.getWorld().spawnParticles(
                     ParticleEffect.builder()
                             .type(ParticleTypes.REDSTONE_DUST)
-                            .option(ParticleOptions.COLOR, Color.ofRgb(255, 0, 0))
+                            .option(ParticleOptions.COLOR, Color.ofRgb(49, 49, 49))
                             .build(),
                     as.getLocation()
                             .getPosition()

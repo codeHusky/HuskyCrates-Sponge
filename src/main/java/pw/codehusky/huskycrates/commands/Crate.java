@@ -75,7 +75,7 @@ public class Crate implements CommandExecutor {
         VirtualCrate vc = plugin.crateUtilities.getVirtualCrate(id);
         if(vc != null){
             ItemStack key = ItemStack.builder()
-                    .itemType(ItemTypes.NETHER_STAR)
+                    .itemType(ItemTypes.RED_FLOWER)
                     .quantity(1)
                     .add(Keys.DISPLAY_NAME, TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName + " Key")).build();
             ArrayList<Text> bb = new ArrayList<>();
