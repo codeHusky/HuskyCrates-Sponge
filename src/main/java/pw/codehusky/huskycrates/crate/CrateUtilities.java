@@ -12,16 +12,14 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.views.NullCrateView;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by lokio on 12/28/2016.
@@ -53,7 +51,10 @@ public class CrateUtilities {
         }
         return null;
     }
+    private ArrayList<Location<World>> toCheck;
     public void generateVirtualCrates(ConfigurationLoader<CommentedConfigurationNode> config){
+        toCheck = new ArrayList<>();
+        physicalCrates = new HashMap<>();
         try {
             CommentedConfigurationNode configRoot = config.load();
             crateTypes = new HashMap<>();
@@ -66,45 +67,46 @@ public class CrateUtilities {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        populatePhysicalCrates();
-    }
-    private Task runner = null;
-    public void populatePhysicalCrates() {
-        for(World e : Sponge.getGame().getServer().getWorlds()){
-            for(Entity ent : e.getEntities()){
-                if(ent instanceof ArmorStand){
-                    ArmorStand arm = (ArmorStand) ent;
-                    if(arm.getCreator().isPresent()){
-                        if(arm.getCreator().get().equals(UUID.fromString(plugin.armorStandIdentifier))){
-                            arm.remove();
-                        }
-                    }
-                }
-            }
-        }
-        physicalCrates = new HashMap<>();
         try {
             CommentedConfigurationNode root = plugin.crateConfig.load();
             List<? extends CommentedConfigurationNode> cacher = root.getNode("cachedCrates").getChildrenList();
             for(CommentedConfigurationNode i : cacher){
-                Location<World> newloco = null;
                 try {
-                    newloco = i.getValue(TypeToken.of(Location.class));
+                    toCheck.add(i.getValue(TypeToken.of(Location.class)));
                 } catch (ObjectMappingException e) {
                     e.printStackTrace();
                     i.setValue(null);
-                    continue;
-                }
-                String id = getTypeFromLocation(newloco);
-                if(id != null) {
-                    physicalCrates.put(newloco, new PhysicalCrate(newloco, id, plugin));
-                }else{
-                    i.setValue(null);
-                    plugin.crateConfig.save(root);
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+    private Task runner = null;
+    public void populatePhysicalCrates(Chunk chunk) {
+        for(Entity ent : chunk.getEntities()){
+            if(ent instanceof ArmorStand){
+                ArmorStand arm = (ArmorStand) ent;
+                if(arm.getCreator().isPresent()){
+                    if(arm.getCreator().get().equals(UUID.fromString(plugin.armorStandIdentifier))){
+                        arm.remove();
+                    }
+                }
+            }
+        }
+
+
+        for(Location<World> loco : toCheck){
+            if(!chunk.containsBlock(loco.getBlockPosition()))
+                return;
+            String id = getTypeFromLocation(loco);
+            if(id != null) {
+                physicalCrates.put(loco, new PhysicalCrate(loco, id, plugin));
+                System.out.println("crate identified");
+            }else{
+                System.out.println("ahem.");
+            }
+            toCheck.remove(loco);
         }
         startParticleEffects();
     }
@@ -147,7 +149,7 @@ public class CrateUtilities {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                populatePhysicalCrates();
+                populatePhysicalCrates(location.getExtent().getChunk(location.getChunkPosition()).get());
             }
         }
     }

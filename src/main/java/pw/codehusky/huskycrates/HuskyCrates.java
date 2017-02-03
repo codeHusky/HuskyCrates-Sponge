@@ -88,8 +88,7 @@ public class HuskyCrates {
 
     @Listener
     public void onChunkLoad(PopulateChunkEvent.Post event){
-        event.getTargetChunk().containsBlock()
-
+        crateUtilities.populatePhysicalCrates(event.getTargetChunk());
     }
     @Listener
     public void placeBlock(ChangeBlockEvent event){
