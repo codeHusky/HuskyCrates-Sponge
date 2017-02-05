@@ -105,18 +105,13 @@ public class CrateUtilities {
             }
         }
 
-        System.out.println(bit);
         for(Location<World> loco : eep){
             if(!bit.containsBlock(loco.getBlockPosition())) {
-                System.out.println("ignore");
                 return;
             }
             String id = getTypeFromLocation(loco);
             if(id != null) {
                 physicalCrates.put(loco, new PhysicalCrate(loco, id, plugin));
-                System.out.println("crate identified");
-            }else{
-                System.out.println("ahem.");
             }
         }
         startParticleEffects();
@@ -131,9 +126,6 @@ public class CrateUtilities {
     }
     public String getTypeFromLocation(Location<World> location) {
         if(!location.getTileEntity().isPresent()) {
-            plugin.logger.info("not present");
-            plugin.logger.info(location.getX() + "," + location.getY() + "," + location.getZ());
-            plugin.logger.info(location.getBlockType().getName());
             return null;
         }
         String prego = ((TileEntityCarrier) location.getTileEntity().get()).getInventory().getName().get();

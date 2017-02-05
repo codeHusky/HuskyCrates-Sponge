@@ -86,20 +86,16 @@ public class HuskyCrates {
     public void entLoad(SpawnEntityEvent event){
         if(hasInitialized)
             return;
-        logger.info("ent loaded");
         for(Entity e : event.getEntities()){
             if(e instanceof ArmorStand){
                 crateUtilities.populatePhysicalCrates(event.getTargetWorld().getChunk(e.getLocation().getChunkPosition()).get());
                 return;
-            }else{
-                System.out.println("ignoring");
             }
         }
     }
 
     @Listener(order = Order.POST)
     public void worldLoaded(LoadWorldEvent event){
-        logger.info("world loaded");
         crateUtilities.populatePhysicalCrates(event.getTargetWorld());
     }
     @Listener
