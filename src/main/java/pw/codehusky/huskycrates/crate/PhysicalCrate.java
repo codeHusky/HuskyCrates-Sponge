@@ -22,18 +22,18 @@ import java.util.UUID;
  */
 @SuppressWarnings("deprecation")
 public class PhysicalCrate {
-    private Location<World> location;
+    public Location<World> location;
     private String crateId;
-    private ArmorStand as = null;
+    public ArmorStand as = null;
     private HuskyCrates huskyCrates;
+    public static Vector3d offset = new Vector3d(0.5,1,0.5);
     public PhysicalCrate(Location<World> crateLocation, String crateId, HuskyCrates huskyCrates){
         this.location = crateLocation;
         this.crateId = crateId;
         this.huskyCrates = huskyCrates;
-        initParticles();
+        createHologram();
     }
-    public void initParticles() {
-        Vector3d offset = new Vector3d(0.5,1,0.5);
+    public void createHologram() {
         for(Entity e: location.getExtent().getEntities()){
             if(e instanceof ArmorStand) {
                 Vector3d newpos = e.getLocation().copy().sub(offset).getPosition();
@@ -41,8 +41,8 @@ public class PhysicalCrate {
                     ArmorStand ass = (ArmorStand)e;
                     if(ass.getCreator().isPresent()){
                         if(ass.getCreator().get().equals(UUID.fromString(huskyCrates.armorStandIdentifier))){
-                            System.out.println("Found an armor stand");
-                            System.out.println(location);
+//                            System.out.println("Found an armor stand");
+//                            System.out.println(location);
                             as = ass;
                         }
                     }
@@ -51,9 +51,9 @@ public class PhysicalCrate {
         }
 
         if(as == null) {
-            as = (ArmorStand)  location.createEntity(EntityTypes.ARMOR_STAND);
+            as = (ArmorStand)  location.getExtent().createEntity(EntityTypes.ARMOR_STAND,location.getPosition());
             as.setLocation(location.copy().add(offset));
-            location.spawnEntity(as,huskyCrates.genericCause);
+            location.getExtent().spawnEntity(as,huskyCrates.genericCause);
         }
         as.setCreator(UUID.fromString(huskyCrates.armorStandIdentifier));
         as.offer(Keys.HAS_GRAVITY,false);

@@ -5,6 +5,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
@@ -12,9 +13,9 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.extent.Extent;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.views.NullCrateView;
 
@@ -81,24 +82,35 @@ public class CrateUtilities {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        for(World e : Sponge.getServer().getWorlds()) {
+            populatePhysicalCrates(e);
+        }
     }
     private Task runner = null;
-    public void populatePhysicalCrates(Chunk chunk) {
-        for(Entity ent : chunk.getEntities()){
+    public void populatePhysicalCrates(Extent bit) {
+        ArrayList<Location<World>> eep = new ArrayList<>();
+        for(Entity ent : bit.getEntities()){
             if(ent instanceof ArmorStand){
                 ArmorStand arm = (ArmorStand) ent;
                 if(arm.getCreator().isPresent()){
                     if(arm.getCreator().get().equals(UUID.fromString(plugin.armorStandIdentifier))){
-                        arm.remove();
+                        Location woot = arm.getLocation().copy().sub(PhysicalCrate.offset);
+
+                        if(physicalCrates.containsKey(woot))
+                            continue;
+                        eep.add(woot);
+                        //arm.remove();
                     }
                 }
             }
         }
 
-
-        for(Location<World> loco : toCheck){
-            if(!chunk.containsBlock(loco.getBlockPosition()))
+        System.out.println(bit);
+        for(Location<World> loco : eep){
+            if(!bit.containsBlock(loco.getBlockPosition())) {
+                System.out.println("ignore");
                 return;
+            }
             String id = getTypeFromLocation(loco);
             if(id != null) {
                 physicalCrates.put(loco, new PhysicalCrate(loco, id, plugin));
@@ -106,7 +118,6 @@ public class CrateUtilities {
             }else{
                 System.out.println("ahem.");
             }
-            toCheck.remove(loco);
         }
         startParticleEffects();
     }
@@ -140,22 +151,32 @@ public class CrateUtilities {
                 try {
 
                     CommentedConfigurationNode root = plugin.crateConfig.load();
-                    try {
-                        root.getNode("cachedCrates").getAppendedNode().setValue(TypeToken.of(Location.class),location);
-                    } catch (ObjectMappingException e) {
-                        e.printStackTrace();
-                    }
+//                    try {
+//                        root.getNode("cachedCrates").getAppendedNode().setValue(TypeToken.of(Location.class),location);
+//                    } catch (ObjectMappingException e) {
+//                        e.printStackTrace();
+//                    }
                     plugin.crateConfig.save(root);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                populatePhysicalCrates(location.getExtent().getChunk(location.getChunkPosition()).get());
+                physicalCrates.put(location,new PhysicalCrate(location,id,plugin));
             }
         }
     }
     private void particleRunner(){
-        for(PhysicalCrate c : physicalCrates.values()){
-            c.runParticles();
+        try {
+            for (Location<World> b : physicalCrates.keySet()) {
+                PhysicalCrate c = physicalCrates.get(b);
+                if (c.location.getBlock().getType() != BlockTypes.CHEST) {
+                    c.as.remove();
+                    physicalCrates.remove(b);
+                    continue;
+                }
+                c.runParticles();
+            }
+        }catch(Exception e){
+
         }
     }
 }

@@ -15,15 +15,19 @@ import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.effect.sound.SoundTypes;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
-import org.spongepowered.api.event.world.chunk.PopulateChunkEvent;
+import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -61,7 +65,7 @@ public class HuskyCrates {
     public CrateUtilities crateUtilities = new CrateUtilities(this);
     public String huskyCrateIdentifier = "☼1☼2☼3HUSKYCRATE-";
     public String armorStandIdentifier = "ABABABAB-CDDE-0000-8374-CAAAECAAAECA";
-
+    private boolean hasInitialized = false;
     @Listener
     public void gameStarted(GameStartedServerEvent event){
         CommandSpec crateSpec = CommandSpec.builder()
@@ -75,6 +79,28 @@ public class HuskyCrates {
         Sponge.getCommandManager().register(this, crateSpec, "crate");
         crateUtilities.generateVirtualCrates(crateConfig);
         logger.info("Crates has been started.");
+        hasInitialized = true;
+    }
+
+    @Listener
+    public void entLoad(SpawnEntityEvent event){
+        if(hasInitialized)
+            return;
+        logger.info("ent loaded");
+        for(Entity e : event.getEntities()){
+            if(e instanceof ArmorStand){
+                crateUtilities.populatePhysicalCrates(event.getTargetWorld().getChunk(e.getLocation().getChunkPosition()).get());
+                return;
+            }else{
+                System.out.println("ignoring");
+            }
+        }
+    }
+
+    @Listener(order = Order.POST)
+    public void worldLoaded(LoadWorldEvent event){
+        logger.info("world loaded");
+        crateUtilities.populatePhysicalCrates(event.getTargetWorld());
     }
     @Listener
     public void gameReloaded(GameReloadEvent event){
@@ -86,10 +112,6 @@ public class HuskyCrates {
                 type==BlockTypes.ENDER_CHEST;
     }
 
-    @Listener
-    public void onChunkLoad(PopulateChunkEvent.Post event){
-        crateUtilities.populatePhysicalCrates(event.getTargetChunk());
-    }
     @Listener
     public void placeBlock(ChangeBlockEvent event){
         if(event instanceof ChangeBlockEvent.Place || event instanceof ChangeBlockEvent.Break) {
