@@ -162,7 +162,7 @@ public class HuskyCrates {
 
                 }
                 VirtualCrate vc = crateUtilities.getVirtualCrate(crateType);
-                plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,plr.getLocation().getPosition(),1.0);
+                plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,plr.getLocation().getPosition(),0.5);
                 plr.sendMessage(Text.of("You need a ",TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName + " Key")," to open this crate."));
             }
 

@@ -71,12 +71,17 @@ public class Crate implements CommandExecutor {
         }
         return null;
     }
+
     public ItemStack getCrateKey(String id){
+        return this.getCrateKey(id,1);
+    }
+
+    public ItemStack getCrateKey(String id,int quantity){
         VirtualCrate vc = plugin.crateUtilities.getVirtualCrate(id);
         if(vc != null){
             ItemStack key = ItemStack.builder()
-                    .itemType(ItemTypes.NETHER_STAR)
-                    .quantity(1)
+                    .itemType(ItemTypes.RED_FLOWER)
+                    .quantity(quantity)
                     .add(Keys.DISPLAY_NAME, TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName + " Key")).build();
             ArrayList<Text> bb = new ArrayList<>();
             bb.add(Text.of(TextColors.WHITE,"A key for a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName) , TextColors.WHITE,"."));
