@@ -23,7 +23,7 @@ public class NullCrateView implements CrateView {
     @Override
     public Inventory getInventory() {
         Inventory woop = Inventory.builder()
-                .property(InventoryDimension.PROPERTY_NAME, InventoryDimension.of(9,1))
+                .property(InventoryDimension.PROPERTY_NAM, InventoryDimension.of(9,1))
                 .property(InventoryTitle.PROPERTY_NAME,InventoryTitle.of(Text.of(TextColors.DARK_RED,"INVALID CRATE TYPE!")))
                 .listener(ClickInventoryEvent.class, evt -> evt.setCancelled(true))
                 .build(plugin);

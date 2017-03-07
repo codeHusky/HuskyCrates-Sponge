@@ -29,7 +29,7 @@ import java.util.Random;
 /**
  * Created by lokio on 12/28/2016.
  */
-@SuppressWarnings("deprecation")
+
 public class CSGOCrateView implements CrateView {
     private HuskyCrates plugin;
 

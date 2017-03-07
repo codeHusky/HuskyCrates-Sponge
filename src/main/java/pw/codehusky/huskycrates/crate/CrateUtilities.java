@@ -124,6 +124,7 @@ public class CrateUtilities {
         Task.Builder taskBuilder = scheduler.createTaskBuilder();
         runner = taskBuilder.execute(this::particleRunner).intervalTicks(1).submit(plugin);
     }
+
     public String getTypeFromLocation(Location<World> location) {
         if(!location.getTileEntity().isPresent()) {
             return null;
