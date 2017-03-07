@@ -15,15 +15,19 @@ import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.effect.sound.SoundTypes;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -45,7 +49,7 @@ import java.util.List;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "0.8.1", description = "Stuff.")
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "0.8.6", description = "A CratesReloaded Replacement for Sponge? lol")
 public class HuskyCrates {
     @Inject
     public Logger logger;
@@ -61,7 +65,7 @@ public class HuskyCrates {
     public CrateUtilities crateUtilities = new CrateUtilities(this);
     public String huskyCrateIdentifier = "☼1☼2☼3HUSKYCRATE-";
     public String armorStandIdentifier = "ABABABAB-CDDE-0000-8374-CAAAECAAAECA";
-
+    private boolean hasInitialized = false;
     @Listener
     public void gameStarted(GameStartedServerEvent event){
         CommandSpec crateSpec = CommandSpec.builder()
@@ -75,6 +79,24 @@ public class HuskyCrates {
         Sponge.getCommandManager().register(this, crateSpec, "crate");
         crateUtilities.generateVirtualCrates(crateConfig);
         logger.info("Crates has been started.");
+        hasInitialized = true;
+    }
+
+    @Listener
+    public void entLoad(SpawnEntityEvent event){
+        if(hasInitialized)
+            return;
+        for(Entity e : event.getEntities()){
+            if(e instanceof ArmorStand){
+                crateUtilities.populatePhysicalCrates(event.getTargetWorld().getChunk(e.getLocation().getChunkPosition()).get());
+                return;
+            }
+        }
+    }
+
+    @Listener(order = Order.POST)
+    public void worldLoaded(LoadWorldEvent event){
+        crateUtilities.populatePhysicalCrates(event.getTargetWorld());
     }
     @Listener
     public void gameReloaded(GameReloadEvent event){
@@ -85,6 +107,7 @@ public class HuskyCrates {
                 type==BlockTypes.TRAPPED_CHEST ||
                 type==BlockTypes.ENDER_CHEST;
     }
+
     @Listener
     public void placeBlock(ChangeBlockEvent event){
         if(event instanceof ChangeBlockEvent.Place || event instanceof ChangeBlockEvent.Break) {
@@ -111,13 +134,13 @@ public class HuskyCrates {
                 String crateType = name.replace(huskyCrateIdentifier, "");
                 if(plr.getItemInHand(HandTypes.MAIN_HAND).isPresent()) {
                     ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
-                    if(inhand.getItem() == ItemTypes.RED_FLOWER && inhand.get(Keys.ITEM_LORE).isPresent()) {
+                    if(inhand.getItem() == ItemTypes.NETHER_STAR && inhand.get(Keys.ITEM_LORE).isPresent()) {
                         List<Text> lore = inhand.get(Keys.ITEM_LORE).get();
                         if(lore.size() > 1) {
                             String idline = lore.get(1).toPlain();
                             if(idline.contains("crate_")) {
                                 if(idline.replace("crate_","").equalsIgnoreCase(crateType)) {
-                                    if(plr.getGameModeData().get(Keys.GAME_MODE).get() != GameModes.CREATIVE && plr.hasPermission("huskycrates.tester")){
+                                    if(!plr.hasPermission("huskycrates.tester")){
                                         if(inhand.getQuantity() == 1)
                                             plr.setItemInHand(HandTypes.MAIN_HAND,null);
                                         else{

@@ -40,21 +40,24 @@ public class CSGOCrateView implements CrateView {
     private Task updater;
     private Player ourplr;
     private VirtualCrate vc;
-    private int revCount;
+    private int clicks = 0;
+    private int maxTicks = 45; // maximum times the spinner "clicks" in one spin
     public CSGOCrateView(HuskyCrates plugin,Player runner, VirtualCrate virtualCrate){
         this.vc = virtualCrate;
         ourplr = runner;
         this.plugin = plugin;
 
         items = virtualCrate.getItemSet();
-        revCount = Math.round(15 * (3f/(float)items.size()));
         //offsetBase = (int)Math.floor(gg);
         float random = new Random().nextFloat()*vc.getMaxProb();
+        System.out.println(vc.getMaxProb() + " - " + vc.displayName);
         float cummProb = 0;
         for(int i = 0; i < items.size(); i++){
             cummProb += (float)items.get(i)[0];
             if(random <= cummProb && offset == null){
+                System.out.println(((ItemStack)items.get(i)[1]).get(Keys.DISPLAY_NAME));
                 offset = i;
+                clicks = -maxTicks + i;
                 itemNum = i;
             }
         }
@@ -89,13 +92,16 @@ public class CSGOCrateView implements CrateView {
             if(state == 0 && (slotnum == 4 || slotnum == 22 )){
                 e.set(selector);
             }else if(slotnum > 9 && slotnum < 17 && (slotnum == 13 || state != 2)){
-                int itemNum = Math.abs(((slotnum - 10) + offset) % items.size());
+                int itemNum = Math.abs(((slotnum - 10) + (clicks-3)) % items.size());
                 e.set((ItemStack)items.get(itemNum)[1]);
                 if(slotnum == 13) {
                     giveToPlayer = ((ItemStack)items.get(itemNum)[1]).copy();
                     if(items.get(itemNum).length == 3){
                         runCmd = true;
                         commandToRun = items.get(itemNum)[2].toString();
+                    }else{
+                        runCmd = false;
+                        commandToRun = "";
                     }
                 }
             }else if(slotnum != 13){
@@ -123,29 +129,22 @@ public class CSGOCrateView implements CrateView {
     private ItemStack giveToPlayer;
     float updateMax = 1;
     int waitCurrent = 0;
-    private double dampening = 1.1;
-    private int revModeRevCount = 5;
-    private double revDampening;
-    private boolean revMode = true;
-    private int clicks = -1;
+    private double dampening = 1.05;
     private int tickerState = 0;
     private void updateTick() {
-        revDampening = 1.15;
+        //revDampening = 1.15;
         waitCurrent++;
-        int revolutions = (int) Math.floor(clicks / items.size());
-        if (waitCurrent == Math.round(updateMax) && (revMode && revolutions < revModeRevCount || !revMode && revolutions < revCount) && tickerState == 0) {
-            offset++;
+        //int revolutions = (int) Math.floor(clicks / items.size());
+        //once clicks is greater than offset we stop the spinner
+        if (waitCurrent == Math.round(updateMax) && clicks < offset && tickerState == 0) {
+            //System.out.println(clicks + " : " + offset);
+
             waitCurrent = 0;
-            if (revMode) {
-                if(clicks % items.size() == items.size() - 1)
-                    updateMax *= revDampening;
-            } else {
-                updateMax *= dampening;
-            }
+            updateMax *= dampening;
             updateInv(-1);
             ourplr.playSound(SoundTypes.UI_BUTTON_CLICK,ourplr.getLocation().getPosition(),0.25);
             clicks++;
-        }else if((revMode && revolutions >= revModeRevCount || !revMode && revolutions >= revCount) && updateMax != 100 && tickerState == 0){
+        }else if(clicks >= offset && updateMax != 100 && tickerState == 0){
             tickerState = 1;
             ourplr.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH,ourplr.getLocation().getPosition(),1);
             updateMax = 100;
