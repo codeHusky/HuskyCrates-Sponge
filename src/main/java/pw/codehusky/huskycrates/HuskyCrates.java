@@ -27,6 +27,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -80,6 +81,11 @@ public class HuskyCrates {
         crateUtilities.generateVirtualCrates(crateConfig);
         logger.info("Crates has been started.");
         hasInitialized = true;
+    }
+
+    @Listener
+    public void stop(GameStoppingServerEvent event){
+        crateUtilities.updateConfig();
     }
 
     @Listener

@@ -22,9 +22,6 @@ import pw.codehusky.huskycrates.crate.views.NullCrateView;
 import java.io.IOException;
 import java.util.*;
 
-/**
- * Created by lokio on 12/28/2016.
- */
 
 public class CrateUtilities {
     private HashMap<String,VirtualCrate> crateTypes;
@@ -72,8 +69,13 @@ public class CrateUtilities {
             List<? extends CommentedConfigurationNode> cacher = root.getNode("cachedCrates").getChildrenList();
             for(CommentedConfigurationNode i : cacher){
                 try {
-                    toCheck.add(i.getValue(TypeToken.of(Location.class)));
-                } catch (ObjectMappingException e) {
+
+                    String[] stringList = ((String) i.getValue()).split(":");
+
+                    World world = Sponge.getServer().getWorld(stringList[0]).get();
+                    Location loc = world.getLocation(Double.parseDouble(stringList[1]), Double.parseDouble(stringList[2]), Double.parseDouble(stringList[3]));
+                    toCheck.add(loc);
+                }catch (Exception e) {
                     e.printStackTrace();
                     i.setValue(null);
                 }
@@ -140,13 +142,7 @@ public class CrateUtilities {
                 id = getTypeFromLocation(location);
             } catch (Exception e) {}
             if(id != null){
-                try {
-
-                    CommentedConfigurationNode root = plugin.crateConfig.load();
-                    plugin.crateConfig.save(root);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                updateConfig();
                 physicalCrates.put(location,new PhysicalCrate(location,id,plugin));
             }
         }
@@ -164,6 +160,23 @@ public class CrateUtilities {
             }
         }catch(Exception e){
 
+        }
+    }
+
+    public void updateConfig(){
+        try {
+
+            CommentedConfigurationNode root = plugin.crateConfig.load();
+            CommentedConfigurationNode node = root.getNode("cachedCrates");
+            ArrayList<String> cached = new ArrayList<>();
+            for(Location<World> b : physicalCrates.keySet()){
+                cached.add(b.getExtent().getName()+":"+b.getX()+":"+b.getY()+":"+b.getZ());
+            }
+
+            node.setValue(cached);
+            plugin.crateConfig.save(root);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
