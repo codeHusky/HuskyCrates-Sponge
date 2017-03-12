@@ -1,9 +1,7 @@
 package pw.codehusky.huskycrates.crate;
 
-import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
@@ -24,41 +22,47 @@ import java.util.*;
 
 
 public class CrateUtilities {
-    private HashMap<String,VirtualCrate> crateTypes;
-    private HashMap<Location<World>,PhysicalCrate> physicalCrates;
-    private HashMap<String,ItemStack> keys;
+    private HashMap<String, VirtualCrate> crateTypes;
+    private HashMap<Location<World>, PhysicalCrate> physicalCrates;
+    private HashMap<String, ItemStack> keys;
     private HuskyCrates plugin;
-    public CrateUtilities(HuskyCrates plugin){
+    private ArrayList<Location<World>> toCheck;
+    private Task runner = null;
+
+    public CrateUtilities(HuskyCrates plugin) {
         this.plugin = plugin;
     }
-    public void launchCrateForPlayer(String crateType, Player target,HuskyCrates plugin){
+
+    public void launchCrateForPlayer(String crateType, Player target, HuskyCrates plugin) {
         crateType = crateType.toLowerCase();
-        if(!crateTypes.containsKey(crateType)) {
-            target.openInventory(new NullCrateView(plugin,target,null).getInventory(), plugin.genericCause);
-        }else{
+        if (!crateTypes.containsKey(crateType)) {
+            target.openInventory(new NullCrateView(plugin, target, null).getInventory(), plugin.genericCause);
+        } else {
             target.openInventory(crateTypes.get(crateType).generateViewForCrate(plugin, target).getInventory(), plugin.genericCause);
         }
     }
-    public ItemStack getCrateItemStack(String crateType){
+
+    public ItemStack getCrateItemStack(String crateType) {
         return null;
     }
-    public VirtualCrate getVirtualCrate(String id){
-        if(crateTypes.containsKey(id)){
+
+    public VirtualCrate getVirtualCrate(String id) {
+        if (crateTypes.containsKey(id)) {
             return crateTypes.get(id);
         }
         return null;
     }
-    private ArrayList<Location<World>> toCheck;
-    public void generateVirtualCrates(ConfigurationLoader<CommentedConfigurationNode> config){
+
+    public void generateVirtualCrates(ConfigurationLoader<CommentedConfigurationNode> config) {
         toCheck = new ArrayList<>();
         physicalCrates = new HashMap<>();
         try {
             CommentedConfigurationNode configRoot = config.load();
             crateTypes = new HashMap<>();
-            Map<Object,? extends CommentedConfigurationNode> b = configRoot.getNode("crates").getChildrenMap();
-            for(Object prekey: b.keySet()){
+            Map<Object, ? extends CommentedConfigurationNode> b = configRoot.getNode("crates").getChildrenMap();
+            for (Object prekey : b.keySet()) {
                 String key = (String) prekey;
-                crateTypes.put(key,new VirtualCrate(key,configRoot.getNode("crates",key)));
+                crateTypes.put(key, new VirtualCrate(key, configRoot.getNode("crates", key)));
             }
             config.save(configRoot);
         } catch (IOException e) {
@@ -67,7 +71,7 @@ public class CrateUtilities {
         try {
             CommentedConfigurationNode root = plugin.crateConfig.load();
             List<? extends CommentedConfigurationNode> cacher = root.getNode("cachedCrates").getChildrenList();
-            for(CommentedConfigurationNode i : cacher){
+            for (CommentedConfigurationNode i : cacher) {
                 try {
 
                     String[] stringList = ((String) i.getValue()).split(":");
@@ -75,7 +79,7 @@ public class CrateUtilities {
                     World world = Sponge.getServer().getWorld(stringList[0]).get();
                     Location loc = world.getLocation(Double.parseDouble(stringList[1]), Double.parseDouble(stringList[2]), Double.parseDouble(stringList[3]));
                     toCheck.add(loc);
-                }catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     i.setValue(null);
                 }
@@ -83,21 +87,21 @@ public class CrateUtilities {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        for(World e : Sponge.getServer().getWorlds()) {
+        for (World e : Sponge.getServer().getWorlds()) {
             populatePhysicalCrates(e);
         }
     }
-    private Task runner = null;
+
     public void populatePhysicalCrates(Extent bit) {
         ArrayList<Location<World>> eep = new ArrayList<>();
-        for(Entity ent : bit.getEntities()){
-            if(ent instanceof ArmorStand){
+        for (Entity ent : bit.getEntities()) {
+            if (ent instanceof ArmorStand) {
                 ArmorStand arm = (ArmorStand) ent;
-                if(arm.getCreator().isPresent()){
-                    if(arm.getCreator().get().equals(UUID.fromString(plugin.armorStandIdentifier))){
+                if (arm.getCreator().isPresent()) {
+                    if (arm.getCreator().get().equals(UUID.fromString(plugin.armorStandIdentifier))) {
                         Location woot = arm.getLocation().copy().sub(PhysicalCrate.offset);
 
-                        if(physicalCrates.containsKey(woot))
+                        if (physicalCrates.containsKey(woot))
                             continue;
                         eep.add(woot);
                         //arm.remove();
@@ -106,19 +110,20 @@ public class CrateUtilities {
             }
         }
 
-        for(Location<World> loco : eep){
-            if(!bit.containsBlock(loco.getBlockPosition())) {
+        for (Location<World> loco : eep) {
+            if (!bit.containsBlock(loco.getBlockPosition())) {
                 return;
             }
             String id = getTypeFromLocation(loco);
-            if(id != null) {
+            if (id != null) {
                 physicalCrates.put(loco, new PhysicalCrate(loco, id, plugin));
             }
         }
         startParticleEffects();
     }
-    public void startParticleEffects(){
-        if(runner != null){
+
+    public void startParticleEffects() {
+        if (runner != null) {
             runner.cancel();
         }
         Scheduler scheduler = Sponge.getScheduler();
@@ -127,27 +132,30 @@ public class CrateUtilities {
     }
 
     public String getTypeFromLocation(Location<World> location) {
-        if(!location.getTileEntity().isPresent()) {
+        if (!location.getTileEntity().isPresent()) {
             return null;
         }
         String prego = ((TileEntityCarrier) location.getTileEntity().get()).getInventory().getName().get();
-        if(!prego.contains(plugin.huskyCrateIdentifier))
+        if (!prego.contains(plugin.huskyCrateIdentifier))
             return null;
-        return prego.replace(plugin.huskyCrateIdentifier,"");
+        return prego.replace(plugin.huskyCrateIdentifier, "");
     }
-    public void recognizeChest(Location<World> location){
-        if(location.getTileEntity().isPresent()){
+
+    public void recognizeChest(Location<World> location) {
+        if (location.getTileEntity().isPresent()) {
             String id = null;
             try {
                 id = getTypeFromLocation(location);
-            } catch (Exception e) {}
-            if(id != null){
+            } catch (Exception e) {
+            }
+            if (id != null) {
                 updateConfig();
-                physicalCrates.put(location,new PhysicalCrate(location,id,plugin));
+                physicalCrates.put(location, new PhysicalCrate(location, id, plugin));
             }
         }
     }
-    private void particleRunner(){
+
+    private void particleRunner() {
         try {
             for (Location<World> b : physicalCrates.keySet()) {
                 PhysicalCrate c = physicalCrates.get(b);
@@ -158,19 +166,19 @@ public class CrateUtilities {
                 }
                 c.runParticles();
             }
-        }catch(Exception e){
+        } catch (Exception e) {
 
         }
     }
 
-    public void updateConfig(){
+    public void updateConfig() {
         try {
 
             CommentedConfigurationNode root = plugin.crateConfig.load();
             CommentedConfigurationNode node = root.getNode("cachedCrates");
             ArrayList<String> cached = new ArrayList<>();
-            for(Location<World> b : physicalCrates.keySet()){
-                cached.add(b.getExtent().getName()+":"+b.getX()+":"+b.getY()+":"+b.getZ());
+            for (Location<World> b : physicalCrates.keySet()) {
+                cached.add(b.getExtent().getName() + ":" + b.getX() + ":" + b.getY() + ":" + b.getZ());
             }
 
             node.setValue(cached);

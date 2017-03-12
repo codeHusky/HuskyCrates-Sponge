@@ -23,47 +23,50 @@ import java.util.ArrayList;
 
 public class Crate implements CommandExecutor {
     private HuskyCrates plugin;
-    public Crate(HuskyCrates ins){
+
+    public Crate(HuskyCrates ins) {
         plugin = ins;
     }
+
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
 
-            if(args.getOne(Text.of("param1")).isPresent()) {
-                if(!args.getOne(Text.of("param2")).isPresent()) {
-                    if(src instanceof Player) {
-                        Player plr = (Player) src;
+        if (args.getOne(Text.of("param1")).isPresent()) {
+            if (!args.getOne(Text.of("param2")).isPresent()) {
+                if (src instanceof Player) {
+                    Player plr = (Player) src;
 
-                        ItemStack poss = getCrateItem(args.getOne(Text.of("param1")).get().toString());
-                        if (poss != null) {
-                            plr.getInventory().offer(poss);
-                        } else {
-                            plr.sendMessage(Text.of("Invalid crate id. Please check your config."));
-                        }
+                    ItemStack poss = getCrateItem(args.getOne(Text.of("param1")).get().toString());
+                    if (poss != null) {
+                        plr.getInventory().offer(poss);
+                    } else {
+                        plr.sendMessage(Text.of("Invalid crate id. Please check your config."));
                     }
-                }else{
-                    if(args.getOne(Text.of("param2")).get().toString().equalsIgnoreCase("key")){
-                        Player plr = null;
-                        if(src instanceof Player)
-                            plr = (Player) src;
-                        ItemStack poss = getCrateKey(args.getOne(Text.of("param1")).get().toString());
-                        if(args.getOne(Text.of("player")).isPresent()){
-                            plr = (Player) args.getOne(Text.of("player")).get();
-                        }
-                        if (poss != null) {
-                            plr.getInventory().offer(poss);
-                        } else {
-                            plr.sendMessage(Text.of("Invalid crate id. Please check your config."));
-                        }
+                }
+            } else {
+                if (args.getOne(Text.of("param2")).get().toString().equalsIgnoreCase("key")) {
+                    Player plr = null;
+                    if (src instanceof Player)
+                        plr = (Player) src;
+                    ItemStack poss = getCrateKey(args.getOne(Text.of("param1")).get().toString());
+                    if (args.getOne(Text.of("player")).isPresent()) {
+                        plr = (Player) args.getOne(Text.of("player")).get();
+                    }
+                    if (poss != null) {
+                        plr.getInventory().offer(poss);
+                    } else {
+                        plr.sendMessage(Text.of("Invalid crate id. Please check your config."));
                     }
                 }
             }
+        }
 
         return CommandResult.success();
     }
-    public ItemStack getCrateItem(String id){
+
+    public ItemStack getCrateItem(String id) {
         VirtualCrate vc = plugin.crateUtilities.getVirtualCrate(id);
-        if(vc != null){
+        if (vc != null) {
             return ItemStack.builder()
                     .itemType(ItemTypes.CHEST)
                     .quantity(1)
@@ -72,21 +75,21 @@ public class Crate implements CommandExecutor {
         return null;
     }
 
-    public ItemStack getCrateKey(String id){
-        return this.getCrateKey(id,1);
+    public ItemStack getCrateKey(String id) {
+        return this.getCrateKey(id, 1);
     }
 
-    public ItemStack getCrateKey(String id,int quantity){
+    public ItemStack getCrateKey(String id, int quantity) {
         VirtualCrate vc = plugin.crateUtilities.getVirtualCrate(id);
-        if(vc != null){
+        if (vc != null) {
             ItemStack key = ItemStack.builder()
                     .itemType(ItemTypes.RED_FLOWER)
                     .quantity(quantity)
                     .add(Keys.DISPLAY_NAME, TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName + " Key")).build();
             ArrayList<Text> bb = new ArrayList<>();
-            bb.add(Text.of(TextColors.WHITE,"A key for a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName) , TextColors.WHITE,"."));
-            bb.add(Text.of(TextColors.WHITE,"crate_" + id));
-            key.offer(Keys.ITEM_LORE,bb);
+            bb.add(Text.of(TextColors.WHITE, "A key for a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName), TextColors.WHITE, "."));
+            bb.add(Text.of(TextColors.WHITE, "crate_" + id));
+            key.offer(Keys.ITEM_LORE, bb);
             return key;
         }
         return null;
