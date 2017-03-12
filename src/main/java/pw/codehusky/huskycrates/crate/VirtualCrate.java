@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * Created by lokio on 12/29/2016.
  */
-@SuppressWarnings("deprecation")
+
 public class VirtualCrate {
     private ArrayList<Object[]> itemSet;
     private HashMap<ItemStack, String> commandSet;

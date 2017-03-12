@@ -20,7 +20,7 @@ import java.util.ArrayList;
 /**
  * Created by lokio on 12/28/2016.
  */
-@SuppressWarnings("deprecation")
+
 public class Crate implements CommandExecutor {
     private HuskyCrates plugin;
     public Crate(HuskyCrates ins){

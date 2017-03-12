@@ -25,7 +25,7 @@ import java.util.*;
 /**
  * Created by lokio on 12/28/2016.
  */
-@SuppressWarnings("deprecation")
+
 public class CrateUtilities {
     private HashMap<String,VirtualCrate> crateTypes;
     private HashMap<Location<World>,PhysicalCrate> physicalCrates;
@@ -37,7 +37,6 @@ public class CrateUtilities {
     public void launchCrateForPlayer(String crateType, Player target,HuskyCrates plugin){
         crateType = crateType.toLowerCase();
         if(!crateTypes.containsKey(crateType)) {
-            System.out.println(crateType);
             target.openInventory(new NullCrateView(plugin,target,null).getInventory(), plugin.genericCause);
         }else{
             target.openInventory(crateTypes.get(crateType).generateViewForCrate(plugin, target).getInventory(), plugin.genericCause);
@@ -144,11 +143,6 @@ public class CrateUtilities {
                 try {
 
                     CommentedConfigurationNode root = plugin.crateConfig.load();
-//                    try {
-//                        root.getNode("cachedCrates").getAppendedNode().setValue(TypeToken.of(Location.class),location);
-//                    } catch (ObjectMappingException e) {
-//                        e.printStackTrace();
-//                    }
                     plugin.crateConfig.save(root);
                 } catch (IOException e) {
                     e.printStackTrace();

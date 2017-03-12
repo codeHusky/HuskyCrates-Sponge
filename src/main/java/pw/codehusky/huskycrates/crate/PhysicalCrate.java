@@ -20,7 +20,7 @@ import java.util.UUID;
 /**
  * Created by lokio on 1/2/2017.
  */
-@SuppressWarnings("deprecation")
+
 public class PhysicalCrate {
     public Location<World> location;
     private String crateId;
@@ -75,7 +75,7 @@ public class PhysicalCrate {
             as.getWorld().spawnParticles(
                     ParticleEffect.builder()
                             .type(ParticleTypes.REDSTONE_DUST)
-                            .option(ParticleOptions.COLOR, Color.ofRgb(100, 100, 100))
+                            .option(ParticleOptions.COLOR, Color.ofRgb(0, 0, 0))
                             .build(),
                     as.getLocation()
                             .getPosition()
@@ -87,7 +87,7 @@ public class PhysicalCrate {
             as.getWorld().spawnParticles(
                     ParticleEffect.builder()
                             .type(ParticleTypes.REDSTONE_DUST)
-                            .option(ParticleOptions.COLOR, Color.ofRgb(255, 0, 0))
+                            .option(ParticleOptions.COLOR, Color.ofRgb(255, 139, 41))
                             .build(),
                     as.getLocation()
                             .getPosition()
