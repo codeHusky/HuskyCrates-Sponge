@@ -46,7 +46,7 @@ public class VirtualCrate {
                         .quantity(amount)
                         .build();
                 if (name.length() > 0)
-                    ourChild.offer(Keys.DISPLAY_NAME, TextSerializers.LEGACY_FORMATTING_CODE.deserialize(name));
+                    ourChild.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(name));
                 EnchantmentData ed = ourChild.getOrCreate(EnchantmentData.class).get();
                 if (false) {
                     ourChild.offer(ed);
@@ -55,7 +55,7 @@ public class VirtualCrate {
                 String lore = e.getNode("lore").getString("");
                 ArrayList<Text> bb = new ArrayList<>();
                 if (lore.length() > 0) {
-                    bb.add(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(lore));
+                    bb.add(TextSerializers.FORMATTING_CODE.deserialize(lore));
                 }
 
                 ourChild.offer(Keys.ITEM_LORE, bb);

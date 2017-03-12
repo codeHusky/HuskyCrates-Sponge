@@ -77,7 +77,7 @@ public class CSGOCrateView implements CrateView {
         disp = Inventory.builder()
                 .of(InventoryArchetypes.CHEST)
                 .listener(ClickInventoryEvent.class, evt -> evt.setCancelled(true))
-                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(virtualCrate.displayName)))
+                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName)))
                 .build(plugin);
         updateInv(0);
         Scheduler scheduler = Sponge.getScheduler();
@@ -165,13 +165,13 @@ public class CSGOCrateView implements CrateView {
                     Sponge.getCommandManager().process(new CrateCommandSource(), commandToRun.replace("%p", ourplr.getName()));
 
                 if (giveToPlayer.getQuantity() != 1 && !runCmd) {
-                    ourplr.sendMessage(Text.of("You won ", TextColors.YELLOW, giveToPlayer.getQuantity() + " ", name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
+                    ourplr.sendMessage(Text.of("You won ", TextColors.YELLOW, giveToPlayer.getQuantity() + " ", name, TextColors.RESET, " from a ", TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
                 } else {
                     String[] vowels = {"a", "e", "i", "o", "u"};
                     if (Arrays.asList(vowels).contains(name.toPlain().substring(0, 1).toLowerCase())) {
-                        ourplr.sendMessage(Text.of("You won an ", name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
+                        ourplr.sendMessage(Text.of("You won an ", name, TextColors.RESET, " from a ", TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
                     } else {
-                        ourplr.sendMessage(Text.of("You won a ", name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
+                        ourplr.sendMessage(Text.of("You won a ", name, TextColors.RESET, " from a ", TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
                     }
                 }
                 if (!runCmd)

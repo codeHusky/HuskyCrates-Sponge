@@ -85,9 +85,9 @@ public class Crate implements CommandExecutor {
             ItemStack key = ItemStack.builder()
                     .itemType(ItemTypes.RED_FLOWER)
                     .quantity(quantity)
-                    .add(Keys.DISPLAY_NAME, TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName + " Key")).build();
+                    .add(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(vc.displayName + " Key")).build();
             ArrayList<Text> bb = new ArrayList<>();
-            bb.add(Text.of(TextColors.WHITE, "A key for a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName), TextColors.WHITE, "."));
+            bb.add(Text.of(TextColors.WHITE, "A key for a ", TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.WHITE, "."));
             bb.add(Text.of(TextColors.WHITE, "crate_" + id));
             key.offer(Keys.ITEM_LORE, bb);
             return key;

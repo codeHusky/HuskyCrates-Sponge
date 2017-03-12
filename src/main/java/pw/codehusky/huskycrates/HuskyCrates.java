@@ -41,6 +41,7 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import pw.codehusky.huskycrates.commands.Crate;
+import pw.codehusky.huskycrates.commands.subcommand.Reload;
 import pw.codehusky.huskycrates.crate.CrateUtilities;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 
@@ -61,14 +62,24 @@ public class HuskyCrates {
     @Inject
     private PluginContainer pC;
     private boolean hasInitialized = false;
+    public static HuskyCrates instance;
 
     @Listener
     public void gameStarted(GameStartedServerEvent event) {
+        instance = this;
+        CommandSpec reload = CommandSpec.builder()
+                .description(Text.of("Reload command for crates"))
+                .permission("huskycrates.reload")
+                .executor(new Reload())
+                .build();
+
+
         CommandSpec crateSpec = CommandSpec.builder()
                 .description(Text.of("Main crates command"))
                 .permission("huskycrates")
                 .arguments(GenericArguments.optional(GenericArguments.string(Text.of("param1"))), GenericArguments.optional(GenericArguments.string(Text.of("param2"))), GenericArguments.optional(GenericArguments.player(Text.of("player"))))
                 .executor(new Crate(this))
+                .child(reload,"reload")
                 .build();
         scheduler = Sponge.getScheduler();
         genericCause = Cause.of(NamedCause.of("PluginContainer", pC));
@@ -76,23 +87,15 @@ public class HuskyCrates {
         crateUtilities.generateVirtualCrates(crateConfig);
         logger.info("Crates has been started.");
         hasInitialized = true;
+
+        for(World world : Sponge.getServer().getWorlds()){
+            crateUtilities.populatePhysicalCrates(world);
+        }
     }
 
     @Listener
     public void stop(GameStoppingServerEvent event) {
         crateUtilities.updateConfig();
-    }
-
-    @Listener
-    public void entLoad(SpawnEntityEvent event) {
-        if (hasInitialized)
-            return;
-        for (Entity e : event.getEntities()) {
-            if (e instanceof ArmorStand) {
-                crateUtilities.populatePhysicalCrates(event.getTargetWorld().getChunk(e.getLocation().getChunkPosition()).get());
-                return;
-            }
-        }
     }
 
     @Listener(order = Order.POST)
@@ -174,6 +177,14 @@ public class HuskyCrates {
             }
 
 
+        }
+    }
+
+
+    public void reload(){
+        crateUtilities.generateVirtualCrates(crateConfig);
+        for(World world : Sponge.getServer().getWorlds()){
+            crateUtilities.populatePhysicalCrates(world);
         }
     }
 }

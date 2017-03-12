@@ -92,11 +92,12 @@ public class CrateUtilities {
         }
     }
 
-    public void populatePhysicalCrates(Extent bit) {
+        public void populatePhysicalCrates(Extent bit) {
         ArrayList<Location<World>> eep = new ArrayList<>();
         for (Entity ent : bit.getEntities()) {
             if (ent instanceof ArmorStand) {
                 ArmorStand arm = (ArmorStand) ent;
+                HuskyCrates.instance.logger.info(ent.toString());
                 if (arm.getCreator().isPresent()) {
                     if (arm.getCreator().get().equals(UUID.fromString(plugin.armorStandIdentifier))) {
                         Location woot = arm.getLocation().copy().sub(PhysicalCrate.offset);
@@ -105,6 +106,8 @@ public class CrateUtilities {
                             continue;
                         eep.add(woot);
                         //arm.remove();
+                    }else{
+
                     }
                 }
             }
@@ -116,7 +119,10 @@ public class CrateUtilities {
             }
             String id = getTypeFromLocation(loco);
             if (id != null) {
+                HuskyCrates.instance.logger.info("added crate"+loco.getExtent().getName() + ":" + loco.getX() + ":" + loco.getY() + ":" + loco.getZ());
                 physicalCrates.put(loco, new PhysicalCrate(loco, id, plugin));
+            }else{
+                HuskyCrates.instance.logger.info("didn't crate"+loco.getExtent().getName() + ":" + loco.getX() + ":" + loco.getY() + ":" + loco.getZ());
             }
         }
         startParticleEffects();
@@ -149,8 +155,8 @@ public class CrateUtilities {
             } catch (Exception e) {
             }
             if (id != null) {
-                updateConfig();
                 physicalCrates.put(location, new PhysicalCrate(location, id, plugin));
+                updateConfig();
             }
         }
     }
