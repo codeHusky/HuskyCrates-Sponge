@@ -97,7 +97,6 @@ public class CrateUtilities {
         for (Entity ent : bit.getEntities()) {
             if (ent instanceof ArmorStand) {
                 ArmorStand arm = (ArmorStand) ent;
-                HuskyCrates.instance.logger.info(ent.toString());
                 if (arm.getCreator().isPresent()) {
                     if (arm.getCreator().get().equals(UUID.fromString(plugin.armorStandIdentifier))) {
                         Location woot = arm.getLocation().copy().sub(PhysicalCrate.offset);

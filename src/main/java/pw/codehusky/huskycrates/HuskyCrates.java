@@ -89,6 +89,7 @@ public class HuskyCrates {
         hasInitialized = true;
 
         for(World world : Sponge.getServer().getWorlds()){
+            logger.info("loaded"+world.getName());
             crateUtilities.populatePhysicalCrates(world);
         }
     }

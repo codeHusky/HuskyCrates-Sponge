@@ -9,6 +9,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -53,7 +54,10 @@ public class Crate implements CommandExecutor {
                         plr = (Player) args.getOne(Text.of("player")).get();
                     }
                     if (poss != null) {
-                        plr.getInventory().offer(poss);
+
+                        if(!plr.getInventory().offer(poss).getType().equals(InventoryTransactionResult.Type.SUCCESS)){
+                            HuskyCrates.instance.logger.info("Couldn't give key to "+args.getOne(Text.of("player")).get()+" because of a full inventory");
+                        }
                     } else {
                         plr.sendMessage(Text.of("Invalid crate id. Please check your config."));
                     }
