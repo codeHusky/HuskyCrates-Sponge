@@ -56,23 +56,23 @@ public class CSGOCrateView implements CrateView {
         items = virtualCrate.getItemSet();
         //offsetBase = (int)Math.floor(gg);
         float random = new Random().nextFloat() * vc.getMaxProb();
-        System.out.println(vc.getMaxProb() + " - " + vc.displayName);
+        HuskyCrates.instance.logger.info(vc.getMaxProb() + " - " + vc.displayName);
         float cummProb = 0;
         for (int i = 0; i < items.size(); i++) {
             cummProb += (float) items.get(i)[0];
             if (random <= cummProb && offset == null) {
-                System.out.println(((ItemStack) items.get(i)[1]).get(Keys.DISPLAY_NAME));
+                HuskyCrates.instance.logger.info(((ItemStack) items.get(i)[1]).get(Keys.DISPLAY_NAME).toString());
                 offset = i;
                 clicks = -maxTicks + i;
                 itemNum = i;
             }
         }
         if (offset == null) {
-            System.out.println("--------------------------------");
-            System.out.println("--------------------------------");
-            System.out.println("ERROR WHEN INITING PROBABILITY FOR " + vc.displayName);
-            System.out.println("--------------------------------");
-            System.out.println("--------------------------------");
+            HuskyCrates.instance.logger.info("--------------------------------");
+            HuskyCrates.instance.logger.info("--------------------------------");
+            HuskyCrates.instance.logger.info("ERROR WHEN INITING PROBABILITY FOR " + vc.displayName);
+            HuskyCrates.instance.logger.info("--------------------------------");
+            HuskyCrates.instance.logger.info("--------------------------------");
         }
         disp = Inventory.builder()
                 .of(InventoryArchetypes.CHEST)
@@ -139,7 +139,7 @@ public class CSGOCrateView implements CrateView {
         //int revolutions = (int) Math.floor(clicks / items.size());
         //once clicks is greater than offset we stop the spinner
         if (waitCurrent == Math.round(updateMax) && clicks < offset && tickerState == 0) {
-            //System.out.println(clicks + " : " + offset);
+            //HuskyCrates.instance.logger.info(clicks + " : " + offset);
 
             waitCurrent = 0;
             updateMax *= dampening;

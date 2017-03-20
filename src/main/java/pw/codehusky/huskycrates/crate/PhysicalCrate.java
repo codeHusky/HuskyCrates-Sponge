@@ -43,8 +43,8 @@ public class PhysicalCrate {
                     ArmorStand ass = (ArmorStand) e;
                     if (ass.getCreator().isPresent()) {
                         if (ass.getCreator().get().equals(UUID.fromString(huskyCrates.armorStandIdentifier))) {
-//                            System.out.println("Found an armor stand");
-//                            System.out.println(location);
+//                            HuskyCrates.instance.logger.info("Found an armor stand");
+//                            HuskyCrates.instance.logger.info(location);
                             as = ass;
                         }
                     }

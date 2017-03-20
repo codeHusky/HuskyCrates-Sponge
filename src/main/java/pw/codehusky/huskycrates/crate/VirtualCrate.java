@@ -76,7 +76,7 @@ public class VirtualCrate {
                     if (potentialCommand.length() > 0) {
                         Object[] add = {potentialCommand};
                         Object[] g = ArrayUtils.addAll(t, add);
-                        //System.out.println((float)g[0]);
+                        //HuskyCrates.instance.logger.info((float)g[0]);
                         itemSet.add(g);
                     } else {
                         itemSet.add(t);
@@ -92,16 +92,16 @@ public class VirtualCrate {
                 Object[] hj = {equalProb};
                 Object[] fin = ArrayUtils.addAll(hj, item);
                 currentProb += equalProb;
-                //System.out.println((float)fin[0]);
+                //HuskyCrates.instance.logger.info((float)fin[0]);
                 itemSet.add(fin);
             }
         } else {
             maxProb = currentProb;
         }
         if (currentProb != maxProb) {
-            System.out.println("You have too big of a chance! " + id + " (" + currentProb + ")");
-            System.out.println("This only fires if you have assumed probability. If you remove assumed chance, this error will be fixed.");
-            System.out.println("If everything looks right in your config, contact @codeHusky on Sponge Forums.");
+            HuskyCrates.instance.logger.info("You have too big of a chance! " + id + " (" + currentProb + ")");
+            HuskyCrates.instance.logger.info("This only fires if you have assumed probability. If you remove assumed chance, this error will be fixed.");
+            HuskyCrates.instance.logger.info("If everything looks right in your config, contact @codeHusky on Sponge Forums.");
         }
         //Self resolving crate
     }
