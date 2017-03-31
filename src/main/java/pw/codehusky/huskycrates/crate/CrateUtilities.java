@@ -71,17 +71,17 @@ public class CrateUtilities {
         try {
             CommentedConfigurationNode root = plugin.crateConfig.load();
             List<? extends CommentedConfigurationNode> cacher = root.getNode("cachedCrates").getChildrenList();
-            for (CommentedConfigurationNode i : cacher) {
+            for (CommentedConfigurationNode cached : cacher) {
                 try {
 
-                    String[] stringList = ((String) i.getValue()).split(":");
+                    String[] stringList = ((String) cached.getValue()).split(":");
 
                     World world = Sponge.getServer().getWorld(stringList[0]).get();
                     Location loc = world.getLocation(Double.parseDouble(stringList[1]), Double.parseDouble(stringList[2]), Double.parseDouble(stringList[3]));
                     toCheck.add(loc);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    i.setValue(null);
+                    cached.setValue(null);
                 }
             }
         } catch (IOException e) {
@@ -192,4 +192,7 @@ public class CrateUtilities {
             e.printStackTrace();
         }
     }
+
+
+
 }

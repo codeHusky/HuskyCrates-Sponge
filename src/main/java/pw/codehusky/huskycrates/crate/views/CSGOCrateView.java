@@ -12,6 +12,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
+import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
@@ -61,7 +62,6 @@ public class CSGOCrateView implements CrateView {
         for (int i = 0; i < items.size(); i++) {
             cummProb += (float) items.get(i)[0];
             if (random <= cummProb && offset == null) {
-                HuskyCrates.instance.logger.info(((ItemStack) items.get(i)[1]).get(Keys.DISPLAY_NAME).toString());
                 offset = i;
                 clicks = -maxTicks + i;
                 itemNum = i;
@@ -153,6 +153,7 @@ public class CSGOCrateView implements CrateView {
             waitCurrent = 0;
         } else if (tickerState == 1) {
             if (waitCurrent == Math.round(updateMax)) {
+                Text specialText = null;
                 updater.cancel();
                 ourplr.closeInventory(plugin.genericCause);
 
@@ -161,10 +162,29 @@ public class CSGOCrateView implements CrateView {
                     name = Text.of(TextStyles.ITALIC, giveToPlayer.get(Keys.DISPLAY_NAME).get());
                 }
 
-                if (runCmd)
+                if (runCmd) {
                     Sponge.getCommandManager().process(new CrateCommandSource(), commandToRun.replace("%p", ourplr.getName()));
+                }else{
+                    boolean gotItem = true;
 
-                if (giveToPlayer.getQuantity() != 1 && !runCmd) {
+                    InventoryTransactionResult offer = ourplr.getInventory().offer(giveToPlayer.copy());
+                    if(!offer.getType().equals(InventoryTransactionResult.Type.SUCCESS)){
+                        InventoryTransactionResult enderOffer = ourplr.getEnderChestInventory().offer(giveToPlayer.copy());
+                        if(!enderOffer.getType().equals(InventoryTransactionResult.Type.SUCCESS)){
+                            gotItem = false;
+                            specialText = Text.of(TextColors.RED,"Both your Inventory and enderchest was full  - so we couldn't give you your reward :'(");
+                        }else{
+                            specialText = Text.of(TextColors.GREEN,"Your Inventory is full so we placed it in your enderchest!");
+                        }
+                    }
+                    if(!gotItem){
+                        HuskyCrates.instance.logger.info(ourplr.getName() + " did NOT get " + giveToPlayer.getQuantity() + " " +name.toPlain()+ " because of a full inventory");
+                    }else{
+                        HuskyCrates.instance.logger.info(ourplr.getName() + " just got "+ giveToPlayer.getQuantity() + " "  + name.toPlain());
+                    }
+                }
+
+                if (!runCmd) {
                     ourplr.sendMessage(Text.of("You won ", TextColors.YELLOW, giveToPlayer.getQuantity() + " ", name, TextColors.RESET, " from a ", TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
                 } else {
                     String[] vowels = {"a", "e", "i", "o", "u"};
@@ -174,8 +194,11 @@ public class CSGOCrateView implements CrateView {
                         ourplr.sendMessage(Text.of("You won a ", name, TextColors.RESET, " from a ", TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
                     }
                 }
-                if (!runCmd)
-                    ourplr.getInventory().offer(giveToPlayer);
+
+                if(!specialText.equals(null)){
+                    ourplr.sendMessage(specialText);
+                }
+
                 ourplr.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, ourplr.getLocation().getPosition(), 1);
 
             } else if (waitCurrent % 5 == 0) {
