@@ -50,12 +50,10 @@ public class CSGOCrateView implements CrateView {
         items = virtualCrate.getItemSet();
         //offsetBase = (int)Math.floor(gg);
         float random = new Random().nextFloat()*vc.getMaxProb();
-        System.out.println(vc.getMaxProb() + " - " + vc.displayName);
         float cummProb = 0;
         for(int i = 0; i < items.size(); i++){
             cummProb += (float)items.get(i)[0];
             if(random <= cummProb && offset == null){
-                System.out.println(((ItemStack)items.get(i)[1]).get(Keys.DISPLAY_NAME));
                 offset = i;
                 clicks = -maxTicks + i;
                 itemNum = i;
@@ -91,7 +89,7 @@ public class CSGOCrateView implements CrateView {
         for(Inventory e : disp.slots()){
             if(state == 0 && (slotnum == 4 || slotnum == 22 )){
                 e.set(selector);
-            }else if(slotnum > 9 && slotnum < 17 && (slotnum == 13 || state != 2)){
+            }else if(slotnum > 9 && slotnum < 17 && state != 2){
                 int itemNum = Math.abs(((slotnum - 10) + (clicks-3)) % items.size());
                 e.set((ItemStack)items.get(itemNum)[1]);
                 if(slotnum == 13) {
@@ -110,6 +108,8 @@ public class CSGOCrateView implements CrateView {
                 }else if(state == 0){
                     e.set(border);
                 }
+            }else if(slotnum == 13 && state == 2){
+                e.set(giveToPlayer);
             }
             slotnum++;
         }

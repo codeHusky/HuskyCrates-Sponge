@@ -49,7 +49,7 @@ import java.util.List;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "0.8.6", description = "A CratesReloaded Replacement for Sponge? lol")
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "0.9.0", description = "A CratesReloaded Replacement for Sponge? lol")
 public class HuskyCrates {
     @Inject
     public Logger logger;
