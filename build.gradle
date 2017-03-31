@@ -3,8 +3,8 @@ plugins {
 }
 
 group = 'pw.codehusky.huskycrates'
-version = '0.9.0'
-description = 'An example plugin'
+version = '0.9.1'
+description = 'A Crates plugin for Sponge'
 
 dependencies {
     compile 'org.spongepowered:spongeapi:5.2.0-SNAPSHOT'

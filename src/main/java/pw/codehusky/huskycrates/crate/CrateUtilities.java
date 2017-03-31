@@ -1,5 +1,6 @@
 package pw.codehusky.huskycrates.crate;
 
+import com.flowpowered.math.vector.Vector3i;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
@@ -11,6 +12,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
@@ -27,6 +29,7 @@ public class CrateUtilities {
     private HashMap<String, ItemStack> keys;
     private HuskyCrates plugin;
     private ArrayList<Location<World>> toCheck;
+    private HashMap<World,Vector3i> toCheckChunk;
     private Task runner = null;
 
     public CrateUtilities(HuskyCrates plugin) {
@@ -55,6 +58,7 @@ public class CrateUtilities {
 
     public void generateVirtualCrates(ConfigurationLoader<CommentedConfigurationNode> config) {
         toCheck = new ArrayList<>();
+        toCheckChunk = new HashMap<>();
         physicalCrates = new HashMap<>();
         try {
             CommentedConfigurationNode configRoot = config.load();
@@ -70,15 +74,20 @@ public class CrateUtilities {
         }
         try {
             CommentedConfigurationNode root = plugin.crateConfig.load();
-            List<? extends CommentedConfigurationNode> cacher = root.getNode("cachedCrates").getChildrenList();
-            for (CommentedConfigurationNode cached : cacher) {
+            HuskyCrates.instance.logger.info(root.getNode("cachedCrates").getChildrenList().size()+"");
+            for (CommentedConfigurationNode cached : root.getNode("cachedCrates").getChildrenList()) {
                 try {
 
                     String[] stringList = ((String) cached.getValue()).split(":");
 
                     World world = Sponge.getServer().getWorld(stringList[0]).get();
                     Location loc = world.getLocation(Double.parseDouble(stringList[1]), Double.parseDouble(stringList[2]), Double.parseDouble(stringList[3]));
-                    toCheck.add(loc);
+                    if(world.getChunkAtBlock(loc.getBlockPosition()).isPresent()) {
+                        this.addCrate(loc);
+                    }else{
+                        toCheck.add(loc);
+                        toCheckChunk.put(world,loc.getChunkPosition());
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                     cached.setValue(null);
@@ -87,12 +96,10 @@ public class CrateUtilities {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        for (World e : Sponge.getServer().getWorlds()) {
-            populatePhysicalCrates(e);
-        }
+
     }
 
-        public void populatePhysicalCrates(Extent bit) {
+    public void populatePhysicalCrates(Extent bit) {
         ArrayList<Location<World>> eep = new ArrayList<>();
         for (Entity ent : bit.getEntities()) {
             if (ent instanceof ArmorStand) {
@@ -101,8 +108,9 @@ public class CrateUtilities {
                     if (arm.getCreator().get().equals(UUID.fromString(plugin.armorStandIdentifier))) {
                         Location woot = arm.getLocation().copy().sub(PhysicalCrate.offset);
 
-                        if (physicalCrates.containsKey(woot))
+                        if (physicalCrates.containsKey(woot)) {
                             continue;
+                        }
                         eep.add(woot);
                         //arm.remove();
                     }else{
@@ -116,13 +124,8 @@ public class CrateUtilities {
             if (!bit.containsBlock(loco.getBlockPosition())) {
                 return;
             }
-            String id = getTypeFromLocation(loco);
-            if (id != null) {
-                HuskyCrates.instance.logger.info("added crate"+loco.getExtent().getName() + ":" + loco.getX() + ":" + loco.getY() + ":" + loco.getZ());
-                physicalCrates.put(loco, new PhysicalCrate(loco, id, plugin));
-            }else{
-                HuskyCrates.instance.logger.info("didn't crate"+loco.getExtent().getName() + ":" + loco.getX() + ":" + loco.getY() + ":" + loco.getZ());
-            }
+
+            this.addCrate(loco);
         }
         startParticleEffects();
     }
@@ -138,6 +141,7 @@ public class CrateUtilities {
 
     public String getTypeFromLocation(Location<World> location) {
         if (!location.getTileEntity().isPresent()) {
+            location.getExtent().getChunkAtBlock(location.getBlockPosition()).isPresent();
             return null;
         }
         String prego = ((TileEntityCarrier) location.getTileEntity().get()).getInventory().getName().get();
@@ -171,9 +175,7 @@ public class CrateUtilities {
                 }
                 c.runParticles();
             }
-        } catch (Exception e) {
-
-        }
+        } catch (Exception e) {}
     }
 
     public void updateConfig() {
@@ -191,6 +193,37 @@ public class CrateUtilities {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void checkChunk(Chunk chunk){
+        if(toCheckChunk != null && toCheckChunk.containsKey(chunk.getWorld()) && toCheckChunk.containsValue(chunk.getPosition())){
+            ArrayList<Location<World>> found = new ArrayList<>();
+            for(Location<World> location : toCheck){
+                if(location.getExtent().equals(chunk.getWorld()) && location.getChunkPosition().equals(chunk.getPosition())){
+                    this.addCrate(location);
+                    found.add(location);
+                }
+            }
+            if(!found.isEmpty()){
+                toCheckChunk.remove(chunk.getPosition());
+                for(Location<World> location : found) {
+                    toCheck.remove(found);
+                }
+
+            }
+        }
+    }
+
+
+    private void addCrate(Location location){
+        String id = getTypeFromLocation(location);
+        if (id != null) {
+            HuskyCrates.instance.logger.info("added crate" + location.getX() + ":" + location.getY() + ":" + location.getZ());
+            physicalCrates.put(location, new PhysicalCrate(location, id, plugin));
+        }else{
+            HuskyCrates.instance.logger.info("didn't crate" + location.getX() + ":" + location.getY() + ":" + location.getZ());
+        }
+
     }
 
 

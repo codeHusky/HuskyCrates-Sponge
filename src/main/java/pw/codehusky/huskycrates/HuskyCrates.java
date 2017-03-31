@@ -27,6 +27,7 @@ import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
+import org.spongepowered.api.event.world.chunk.LoadChunkEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -45,7 +46,7 @@ import pw.codehusky.huskycrates.crate.VirtualCrate;
 
 import java.util.List;
 
-@Plugin(id = "huskycrates", name = "HuskyCrates", version = "0.8.6", description = "A CratesReloaded Replacement for Sponge? lol")
+@Plugin(id = "huskycrates", name = "HuskyCrates", version = "0.9.1", description = "A Crates plugin for Sponge")
 public class HuskyCrates {
     @Inject
     public Logger logger;
@@ -85,11 +86,6 @@ public class HuskyCrates {
         crateUtilities.generateVirtualCrates(crateConfig);
         logger.info("Crates has been started.");
         hasInitialized = true;
-
-        for(World world : Sponge.getServer().getWorlds()){
-            logger.info("loaded"+world.getName());
-            crateUtilities.populatePhysicalCrates(world);
-        }
     }
 
     @Listener
@@ -101,6 +97,13 @@ public class HuskyCrates {
     public void worldLoaded(LoadWorldEvent event) {
         crateUtilities.populatePhysicalCrates(event.getTargetWorld());
     }
+
+
+    @Listener(order = Order.POST)
+    public void chunkLoad(LoadChunkEvent event) {
+        crateUtilities.checkChunk(event.getTargetChunk());
+    }
+
 
     @Listener
     public void gameReloaded(GameReloadEvent event) {

@@ -37,17 +37,11 @@ public class PhysicalCrate {
 
     public void createHologram() {
         for (Entity e : location.getExtent().getEntities()) {
-            if (e instanceof ArmorStand) {
-                Vector3d newpos = e.getLocation().copy().sub(offset).getPosition();
-                if (e.getLocation().copy().sub(offset).getPosition().equals(location.getPosition())) {
-                    ArmorStand ass = (ArmorStand) e;
-                    if (ass.getCreator().isPresent()) {
-                        if (ass.getCreator().get().equals(UUID.fromString(huskyCrates.armorStandIdentifier))) {
-//                            HuskyCrates.instance.logger.info("Found an armor stand");
-//                            HuskyCrates.instance.logger.info(location);
-                            as = ass;
-                        }
-                    }
+            if (e instanceof ArmorStand && e.getLocation().copy().sub(offset).getPosition().equals(location.getPosition())) {
+                ArmorStand ass = (ArmorStand) e;
+                if (ass.getCreator().isPresent() && ass.getCreator().get().equals(UUID.fromString(huskyCrates.armorStandIdentifier))) {
+                    as = ass;
+                    break;
                 }
             }
         }
@@ -57,6 +51,7 @@ public class PhysicalCrate {
             as.setLocation(location.copy().add(offset));
             location.getExtent().spawnEntity(as, huskyCrates.genericCause);
         }
+
         as.setCreator(UUID.fromString(huskyCrates.armorStandIdentifier));
         as.offer(Keys.HAS_GRAVITY, false);
         as.offer(Keys.INVISIBLE, true);
@@ -95,8 +90,6 @@ public class PhysicalCrate {
                     as.getLocation()
                             .getPosition()
                             .add(x, y, z));
-        } catch (Exception e) {
-
-        }
+        } catch (Exception e) {}
     }
 }

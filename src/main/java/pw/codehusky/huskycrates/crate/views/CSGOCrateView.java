@@ -195,7 +195,7 @@ public class CSGOCrateView implements CrateView {
                     }
                 }
 
-                if(!specialText.equals(null)){
+                if(specialText != null){
                     ourplr.sendMessage(specialText);
                 }
 
