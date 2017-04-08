@@ -9,6 +9,7 @@ import org.spongepowered.api.text.Text;
 import pw.codehusky.huskycrates.HuskyCrates;
 
 public class Reload implements CommandExecutor {
+
     @Override
     public CommandResult execute(CommandSource commandSource, CommandContext commandContext) throws CommandException {
         HuskyCrates.instance.reload();

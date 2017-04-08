@@ -32,6 +32,7 @@ import java.util.Random;
  */
 
 public class CSGOCrateView implements CrateView {
+
     Integer offset = null;
     int itemNum = -1;
     float updateMax = 1;
@@ -49,6 +50,7 @@ public class CSGOCrateView implements CrateView {
     private ItemStack giveToPlayer;
     private double dampening = 1.05;
     private int tickerState = 0;
+
     public CSGOCrateView(HuskyCrates plugin, Player runner, VirtualCrate virtualCrate) {
         this.vc = virtualCrate;
         ourplr = runner;
@@ -124,7 +126,9 @@ public class CSGOCrateView implements CrateView {
     }
 
     private ItemStack confettiBorder() {
-        DyeColor[] colors = {DyeColors.BLUE, DyeColors.CYAN, DyeColors.GREEN, DyeColors.LIGHT_BLUE, DyeColors.LIME, DyeColors.MAGENTA, DyeColors.ORANGE, DyeColors.PINK, DyeColors.PURPLE, DyeColors.RED, DyeColors.YELLOW};
+        DyeColor[] colors =
+                {DyeColors.BLUE, DyeColors.CYAN, DyeColors.GREEN, DyeColors.LIGHT_BLUE, DyeColors.LIME, DyeColors.MAGENTA, DyeColors.ORANGE,
+                        DyeColors.PINK, DyeColors.PURPLE, DyeColors.RED, DyeColors.YELLOW};
         ItemStack g = ItemStack.builder()
                 .itemType(ItemTypes.STAINED_GLASS_PANE)
                 .add(Keys.DYE_COLOR, colors[(int) Math.floor(Math.random() * colors.length)])
@@ -164,38 +168,44 @@ public class CSGOCrateView implements CrateView {
 
                 if (runCmd) {
                     Sponge.getCommandManager().process(new CrateCommandSource(), commandToRun.replace("%p", ourplr.getName()));
-                }else{
+                } else {
                     boolean gotItem = true;
 
                     InventoryTransactionResult offer = ourplr.getInventory().offer(giveToPlayer.copy());
-                    if(!offer.getType().equals(InventoryTransactionResult.Type.SUCCESS)){
+                    if (!offer.getType().equals(InventoryTransactionResult.Type.SUCCESS)) {
                         InventoryTransactionResult enderOffer = ourplr.getEnderChestInventory().offer(giveToPlayer.copy());
-                        if(!enderOffer.getType().equals(InventoryTransactionResult.Type.SUCCESS)){
+                        if (!enderOffer.getType().equals(InventoryTransactionResult.Type.SUCCESS)) {
                             gotItem = false;
-                            specialText = Text.of(TextColors.RED,"Both your Inventory and enderchest was full  - so we couldn't give you your reward :'(");
-                        }else{
-                            specialText = Text.of(TextColors.GREEN,"Your Inventory is full so we placed it in your enderchest!");
+                            specialText =
+                                    Text.of(TextColors.RED, "Both your Inventory and enderchest was full  - so we couldn't give you your reward :'(");
+                        } else {
+                            specialText = Text.of(TextColors.GREEN, "Your Inventory is full so we placed it in your enderchest!");
                         }
                     }
-                    if(!gotItem){
-                        HuskyCrates.instance.logger.info(ourplr.getName() + " did NOT get " + giveToPlayer.getQuantity() + " " +name.toPlain()+ " because of a full inventory");
-                    }else{
-                        HuskyCrates.instance.logger.info(ourplr.getName() + " just got "+ giveToPlayer.getQuantity() + " "  + name.toPlain());
+                    if (!gotItem) {
+                        HuskyCrates.instance.logger.info(ourplr.getName() + " did NOT get " + giveToPlayer.getQuantity() + " " + name.toPlain()
+                                + " because of a full inventory");
+                    } else {
+                        HuskyCrates.instance.logger.info(ourplr.getName() + " just got " + giveToPlayer.getQuantity() + " " + name.toPlain());
                     }
                 }
 
                 if (!runCmd) {
-                    ourplr.sendMessage(Text.of("You won ", TextColors.YELLOW, giveToPlayer.getQuantity() + " ", name, TextColors.RESET, " from a ", TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
+                    ourplr.sendMessage(Text.of("You won ", TextColors.YELLOW, giveToPlayer.getQuantity() + " ", name, TextColors.RESET, " from a ",
+                            TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
                 } else {
                     String[] vowels = {"a", "e", "i", "o", "u"};
                     if (Arrays.asList(vowels).contains(name.toPlain().substring(0, 1).toLowerCase())) {
-                        ourplr.sendMessage(Text.of("You won an ", name, TextColors.RESET, " from a ", TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
+                        ourplr.sendMessage(Text.of("You won an ", name, TextColors.RESET, " from a ",
+                                TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
                     } else {
-                        ourplr.sendMessage(Text.of("You won a ", name, TextColors.RESET, " from a ", TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
+                        ourplr.sendMessage(
+                                Text.of("You won a ", name, TextColors.RESET, " from a ", TextSerializers.FORMATTING_CODE.deserialize(vc.displayName),
+                                        TextColors.RESET, "!"));
                     }
                 }
 
-                if(specialText != null){
+                if (specialText != null) {
                     ourplr.sendMessage(specialText);
                 }
 

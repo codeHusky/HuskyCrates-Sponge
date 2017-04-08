@@ -22,6 +22,7 @@ import java.util.UUID;
  */
 
 public class PhysicalCrate {
+
     public static Vector3d offset = new Vector3d(0.5, 1, 0.5);
     public Location<World> location;
     public ArmorStand as = null;
@@ -90,6 +91,7 @@ public class PhysicalCrate {
                     as.getLocation()
                             .getPosition()
                             .add(x, y, z));
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
     }
 }

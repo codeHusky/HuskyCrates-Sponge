@@ -17,6 +17,7 @@ import java.util.Set;
  * Created by lokio on 1/16/2017.
  */
 public class CrateCommandSource implements CommandSource {
+
     @Override
     public String getName() {
         return "HuskyCrates";

@@ -23,6 +23,7 @@ import java.util.ArrayList;
  */
 
 public class Crate implements CommandExecutor {
+
     private HuskyCrates plugin;
 
     public Crate(HuskyCrates ins) {
@@ -56,20 +57,21 @@ public class Crate implements CommandExecutor {
                         plr = (Player) args.getOne(Text.of("player")).get();
                     }
 
-                    if(plr == null){
+                    if (plr == null) {
                         src.sendMessage(Text.of("You need to be in game or specify a player for this command to work."));
                         return CommandResult.empty();
                     }
 
-                    if(poss == null ){
+                    if (poss == null) {
                         HuskyCrates.instance.logger.info("Invalid crate id. Please check your config.");
                         return CommandResult.empty();
 
                     }
 
-                    if(!plr.getInventory().offer(poss.copy()).getType().equals(InventoryTransactionResult.Type.SUCCESS) &&
-                        !plr.getEnderChestInventory().offer(poss.copy()).getType().equals(InventoryTransactionResult.Type.SUCCESS) ){
-                        HuskyCrates.instance.logger.info("Couldn't give key to "+args.getOne(Text.of("player")).get()+" because of a full inventory and enderchest");
+                    if (!plr.getInventory().offer(poss.copy()).getType().equals(InventoryTransactionResult.Type.SUCCESS) &&
+                            !plr.getEnderChestInventory().offer(poss.copy()).getType().equals(InventoryTransactionResult.Type.SUCCESS)) {
+                        HuskyCrates.instance.logger
+                                .info("Couldn't give key to " + args.getOne(Text.of("player")).get() + " because of a full inventory and enderchest");
                     }
                 }
             }

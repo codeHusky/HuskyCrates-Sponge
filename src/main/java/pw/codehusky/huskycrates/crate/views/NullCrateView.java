@@ -16,6 +16,7 @@ import pw.codehusky.huskycrates.crate.VirtualCrate;
  * Created by lokio on 12/29/2016.
  */
 public class NullCrateView implements CrateView {
+
     private HuskyCrates plugin;
 
     public NullCrateView(HuskyCrates plugin, Player runner, VirtualCrate virtualCrate) {

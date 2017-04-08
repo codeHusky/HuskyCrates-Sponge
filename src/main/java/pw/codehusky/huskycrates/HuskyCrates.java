@@ -22,7 +22,6 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
@@ -48,6 +47,8 @@ import java.util.List;
 
 @Plugin(id = "huskycrates", name = "HuskyCrates", version = "0.9.1", description = "A Crates plugin for Sponge")
 public class HuskyCrates {
+
+    public static HuskyCrates instance;
     @Inject
     public Logger logger;
     @Inject
@@ -61,7 +62,6 @@ public class HuskyCrates {
     @Inject
     private PluginContainer pC;
     private boolean hasInitialized = false;
-    public static HuskyCrates instance;
 
     @Listener
     public void gameStarted(GameStartedServerEvent event) {
@@ -76,9 +76,11 @@ public class HuskyCrates {
         CommandSpec crateSpec = CommandSpec.builder()
                 .description(Text.of("Main crates command"))
                 .permission("huskycrates")
-                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("param1"))), GenericArguments.optional(GenericArguments.string(Text.of("param2"))), GenericArguments.optional(GenericArguments.player(Text.of("player"))))
+                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("param1"))),
+                        GenericArguments.optional(GenericArguments.string(Text.of("param2"))),
+                        GenericArguments.optional(GenericArguments.player(Text.of("player"))))
                 .executor(new Crate(this))
-                .child(reload,"reload")
+                .child(reload, "reload")
                 .build();
         scheduler = Sponge.getScheduler();
         genericCause = Cause.of(NamedCause.of("PluginContainer", pC));
@@ -132,8 +134,9 @@ public class HuskyCrates {
 
     @Listener
     public void crateInteract(InteractBlockEvent.Secondary.MainHand event) {
-        if (!event.getTargetBlock().getLocation().isPresent())
+        if (!event.getTargetBlock().getLocation().isPresent()) {
             return;
+        }
 
         Location<World> blk = event.getTargetBlock().getLocation().get();
         if (blk.getBlock().getType() == BlockTypes.CHEST) {
@@ -153,9 +156,9 @@ public class HuskyCrates {
                             if (idline.contains("crate_")) {
                                 if (idline.replace("crate_", "").equalsIgnoreCase(crateType)) {
                                     if (!plr.hasPermission("huskycrates.tester")) {
-                                        if (inhand.getQuantity() == 1)
+                                        if (inhand.getQuantity() == 1) {
                                             plr.setItemInHand(HandTypes.MAIN_HAND, null);
-                                        else {
+                                        } else {
                                             ItemStack tobe = inhand.copy();
                                             tobe.setQuantity(tobe.getQuantity() - 1);
                                             plr.setItemInHand(HandTypes.MAIN_HAND, tobe);
@@ -183,9 +186,9 @@ public class HuskyCrates {
     }
 
 
-    public void reload(){
+    public void reload() {
         crateUtilities.generateVirtualCrates(crateConfig);
-        for(World world : Sponge.getServer().getWorlds()){
+        for (World world : Sponge.getServer().getWorlds()) {
             crateUtilities.populatePhysicalCrates(world);
         }
     }

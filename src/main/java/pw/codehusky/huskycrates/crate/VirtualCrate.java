@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class VirtualCrate {
+
     public String displayName;
     public String crateType;
     public boolean invalidCrate = false;
@@ -45,8 +46,9 @@ public class VirtualCrate {
                         .itemType(Sponge.getRegistry().getType(ItemType.class, itemID).get())
                         .quantity(amount)
                         .build();
-                if (name.length() > 0)
+                if (name.length() > 0) {
                     ourChild.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(name));
+                }
                 EnchantmentData ed = ourChild.getOrCreate(EnchantmentData.class).get();
                 if (false) {
                     ourChild.offer(ed);
@@ -100,7 +102,8 @@ public class VirtualCrate {
         }
         if (currentProb != maxProb) {
             HuskyCrates.instance.logger.info("You have too big of a chance! " + id + " (" + currentProb + ")");
-            HuskyCrates.instance.logger.info("This only fires if you have assumed probability. If you remove assumed chance, this error will be fixed.");
+            HuskyCrates.instance.logger
+                    .info("This only fires if you have assumed probability. If you remove assumed chance, this error will be fixed.");
             HuskyCrates.instance.logger.info("If everything looks right in your config, contact @codeHusky on Sponge Forums.");
         }
         //Self resolving crate
@@ -119,8 +122,9 @@ public class VirtualCrate {
     }
 
     public CrateView generateViewForCrate(HuskyCrates plugin, Player plr) {
-        if (invalidCrate)
+        if (invalidCrate) {
             return new NullCrateView(plugin, plr, this);
+        }
         if (crateType.equalsIgnoreCase("spinner")) {
             return new CSGOCrateView(plugin, plr, this);
         } else {
