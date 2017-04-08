@@ -47,19 +47,29 @@ public class Crate implements CommandExecutor {
             } else {
                 if (args.getOne(Text.of("param2")).get().toString().equalsIgnoreCase("key")) {
                     Player plr = null;
-                    if (src instanceof Player)
+                    if (src instanceof Player) {
                         plr = (Player) src;
+                    }
                     ItemStack poss = getCrateKey(args.getOne(Text.of("param1")).get().toString());
+
                     if (args.getOne(Text.of("player")).isPresent()) {
                         plr = (Player) args.getOne(Text.of("player")).get();
                     }
-                    if (poss != null) {
 
-                        if(!plr.getInventory().offer(poss).getType().equals(InventoryTransactionResult.Type.SUCCESS)){
-                            HuskyCrates.instance.logger.info("Couldn't give key to "+args.getOne(Text.of("player")).get()+" because of a full inventory");
-                        }
-                    } else {
-                        plr.sendMessage(Text.of("Invalid crate id. Please check your config."));
+                    if(plr == null){
+                        src.sendMessage(Text.of("You need to be in game or specify a player for this command to work."));
+                        return CommandResult.empty();
+                    }
+
+                    if(poss == null ){
+                        HuskyCrates.instance.logger.info("Invalid crate id. Please check your config.");
+                        return CommandResult.empty();
+
+                    }
+
+                    if(!plr.getInventory().offer(poss.copy()).getType().equals(InventoryTransactionResult.Type.SUCCESS) &&
+                        !plr.getEnderChestInventory().offer(poss.copy()).getType().equals(InventoryTransactionResult.Type.SUCCESS) ){
+                        HuskyCrates.instance.logger.info("Couldn't give key to "+args.getOne(Text.of("player")).get()+" because of a full inventory and enderchest");
                     }
                 }
             }
