@@ -1,6 +1,10 @@
 # HuskyCrates
 A simple, straightforward crate system for Sponge!
 
+This fork has some changes made to it  - this is updated with the documentation fori t :)!
+
+It can be downloaded on my CI server
+
 # Forum Topic
 [Go here.](https://forums.spongepowered.org/t/huskycrates-cratesreloaded-but-free-or-something/16433)
 
@@ -42,14 +46,17 @@ Please note that if you want a chance maximum other than 100 right now, you cann
 
 # Commands
 - `/crate` - does nothing
+- `/crate reload` - Reload your configuration
 - `/crate <crate id>` - Gives you a placeable crate block. Will look weird but trust me, it's the right thing.
-- `/crate <crate id> key [player]` - Give you, or someone you choose, a crate key.
+- `/crate key <crate id> [player]` - Give you, or someone you choose, a crate key.
 
 Crate IDs are the values you put first inside of the crates{} in the config. So like, command in the example would be the crate id.
 
 # Permissions
 - `huskycrates.tester` - Allows a user to override the key removal in the inventory.
+- `huskycrates.reload` - Reload the configuration.
 - `huskycrates` - Gives access to the `/crate` command.
+
 - **Permissions To Be Implemented**
   - `huskycrates.<crate id>.use` - Allows a user to use a certain crate
   - `huskycrates.<crate id>.create` - Allows a user to get a certain crate's item
