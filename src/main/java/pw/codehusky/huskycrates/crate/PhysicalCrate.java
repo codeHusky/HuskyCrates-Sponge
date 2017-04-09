@@ -40,7 +40,7 @@ public class PhysicalCrate {
         for (Entity e : location.getExtent().getEntities()) {
             if (e instanceof ArmorStand && e.getLocation().copy().sub(offset).getPosition().equals(location.getPosition())) {
                 ArmorStand ass = (ArmorStand) e;
-                if (ass.getCreator().isPresent() && ass.getCreator().get().equals(UUID.fromString(huskyCrates.armorStandIdentifier))) {
+                if (ass.getCreator().isPresent() && ass.getCreator().get().equals(UUID.fromString(HuskyCrates.instance.getArmorStandIdentifier()))) {
                     as = ass;
                     break;
                 }
@@ -53,12 +53,12 @@ public class PhysicalCrate {
             location.getExtent().spawnEntity(as, huskyCrates.genericCause);
         }
 
-        as.setCreator(UUID.fromString(huskyCrates.armorStandIdentifier));
+        as.setCreator(UUID.fromString(HuskyCrates.instance.getArmorStandIdentifier()));
         as.offer(Keys.HAS_GRAVITY, false);
         as.offer(Keys.INVISIBLE, true);
         as.offer(Keys.ARMOR_STAND_MARKER, true);
         as.offer(Keys.CUSTOM_NAME_VISIBLE, true);
-        String name = huskyCrates.crateUtilities.getVirtualCrate(crateId).displayName;
+        String name = HuskyCrates.instance.getCrateUtilities().getVirtualCrate(crateId).displayName;
         as.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(name));
 
     }

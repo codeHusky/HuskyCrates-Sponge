@@ -6,12 +6,17 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -22,6 +27,7 @@ import pw.codehusky.huskycrates.crate.views.NullCrateView;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -110,7 +116,7 @@ public class CrateUtilities {
             if (ent instanceof ArmorStand) {
                 ArmorStand arm = (ArmorStand) ent;
                 if (arm.getCreator().isPresent()) {
-                    if (arm.getCreator().get().equals(UUID.fromString(plugin.armorStandIdentifier))) {
+                    if (arm.getCreator().get().equals(UUID.fromString(HuskyCrates.instance.getArmorStandIdentifier()))) {
                         Location woot = arm.getLocation().copy().sub(PhysicalCrate.offset);
 
                         if (physicalCrates.containsKey(woot)) {
@@ -150,10 +156,10 @@ public class CrateUtilities {
             return null;
         }
         String prego = ((TileEntityCarrier) location.getTileEntity().get()).getInventory().getName().get();
-        if (!prego.contains(plugin.huskyCrateIdentifier)) {
+        if (!prego.contains(HuskyCrates.instance.getHuskyCrateIdentifier())) {
             return null;
         }
-        return prego.replace(plugin.huskyCrateIdentifier, "");
+        return prego.replace(HuskyCrates.instance.getHuskyCrateIdentifier(), "");
     }
 
     public void recognizeChest(Location<World> location) {
@@ -233,5 +239,39 @@ public class CrateUtilities {
 
     }
 
+    public List<String> getCrateTypes() {
+        return new ArrayList<String>(crateTypes.keySet());
+    }
 
+
+    public ItemStack getCrateItem(String id) {
+        VirtualCrate vc = getVirtualCrate(id);
+        if (vc != null) {
+            return ItemStack.builder()
+                    .itemType(ItemTypes.CHEST)
+                    .quantity(1)
+                    .add(Keys.DISPLAY_NAME, Text.of(HuskyCrates.instance.getHuskyCrateIdentifier() + id)).build();
+        }
+        return null;
+    }
+
+    public ItemStack getCrateKey(String id) {
+        return this.getCrateKey(id, 1);
+    }
+
+    public ItemStack getCrateKey(String id, int quantity) {
+        VirtualCrate vc = getVirtualCrate(id);
+        if (vc != null) {
+            ItemStack key = ItemStack.builder()
+                    .itemType(ItemTypes.RED_FLOWER)
+                    .quantity(quantity)
+                    .add(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(vc.displayName + " Key")).build();
+            ArrayList<Text> bb = new ArrayList<>();
+            bb.add(Text.of(TextColors.WHITE, "A key for a ", TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.WHITE, "."));
+            bb.add(Text.of(TextColors.WHITE, "crate_" + id));
+            key.offer(Keys.ITEM_LORE, bb);
+            return key;
+        }
+        return null;
+    }
 }
