@@ -1,7 +1,7 @@
 # HuskyCrates
 A simple, straightforward crate system for Sponge!
 
-This fork has some changes made to it  - this is updated with the documentation fori t :)!
+This fork has some changes made to it  - this is updated with the documentation for it :)!
 
 It can be downloaded on my CI server
 
