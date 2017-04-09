@@ -3,7 +3,7 @@ A simple, straightforward crate system for Sponge!
 
 This fork has some changes made to it  - this is updated with the documentation for it :)!
 
-It can be downloaded on my CI server
+It can be [downloaded on my CI server](http://ci.communitybuilt.net:8080/job/HuskyCrates/)
 
 # Forum Topic
 [Go here.](https://forums.spongepowered.org/t/huskycrates-cratesreloaded-but-free-or-something/16433)
