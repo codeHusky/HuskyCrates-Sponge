@@ -10,9 +10,3 @@ dependencies {
     compile 'org.spongepowered:spongeapi:5.2.0-SNAPSHOT'
 }
 
-task copyJarToBin(type:Copy,dependsOn:[build]) {
-    copy {
-        from "${buildDir}\\libs\\HuskyCrates-Sponge-${version}.jar"  // needs to be gstring
-        into "D:\\Minecraft\\Kcauldron setup\\mods"
-    }
-}
