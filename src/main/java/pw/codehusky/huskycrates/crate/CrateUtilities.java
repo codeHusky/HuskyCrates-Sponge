@@ -231,10 +231,7 @@ public class CrateUtilities {
     private void addCrate(Location location) {
         String id = getTypeFromLocation(location);
         if (id != null) {
-            HuskyCrates.instance.logger.info("added crate" + location.getX() + ":" + location.getY() + ":" + location.getZ());
             physicalCrates.put(location, new PhysicalCrate(location, id, plugin));
-        } else {
-            HuskyCrates.instance.logger.info("didn't crate" + location.getX() + ":" + location.getY() + ":" + location.getZ());
         }
 
     }
