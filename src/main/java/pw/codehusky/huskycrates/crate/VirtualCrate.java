@@ -7,8 +7,10 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.views.CSGOCrateView;
@@ -22,15 +24,25 @@ import java.util.List;
 public class VirtualCrate {
 
     public String displayName;
+    public String id;
     public String crateType;
+    public int color1;
+    public int color2;
     public boolean invalidCrate = false;
     private ArrayList<Object[]> itemSet;
     private HashMap<ItemStack, String> commandSet;
     private float maxProb = 100;
 
     public VirtualCrate(String id, CommentedConfigurationNode node) {
+        this.id = id;
         displayName = node.getNode("name").getString();
         crateType = node.getNode("type").getString();
+        String color1 = node.getNode("color1").isVirtual() ? "000000"  : node.getNode("color1").getString().replace("#","");
+        this.color1 = Integer.parseInt(color1, 16);
+
+        String color2= node.getNode("color2").isVirtual() ? "ff8b29"  : node.getNode("color2").getString().replace("#","");
+        this.color2 = Integer.parseInt(color2, 16);
+
         List<? extends CommentedConfigurationNode> items = node.getNode("items").getChildrenList();
         ArrayList<Object[]> equality = new ArrayList<>();
         float currentProb = 0;
@@ -132,4 +144,26 @@ public class VirtualCrate {
         }
         return new NullCrateView(plugin, plr, this);
     }
+
+
+    public ItemStack getCrateKey(int quantity){
+            ItemStack key = ItemStack.builder()
+                    .itemType(ItemTypes.RED_FLOWER)
+                    .quantity(quantity)
+                    .add(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(displayName + " Key")).build();
+            ArrayList<Text> bb = new ArrayList<>();
+            bb.add(Text.of(TextColors.WHITE, "A key for a ", TextSerializers.FORMATTING_CODE.deserialize(displayName), TextColors.WHITE, "."));
+            bb.add(Text.of(TextColors.WHITE, "crate_" + id));
+            key.offer(Keys.ITEM_LORE, bb);
+            return key;
+
+    }
+
+    public ItemStack getCrateItem() {
+            return ItemStack.builder()
+                    .itemType(ItemTypes.CHEST)
+                    .quantity(1)
+                    .add(Keys.DISPLAY_NAME, Text.of(HuskyCrates.instance.getHuskyCrateIdentifier() + id)).build();
+    }
+
 }

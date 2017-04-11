@@ -26,7 +26,7 @@ public class CrateElement extends CommandElement {
         if (HuskyCrates.instance.getCrateUtilities().getCrateTypes().contains(arg)) {
             return arg;
         }
-        throw commandArgs.createError(Text.of(new Object[]{TextColors.RED, arg, " is not a valid Crate!"}));
+        throw commandArgs.createError(Text.of(TextColors.RED, arg, " is not a valid Crate!"));
     }
 
     @Override

@@ -55,10 +55,6 @@ public class CrateUtilities {
         }
     }
 
-    public ItemStack getCrateItemStack(String crateType) {
-        return null;
-    }
-
     public VirtualCrate getVirtualCrate(String id) {
         if (crateTypes.containsKey(id)) {
             return crateTypes.get(id);
@@ -150,7 +146,7 @@ public class CrateUtilities {
         runner = taskBuilder.execute(this::particleRunner).intervalTicks(1).submit(plugin);
     }
 
-    public String getTypeFromLocation(Location<World> location) {
+    public VirtualCrate getTypeFromLocation(Location<World> location) {
         if (!location.getTileEntity().isPresent()) {
             location.getExtent().getChunkAtBlock(location.getBlockPosition()).isPresent();
             return null;
@@ -159,18 +155,19 @@ public class CrateUtilities {
         if (!prego.contains(HuskyCrates.instance.getHuskyCrateIdentifier())) {
             return null;
         }
-        return prego.replace(HuskyCrates.instance.getHuskyCrateIdentifier(), "");
+        String id = prego.replace(HuskyCrates.instance.getHuskyCrateIdentifier(), "");
+        return getVirtualCrate(id);
     }
 
     public void recognizeChest(Location<World> location) {
         if (location.getTileEntity().isPresent()) {
-            String id = null;
+            VirtualCrate virtualCrate = null;
             try {
-                id = getTypeFromLocation(location);
+                virtualCrate = getTypeFromLocation(location);
             } catch (Exception e) {
             }
-            if (id != null) {
-                physicalCrates.put(location, new PhysicalCrate(location, id, plugin));
+            if (virtualCrate != null) {
+                physicalCrates.put(location, new PhysicalCrate(location, virtualCrate));
                 updateConfig();
             }
         }
@@ -229,9 +226,9 @@ public class CrateUtilities {
 
 
     private void addCrate(Location location) {
-        String id = getTypeFromLocation(location);
-        if (id != null) {
-            physicalCrates.put(location, new PhysicalCrate(location, id, plugin));
+        VirtualCrate virtualCrate = getTypeFromLocation(location);
+        if (virtualCrate != null) {
+            physicalCrates.put(location, new PhysicalCrate(location, virtualCrate));
         }
 
     }
@@ -240,35 +237,4 @@ public class CrateUtilities {
         return new ArrayList<String>(crateTypes.keySet());
     }
 
-
-    public ItemStack getCrateItem(String id) {
-        VirtualCrate vc = getVirtualCrate(id);
-        if (vc != null) {
-            return ItemStack.builder()
-                    .itemType(ItemTypes.CHEST)
-                    .quantity(1)
-                    .add(Keys.DISPLAY_NAME, Text.of(HuskyCrates.instance.getHuskyCrateIdentifier() + id)).build();
-        }
-        return null;
-    }
-
-    public ItemStack getCrateKey(String id) {
-        return this.getCrateKey(id, 1);
-    }
-
-    public ItemStack getCrateKey(String id, int quantity) {
-        VirtualCrate vc = getVirtualCrate(id);
-        if (vc != null) {
-            ItemStack key = ItemStack.builder()
-                    .itemType(ItemTypes.RED_FLOWER)
-                    .quantity(quantity)
-                    .add(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(vc.displayName + " Key")).build();
-            ArrayList<Text> bb = new ArrayList<>();
-            bb.add(Text.of(TextColors.WHITE, "A key for a ", TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.WHITE, "."));
-            bb.add(Text.of(TextColors.WHITE, "crate_" + id));
-            key.offer(Keys.ITEM_LORE, bb);
-            return key;
-        }
-        return null;
-    }
 }

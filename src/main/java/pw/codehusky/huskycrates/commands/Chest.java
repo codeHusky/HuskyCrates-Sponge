@@ -10,6 +10,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.text.Text;
 import pw.codehusky.huskycrates.HuskyCrates;
+import pw.codehusky.huskycrates.crate.VirtualCrate;
 
 import java.util.Optional;
 
@@ -19,6 +20,13 @@ public class Chest implements CommandExecutor {
         String type = commandContext.<String>getOne("type").get();
         Optional<Player> player = commandContext.getOne("player");
         Optional<String> key = commandContext.getOne("key");
+        VirtualCrate virtualCrate = HuskyCrates.instance.getCrateUtilities().getVirtualCrate(type);
+
+        if (virtualCrate == null) {
+            HuskyCrates.instance.logger.info("Invalid crate id. Please check your config.");
+            return CommandResult.empty();
+        }
+
         // TODO: THIS SHOULD BE REMOVED SOON
         if (key.isPresent()) {
             HuskyCrates.instance.logger.info("---------------------------------");
@@ -30,15 +38,11 @@ public class Chest implements CommandExecutor {
                 commandSource.sendMessage(Text.of("You need to be in game or specify a player for this command to work."));
                 return CommandResult.empty();
             }
-            ItemStack poss = HuskyCrates.instance.getCrateUtilities().getCrateKey(type);
-            if (poss == null) {
-                HuskyCrates.instance.logger.info("Invalid crate id. Please check your config.");
-                return CommandResult.empty();
 
-            }
+            ItemStack keyItemStack = virtualCrate.getCrateKey(1);
 
-            if (!player.get().getInventory().offer(poss.copy()).getType().equals(InventoryTransactionResult.Type.SUCCESS) &&
-                    !player.get().getEnderChestInventory().offer(poss.copy()).getType().equals(InventoryTransactionResult.Type.SUCCESS)) {
+            if (!player.get().getInventory().offer(keyItemStack.copy()).getType().equals(InventoryTransactionResult.Type.SUCCESS) &&
+                    !player.get().getEnderChestInventory().offer(keyItemStack.copy()).getType().equals(InventoryTransactionResult.Type.SUCCESS)) {
                 HuskyCrates.instance.logger
                         .info("Couldn't give key to " + player.get().getName() + " because of a full inventory and enderchest");
             }
@@ -51,13 +55,9 @@ public class Chest implements CommandExecutor {
             return CommandResult.empty();
         }
 
-        ItemStack poss = HuskyCrates.instance.getCrateUtilities().getCrateItem(type);
-        if (poss != null) {
-            player.get().getInventory().offer(poss);
-            return CommandResult.empty();
-        } else {
-            commandSource.sendMessage(Text.of("Invalid crate id. Please check your config."));
-        }
+
+        ItemStack chestItemStack = virtualCrate.getCrateItem();
+        player.get().getInventory().offer(chestItemStack);
 
         return CommandResult.success();
 

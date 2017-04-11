@@ -47,7 +47,7 @@ import pw.codehusky.huskycrates.crate.VirtualCrate;
 
 import java.util.List;
 
-@Plugin(id = "huskycrates", name = "HuskyCrates", version = "0.9.2", description = "A Crates plugin for Sponge", authors = {"CodeHusky",
+@Plugin(id = "huskycrates", name = "HuskyCrates", version = "0.9.3", description = "A Crates plugin for Sponge", authors = {"CodeHusky",
 "KasperFranz"})
 public class HuskyCrates {
 

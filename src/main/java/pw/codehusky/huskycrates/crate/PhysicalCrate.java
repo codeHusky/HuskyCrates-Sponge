@@ -26,13 +26,11 @@ public class PhysicalCrate {
     public static Vector3d offset = new Vector3d(0.5, 1, 0.5);
     public Location<World> location;
     public ArmorStand as = null;
-    private String crateId;
-    private HuskyCrates huskyCrates;
+    private VirtualCrate virtualCrate;
 
-    public PhysicalCrate(Location<World> crateLocation, String crateId, HuskyCrates huskyCrates) {
+    public PhysicalCrate(Location<World> crateLocation, VirtualCrate virtualCrate) {
         this.location = crateLocation;
-        this.crateId = crateId;
-        this.huskyCrates = huskyCrates;
+        this.virtualCrate = virtualCrate;
         createHologram();
     }
 
@@ -50,7 +48,7 @@ public class PhysicalCrate {
         if (as == null) {
             as = (ArmorStand) location.getExtent().createEntity(EntityTypes.ARMOR_STAND, location.getPosition());
             as.setLocation(location.copy().add(offset));
-            location.getExtent().spawnEntity(as, huskyCrates.genericCause);
+            location.getExtent().spawnEntity(as, HuskyCrates.instance.genericCause);
         }
 
         as.setCreator(UUID.fromString(HuskyCrates.instance.getArmorStandIdentifier()));
@@ -58,7 +56,7 @@ public class PhysicalCrate {
         as.offer(Keys.INVISIBLE, true);
         as.offer(Keys.ARMOR_STAND_MARKER, true);
         as.offer(Keys.CUSTOM_NAME_VISIBLE, true);
-        String name = HuskyCrates.instance.getCrateUtilities().getVirtualCrate(crateId).displayName;
+        String name = virtualCrate.displayName;
         as.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(name));
 
     }
@@ -74,7 +72,7 @@ public class PhysicalCrate {
             as.getWorld().spawnParticles(
                     ParticleEffect.builder()
                             .type(ParticleTypes.REDSTONE_DUST)
-                            .option(ParticleOptions.COLOR, Color.ofRgb(0, 0, 0))
+                            .option(ParticleOptions.COLOR, Color.ofRgb(virtualCrate.color2))
                             .build(),
                     as.getLocation()
                             .getPosition()
@@ -86,12 +84,11 @@ public class PhysicalCrate {
             as.getWorld().spawnParticles(
                     ParticleEffect.builder()
                             .type(ParticleTypes.REDSTONE_DUST)
-                            .option(ParticleOptions.COLOR, Color.ofRgb(255, 139, 41))
+                            .option(ParticleOptions.COLOR, Color.ofRgb(virtualCrate.color2))
                             .build(),
                     as.getLocation()
                             .getPosition()
                             .add(x, y, z));
-        } catch (Exception e) {
-        }
+        } catch (Exception e) {}
     }
 }
