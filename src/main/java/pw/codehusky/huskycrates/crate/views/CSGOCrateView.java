@@ -59,7 +59,6 @@ public class CSGOCrateView implements CrateView {
         items = virtualCrate.getItemSet();
         //offsetBase = (int)Math.floor(gg);
         float random = new Random().nextFloat() * vc.getMaxProb();
-        HuskyCrates.instance.logger.info(vc.getMaxProb() + " - " + vc.displayName);
         float cummProb = 0;
         for (int i = 0; i < items.size(); i++) {
             cummProb += (float) items.get(i)[0];
