@@ -68,7 +68,8 @@ public class CSGOCrateView implements CrateView {
         }
         disp = Inventory.builder()
                 .of(InventoryArchetypes.CHEST)
-                .listener(ClickInventoryEvent.class,evt -> evt.setCancelled(true))
+                .listener(ClickInventoryEvent.class,evt ->
+                        evt.setCancelled(true))
                 .property(InventoryTitle.PROPERTY_NAME,InventoryTitle.of(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(virtualCrate.displayName)))
                 .build(plugin);
         updateInv(0);
@@ -82,9 +83,9 @@ public class CSGOCrateView implements CrateView {
     private boolean runCmd = false;
     private void updateInv(int state) {
         ItemStack border = ItemStack.builder().itemType(ItemTypes.STAINED_GLASS_PANE).add(Keys.DYE_COLOR,DyeColors.BLACK).build();
-        border.offer(Keys.DISPLAY_NAME,Text.of(""));
+        border.offer(Keys.DISPLAY_NAME,Text.of(TextStyles.RESET,"HuskyCrates"));
         ItemStack selector = ItemStack.of(ItemTypes.REDSTONE_TORCH,1);
-        selector.offer(Keys.DISPLAY_NAME,Text.of(""));
+        selector.offer(Keys.DISPLAY_NAME,Text.of(TextStyles.RESET,"HuskyCrates"));
         int slotnum = 0;
         for(Inventory e : disp.slots()){
             if(state == 0 && (slotnum == 4 || slotnum == 22 )){
@@ -123,7 +124,7 @@ public class CSGOCrateView implements CrateView {
                 .itemType(ItemTypes.STAINED_GLASS_PANE)
                 .add(Keys.DYE_COLOR,colors[(int)Math.floor(Math.random() * colors.length)])
                 .build();
-        g.offer(Keys.DISPLAY_NAME,Text.of("You won an item!"));
+        g.offer(Keys.DISPLAY_NAME,Text.of(TextStyles.RESET,"You won an item!"));
         return g;
     }
     private ItemStack giveToPlayer;
@@ -145,6 +146,7 @@ public class CSGOCrateView implements CrateView {
             ourplr.playSound(SoundTypes.UI_BUTTON_CLICK,ourplr.getLocation().getPosition(),0.25);
             clicks++;
         }else if(clicks >= offset && updateMax != 100 && tickerState == 0){
+            ourplr.openInventory(disp,plugin.genericCause);
             tickerState = 1;
             ourplr.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH,ourplr.getLocation().getPosition(),1);
             updateMax = 100;

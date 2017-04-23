@@ -1,6 +1,7 @@
 package pw.codehusky.huskycrates.crate;
 
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
+import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.apache.commons.lang3.ArrayUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
@@ -15,6 +16,7 @@ import pw.codehusky.huskycrates.crate.views.CSGOCrateView;
 import pw.codehusky.huskycrates.crate.views.CrateView;
 import pw.codehusky.huskycrates.crate.views.NullCrateView;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +32,7 @@ public class VirtualCrate {
     public String crateType;
     private float maxProb = 100;
     public boolean invalidCrate = false;
-    public VirtualCrate(String id, CommentedConfigurationNode node){
+    public VirtualCrate(String id, ConfigurationLoader<CommentedConfigurationNode> config, CommentedConfigurationNode node){
         displayName = node.getNode("name").getString();
         crateType = node.getNode("type").getString();
         List<? extends CommentedConfigurationNode> items = node.getNode("items").getChildrenList();
@@ -105,6 +107,11 @@ public class VirtualCrate {
             System.out.println("You have too big of a chance! " + id + " (" + currentProb + ")");
             System.out.println("This only fires if you have assumed probability. If you remove assumed chance, this error will be fixed.");
             System.out.println("If everything looks right in your config, contact @codeHusky on Sponge Forums.");
+        }
+        try {
+            config.save(node.getParent());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         //Self resolving crate
     }

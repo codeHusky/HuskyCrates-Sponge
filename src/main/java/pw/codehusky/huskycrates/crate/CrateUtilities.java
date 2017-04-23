@@ -63,7 +63,7 @@ public class CrateUtilities {
             Map<Object,? extends CommentedConfigurationNode> b = configRoot.getNode("crates").getChildrenMap();
             for(Object prekey: b.keySet()){
                 String key = (String) prekey;
-                crateTypes.put(key,new VirtualCrate(key,configRoot.getNode("crates",key)));
+                crateTypes.put(key,new VirtualCrate(key,config,configRoot.getNode("crates",key)));
             }
             config.save(configRoot);
         } catch (IOException e) {

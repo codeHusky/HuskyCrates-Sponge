@@ -1,11 +1,15 @@
 package pw.codehusky.huskycrates.commands;
 
+import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.persistence.DataTranslators;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -15,6 +19,8 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 
+import java.io.BufferedWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 
 /**
@@ -30,14 +36,40 @@ public class Crate implements CommandExecutor {
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
 
             if(args.getOne(Text.of("param1")).isPresent()) {
-                if(!args.getOne(Text.of("param2")).isPresent()) {
+                if(args.getOne(Text.of("param1")).get().toString().equalsIgnoreCase("confitemgen")) {
+                    Player plr = null;
+                    if (src instanceof Player)
+                        plr = (Player) src;
+                    else {
+                        plr.sendMessage(Text.of("Players only."));
+                        return CommandResult.success();
+                    }
+                    StringWriter sink = new StringWriter();
+                    HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSink(() -> new BufferedWriter(sink))
+                            .build();
+                    try {
+                        ConfigurationNode node = DataTranslators.CONFIGURATION_NODE.translate(plr.getItemInHand(HandTypes.MAIN_HAND).get().toContainer());
+                        //node.getNode("data").setValue(null);
+                        loader.save(node);
+                        System.out.println(sink.toString());
+                        ItemStack deserial = ItemStack.builder()
+                                .fromContainer(DataTranslators.CONFIGURATION_NODE.translate(node))
+                                .build();
+                        System.out.println(deserial.getItem().getName());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }else if(!args.getOne(Text.of("param2")).isPresent()) {
                     if(src instanceof Player) {
                         Player plr = (Player) src;
 
                         ItemStack poss = getCrateItem(args.getOne(Text.of("param1")).get().toString());
                         if (poss != null) {
                             plr.getInventory().offer(poss);
+                            plr.sendMessage(Text.of("Giving a crate to " + plr.getName() + "."));
                         } else {
+                            System.out.println(plr.getItemInHand(HandTypes.MAIN_HAND).get().toContainer());
                             plr.sendMessage(Text.of("Invalid crate id. Please check your config."));
                         }
                     }
@@ -52,9 +84,12 @@ public class Crate implements CommandExecutor {
                         }
                         if (poss != null) {
                             plr.getInventory().offer(poss);
+                            plr.sendMessage(Text.of("Giving a key to " + plr.getName() + "."));
                         } else {
                             plr.sendMessage(Text.of("Invalid crate id. Please check your config."));
                         }
+                    }else{
+                        src.sendMessage(Text.of("??"));
                     }
                 }
             }
