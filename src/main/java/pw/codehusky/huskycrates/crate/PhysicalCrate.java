@@ -60,7 +60,7 @@ public class PhysicalCrate {
         as.offer(Keys.INVISIBLE,true);
         as.offer(Keys.ARMOR_STAND_MARKER,true);
         as.offer(Keys.CUSTOM_NAME_VISIBLE,true);
-        String name = huskyCrates.crateUtilities.getVirtualCrate(crateId).displayName;
+        String name = /*crateId*/ huskyCrates.crateUtilities.getVirtualCrate(crateId).displayName;
         as.offer(Keys.DISPLAY_NAME, TextSerializers.LEGACY_FORMATTING_CODE.deserialize(name));
 
     }

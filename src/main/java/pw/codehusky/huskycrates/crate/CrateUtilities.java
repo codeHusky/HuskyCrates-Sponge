@@ -27,9 +27,10 @@ import java.util.*;
  */
 @SuppressWarnings("deprecation")
 public class CrateUtilities {
-    private HashMap<String,VirtualCrate> crateTypes;
-    private HashMap<Location<World>,PhysicalCrate> physicalCrates;
-    private HashMap<String,ItemStack> keys;
+    private HashMap<String,VirtualCrate> crateTypes = new HashMap<>();
+    private HashMap<Location<World>,PhysicalCrate> physicalCrates = new HashMap<>();
+    private HashMap<String,ItemStack> keys = new HashMap<>();
+    public boolean hasInitalizedVirtualCrates = false;
     private HuskyCrates plugin;
     public CrateUtilities(HuskyCrates plugin){
         this.plugin = plugin;
@@ -82,9 +83,7 @@ public class CrateUtilities {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        for(World e : Sponge.getServer().getWorlds()) {
-            populatePhysicalCrates(e);
-        }
+        hasInitalizedVirtualCrates = true;
     }
     private Task runner = null;
     public void populatePhysicalCrates(Extent bit) {
@@ -135,23 +134,12 @@ public class CrateUtilities {
     }
     public void recognizeChest(Location<World> location){
         if(location.getTileEntity().isPresent()){
+            if(physicalCrates.containsKey(location)) return;
             String id = null;
             try {
                 id = getTypeFromLocation(location);
             } catch (Exception e) {}
             if(id != null){
-                try {
-
-                    CommentedConfigurationNode root = plugin.crateConfig.load();
-//                    try {
-//                        root.getNode("cachedCrates").getAppendedNode().setValue(TypeToken.of(Location.class),location);
-//                    } catch (ObjectMappingException e) {
-//                        e.printStackTrace();
-//                    }
-                    plugin.crateConfig.save(root);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
                 physicalCrates.put(location,new PhysicalCrate(location,id,plugin));
             }
         }

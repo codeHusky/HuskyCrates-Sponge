@@ -24,10 +24,11 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.game.GameReloadEvent;
+import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
+import org.spongepowered.api.event.world.chunk.LoadChunkEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -65,7 +66,10 @@ public class HuskyCrates {
     public CrateUtilities crateUtilities = new CrateUtilities(this);
     public String huskyCrateIdentifier = "☼1☼2☼3HUSKYCRATE-";
     public String armorStandIdentifier = "ABABABAB-CDDE-0000-8374-CAAAECAAAECA";
-    private boolean hasInitialized = false;
+    @Listener
+    public void gameInit(GamePreInitializationEvent event){
+        crateUtilities.generateVirtualCrates(crateConfig);
+    }
     @Listener
     public void gameStarted(GameStartedServerEvent event){
         CommandSpec crateSpec = CommandSpec.builder()
@@ -77,18 +81,17 @@ public class HuskyCrates {
         scheduler = Sponge.getScheduler();
         genericCause = Cause.of(NamedCause.of("PluginContainer",pC));
         Sponge.getCommandManager().register(this, crateSpec, "crate");
-        crateUtilities.generateVirtualCrates(crateConfig);
         logger.info("Crates has been started.");
-        hasInitialized = true;
     }
 
-    @Listener
-    public void entLoad(SpawnEntityEvent event){
-        if(hasInitialized)
-            return;
-        for(Entity e : event.getEntities()){
+    @Listener(order = Order.POST)
+    public void chunkLoad(LoadChunkEvent event){
+        if(!crateUtilities.hasInitalizedVirtualCrates){
+            crateUtilities.generateVirtualCrates(crateConfig);
+        }
+        for(Entity e : event.getTargetChunk().getEntities()){
             if(e instanceof ArmorStand){
-                crateUtilities.populatePhysicalCrates(event.getTargetWorld().getChunk(e.getLocation().getChunkPosition()).get());
+                crateUtilities.populatePhysicalCrates(event.getTargetChunk());
                 return;
             }
         }
@@ -101,6 +104,9 @@ public class HuskyCrates {
     @Listener
     public void gameReloaded(GameReloadEvent event){
         crateUtilities.generateVirtualCrates(crateConfig);
+        for(World e: Sponge.getServer().getWorlds()){
+            crateUtilities.populatePhysicalCrates(e);
+        }
     }
     private boolean blockCanBeCrate(BlockType type){
         return type==BlockTypes.CHEST ||
@@ -132,6 +138,7 @@ public class HuskyCrates {
             if(name.contains(huskyCrateIdentifier)){
                 event.setCancelled(true);
                 String crateType = name.replace(huskyCrateIdentifier, "");
+                crateUtilities.recognizeChest(te.getLocation());
                 if(plr.getItemInHand(HandTypes.MAIN_HAND).isPresent()) {
                     ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
                     if(inhand.getItem() == ItemTypes.NETHER_STAR && inhand.get(Keys.ITEM_LORE).isPresent()) {
