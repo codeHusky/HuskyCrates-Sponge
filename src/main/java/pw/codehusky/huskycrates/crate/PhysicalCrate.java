@@ -72,7 +72,7 @@ public class PhysicalCrate {
             as.getWorld().spawnParticles(
                     ParticleEffect.builder()
                             .type(ParticleTypes.REDSTONE_DUST)
-                            .option(ParticleOptions.COLOR, Color.ofRgb(virtualCrate.color2))
+                            .option(ParticleOptions.COLOR, Color.ofRgb(virtualCrate.color1))
                             .build(),
                     as.getLocation()
                             .getPosition()
