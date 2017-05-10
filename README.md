@@ -2,6 +2,10 @@
 A simple, straightforward crate system for Sponge!
 
 This fork has some changes made to it  - this is updated with the documentation for it :)!
+## Changes:
+ - Using a poppy instead of a nether star
+ - Possible to change the colors in the crate.
+ - Performance changes 
 
 It can be [downloaded on my CI server](http://ci.communitybuilt.net/job/HuskyCrates/)
 
@@ -37,8 +41,8 @@ crates {
             #Make sure your chances don't add past 100 or you'll get an error!
         ]
         name="§3Command Crate" # Make sure this looks good everywhere :)
-        color1="§3Command Crate" 
-        color2="§3Command Crate" 
+        color1="000000" 
+        color2="ff8b29" 
         type=Spinner # Types will be added in the future, but keeping this as a Spinner will keep your config future proof.
     }
     #Keys will also be configurable in the future, so keep your eye out.
