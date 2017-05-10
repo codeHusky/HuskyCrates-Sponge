@@ -4,6 +4,7 @@ A simple, straightforward crate system for Sponge!
 This fork has some changes made to it  - this is updated with the documentation for it :)!
 ## Changes:
  - Using a poppy instead of a nether star
+ - Send the gifts to the enderChest if their inventory is full.
  - Possible to change the colors in the crate.
  - Performance changes 
 
