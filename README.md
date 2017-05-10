@@ -1,7 +1,7 @@
 # HuskyCrates
 [![Build Status](http://ci.communitybuilt.net/job/HuskyCrates/badge/icon)](http://ci.communitybuilt.net/job/HuskyCrates/)
-A simple, straightforward crate system for Sponge!
 
+A simple, straightforward crate system for Sponge!
 
 This fork has some changes made to it  - this is updated with the documentation for it :)!
 
