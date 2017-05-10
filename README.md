@@ -1,14 +1,16 @@
 # HuskyCrates
+[![Build Status](http://ci.communitybuilt.net/job/HuskyCrates/badge/icon)](http://ci.communitybuilt.net/job/HuskyCrates/)
 A simple, straightforward crate system for Sponge!
 
+
 This fork has some changes made to it  - this is updated with the documentation for it :)!
+
+It can be [downloaded on my CI server](http://ci.communitybuilt.net/job/HuskyCrates/)
 ## Changes:
  - Using a poppy instead of a nether star
  - Send the gifts to the enderChest if their inventory is full.
  - Possible to change the colors in the crate.
  - Performance changes 
-
-It can be [downloaded on my CI server](http://ci.communitybuilt.net/job/HuskyCrates/)
 
 # Forum Topic
 [Go here.](https://forums.spongepowered.org/t/huskycrates-cratesreloaded-but-free-or-something/16433)
