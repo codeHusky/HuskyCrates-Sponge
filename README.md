@@ -42,8 +42,8 @@ crates {
             #Make sure your chances don't add past 100 or you'll get an error!
         ]
         name="§3Command Crate" # Make sure this looks good everywhere :)
-        color1="000000" 
-        color2="ff8b29" 
+        color1="000000"  #Color 1 of the particles going around the crate.
+        color2="ff8b29"  #Color 2 of the particles going around the crate.
         type=Spinner # Types will be added in the future, but keeping this as a Spinner will keep your config future proof.
     }
     #Keys will also be configurable in the future, so keep your eye out.
