@@ -37,6 +37,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -176,7 +177,12 @@ public class HuskyCrates {
                 }
                 VirtualCrate vc = crateUtilities.getVirtualCrate(crateType);
                 plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,plr.getLocation().getPosition(),0.5);
-                plr.sendMessage(Text.of("You need a ",TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName + " Key")," to open this crate."));
+                try {
+                    plr.sendMessage(Text.of("You need a ", TextSerializers.FORMATTING_CODE.deserialize(vc.displayName + " Key"), " to open this crate."));
+                }catch(Exception e){
+                    plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
+                    e.printStackTrace();
+                }
             }
 
 

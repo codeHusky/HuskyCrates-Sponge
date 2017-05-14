@@ -21,6 +21,7 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.CrateCommandSource;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
+import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,7 +71,7 @@ public class CSGOCrateView implements CrateView {
                 .of(InventoryArchetypes.CHEST)
                 .listener(ClickInventoryEvent.class,evt ->
                         evt.setCancelled(true))
-                .property(InventoryTitle.PROPERTY_NAME,InventoryTitle.of(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(virtualCrate.displayName)))
+                .property(InventoryTitle.PROPERTY_NAME,InventoryTitle.of(TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName)))
                 .build(plugin);
         updateInv(0);
         Scheduler scheduler = Sponge.getScheduler();
@@ -79,8 +80,6 @@ public class CSGOCrateView implements CrateView {
 
 
     }
-    private String commandToRun = "";
-    private boolean runCmd = false;
     private void updateInv(int state) {
         ItemStack border = ItemStack.builder().itemType(ItemTypes.STAINED_GLASS_PANE).add(Keys.DYE_COLOR,DyeColors.BLACK).build();
         border.offer(Keys.DISPLAY_NAME,Text.of(TextStyles.RESET,"HuskyCrates"));
@@ -92,16 +91,9 @@ public class CSGOCrateView implements CrateView {
                 e.set(selector);
             }else if(slotnum > 9 && slotnum < 17 && state != 2){
                 int itemNum = Math.abs(((slotnum - 10) + (clicks-3)) % items.size());
-                e.set((ItemStack)items.get(itemNum)[1]);
+                e.set(((CrateRewardHolder)items.get(itemNum)[1]).getDisplayItem());
                 if(slotnum == 13) {
-                    giveToPlayer = ((ItemStack)items.get(itemNum)[1]).copy();
-                    if(items.get(itemNum).length == 3){
-                        runCmd = true;
-                        commandToRun = items.get(itemNum)[2].toString();
-                    }else{
-                        runCmd = false;
-                        commandToRun = "";
-                    }
+                    giveToPlayer = (CrateRewardHolder)items.get(itemNum)[1];
                 }
             }else if(slotnum != 13){
                 if(state == 2 ){
@@ -110,7 +102,7 @@ public class CSGOCrateView implements CrateView {
                     e.set(border);
                 }
             }else if(slotnum == 13 && state == 2){
-                e.set(giveToPlayer);
+                e.set(giveToPlayer.getDisplayItem());
             }
             slotnum++;
         }
@@ -127,7 +119,7 @@ public class CSGOCrateView implements CrateView {
         g.offer(Keys.DISPLAY_NAME,Text.of(TextStyles.RESET,"You won an item!"));
         return g;
     }
-    private ItemStack giveToPlayer;
+    private CrateRewardHolder giveToPlayer;
     float updateMax = 1;
     int waitCurrent = 0;
     private double dampening = 1.05;
@@ -155,27 +147,35 @@ public class CSGOCrateView implements CrateView {
             if (waitCurrent == Math.round(updateMax)) {
                 updater.cancel();
                 ourplr.closeInventory(plugin.genericCause);
+                if (giveToPlayer.getReward().getReward() instanceof String){
+                    Sponge.getCommandManager().process(new CrateCommandSource(), giveToPlayer.getReward().getReward().toString().replace("%p", ourplr.getName()));
+                }else {
+                    System.out.println(giveToPlayer.getReward().treatAsSingle());
 
-                Text name = Text.of(TextColors.YELLOW, giveToPlayer.createSnapshot().getType().getTranslation().get());
-                if(giveToPlayer.get(Keys.DISPLAY_NAME).isPresent()){
-                    name = Text.of(TextStyles.ITALIC,giveToPlayer.get(Keys.DISPLAY_NAME).get());
+                    ourplr.getInventory().offer((ItemStack) giveToPlayer.getReward().getReward());
                 }
-                
-                if(runCmd)
-                    Sponge.getCommandManager().process(new CrateCommandSource(),commandToRun.replace("%p",ourplr.getName()));
-
-                if(giveToPlayer.getQuantity() != 1 && !runCmd){
-                    ourplr.sendMessage(Text.of("You won ",TextColors.YELLOW, giveToPlayer.getQuantity() + " ",  name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName),TextColors.RESET,"!"));
-                }else{
-                    String[] vowels = {"a","e","i","o","u"};
-                    if(Arrays.asList(vowels).contains(name.toPlain().substring(0,1).toLowerCase())){
-                        ourplr.sendMessage(Text.of("You won an ", name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
-                    }else {
-                        ourplr.sendMessage(Text.of("You won a ", name, TextColors.RESET, " from a ", TextSerializers.LEGACY_FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
+                boolean mult = false;
+                if (!giveToPlayer.getReward().treatAsSingle() &&  giveToPlayer.getReward().getReward() instanceof ItemStack) {
+                    if(((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() > 1) {
+                        ourplr.sendMessage(Text.of("You won ", TextColors.YELLOW,
+                                ((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() + " ",
+                                TextSerializers.FORMATTING_CODE.deserialize(giveToPlayer.getReward().getRewardName()), TextColors.RESET, " from a ",
+                                TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
+                        mult = true;
                     }
                 }
-                if(!runCmd)
-                    ourplr.getInventory().offer(giveToPlayer);
+                if(!mult){
+                    String[] vowels = {"a", "e", "i", "o", "u"};
+                    if (Arrays.asList(vowels).contains(giveToPlayer.getReward().getRewardName().substring(0, 1).toLowerCase())) {
+                        ourplr.sendMessage(Text.of("You won an ",
+                                TextSerializers.FORMATTING_CODE.deserialize(giveToPlayer.getReward().getRewardName()), TextColors.RESET, " from a ",
+                                TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
+                    } else {
+                        ourplr.sendMessage(Text.of("You won a ",
+                                TextSerializers.FORMATTING_CODE.deserialize(giveToPlayer.getReward().getRewardName()), TextColors.RESET, " from a ",
+                                TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
+                    }
+                }
                 ourplr.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP,ourplr.getLocation().getPosition(),1);
 
             }else if(waitCurrent % 5 == 0){

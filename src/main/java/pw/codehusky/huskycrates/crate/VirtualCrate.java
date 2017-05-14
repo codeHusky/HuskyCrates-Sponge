@@ -3,7 +3,6 @@ package pw.codehusky.huskycrates.crate;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.apache.commons.lang3.ArrayUtils;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 import pw.codehusky.huskycrates.HuskyCrates;
@@ -39,55 +38,16 @@ public class VirtualCrate {
         commandSet = new HashMap<>();
         for(CommentedConfigurationNode e : items){
             CrateRewardHolder rewardHolder = CrateRewardHolderParser.fromConfig(e);
-            System.out.println(rewardHolder.getDisplayItem().get(Keys.DISPLAY_NAME));
-            System.out.println(rewardHolder.getReward().getRewardName());
-            /*String name = e.getNode("name").getString("");
-            String itemID = e.getNode("id").getString("").toUpperCase();
-            int amount = e.getNode("amount").getInt(1);
-            if(Sponge.getRegistry().getType(ItemType.class,itemID).isPresent()) {
-                ItemStack ourChild = ItemStack.builder()
-                        .itemType(Sponge.getRegistry().getType(ItemType.class,itemID).get())
-                        .quantity(amount)
-                        .build();
-                if(name.length() > 0)
-                    ourChild.offer(Keys.DISPLAY_NAME, TextSerializers.LEGACY_FORMATTING_CODE.deserialize(name));
-                EnchantmentData ed = ourChild.getOrCreate(EnchantmentData.class).get();
-                if(false){
-                    ourChild.offer(ed);
-                }
-                //ed.addElement()
-                String lore = e.getNode("lore").getString("");
-                ArrayList<Text> bb = new ArrayList<>();
-                if(lore.length() > 0) {
-                    bb.add(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(lore));
-                }
+            if(rewardHolder.getChance() != -1){
+                Object[] t = {rewardHolder};
+                equality.add(t);
+            }else{
+                Object[] t = {rewardHolder.getChance(), rewardHolder};
+                currentProb += rewardHolder.getChance();
+                itemSet.add(t);
+            }
 
-                ourChild.offer(Keys.ITEM_LORE,bb);
-                ourChild.offer(Keys.HIDE_ENCHANTMENTS,true);
-                String potentialCommand = e.getNode("command").getString("");
-                if(e.getNode("chance").isVirtual()){
-                    Object[] t = {ourChild};
-                    if(potentialCommand.length() > 0){
-                        Object[] add = {potentialCommand};
-                        Object[] g = ArrayUtils.addAll(t,add);
-                        equality.add(g);
-                    }else {
-                        equality.add(t);
-                    }
-                }else{
-                    Object[] t = {e.getNode("chance").getFloat(), ourChild};
-                    currentProb += e.getNode("chance").getFloat();
-                    if(potentialCommand.length() > 0){
-                        Object[] add = {potentialCommand};
-                        Object[] g = ArrayUtils.addAll(t,add);
-                        //System.out.println((float)g[0]);
-                        itemSet.add(g);
-                    }else {
-                        itemSet.add(t);
-                    }
-                }
 
-            }*/
         }
         if(equality.size() > 0){
             int remaining =(int) (100 - currentProb);
