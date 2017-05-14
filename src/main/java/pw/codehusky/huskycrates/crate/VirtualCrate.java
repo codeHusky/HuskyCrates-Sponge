@@ -3,15 +3,12 @@ package pw.codehusky.huskycrates.crate;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.apache.commons.lang3.ArrayUtils;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
+import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
+import pw.codehusky.huskycrates.crate.config.CrateRewardHolderParser;
 import pw.codehusky.huskycrates.crate.views.CSGOCrateView;
 import pw.codehusky.huskycrates.crate.views.CrateView;
 import pw.codehusky.huskycrates.crate.views.NullCrateView;
@@ -41,8 +38,10 @@ public class VirtualCrate {
         itemSet = new ArrayList<>();
         commandSet = new HashMap<>();
         for(CommentedConfigurationNode e : items){
-
-            String name = e.getNode("name").getString("");
+            CrateRewardHolder rewardHolder = CrateRewardHolderParser.fromConfig(e);
+            System.out.println(rewardHolder.getDisplayItem().get(Keys.DISPLAY_NAME));
+            System.out.println(rewardHolder.getReward().getRewardName());
+            /*String name = e.getNode("name").getString("");
             String itemID = e.getNode("id").getString("").toUpperCase();
             int amount = e.getNode("amount").getInt(1);
             if(Sponge.getRegistry().getType(ItemType.class,itemID).isPresent()) {
@@ -88,7 +87,7 @@ public class VirtualCrate {
                     }
                 }
 
-            }
+            }*/
         }
         if(equality.size() > 0){
             int remaining =(int) (100 - currentProb);

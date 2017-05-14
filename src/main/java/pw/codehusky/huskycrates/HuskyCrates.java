@@ -68,7 +68,7 @@ public class HuskyCrates {
     public String armorStandIdentifier = "ABABABAB-CDDE-0000-8374-CAAAECAAAECA";
     @Listener
     public void gameInit(GamePreInitializationEvent event){
-        crateUtilities.generateVirtualCrates(crateConfig);
+        logger.info("Let's not init VCrates here anymore. ://)");
     }
     @Listener
     public void gameStarted(GameStartedServerEvent event){
@@ -81,6 +81,9 @@ public class HuskyCrates {
         scheduler = Sponge.getScheduler();
         genericCause = Cause.of(NamedCause.of("PluginContainer",pC));
         Sponge.getCommandManager().register(this, crateSpec, "crate");
+        if(!crateUtilities.hasInitalizedVirtualCrates){
+            crateUtilities.generateVirtualCrates(crateConfig);
+        }
         logger.info("Crates has been started.");
     }
 
@@ -99,6 +102,9 @@ public class HuskyCrates {
 
     @Listener(order = Order.POST)
     public void worldLoaded(LoadWorldEvent event){
+        if(!crateUtilities.hasInitalizedVirtualCrates){
+            crateUtilities.generateVirtualCrates(crateConfig);
+        }
         crateUtilities.populatePhysicalCrates(event.getTargetWorld());
     }
     @Listener

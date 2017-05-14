@@ -1,5 +1,6 @@
 package pw.codehusky.huskycrates.commands;
 
+import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.api.command.CommandException;
@@ -48,13 +49,13 @@ public class Crate implements CommandExecutor {
                     HoconConfigurationLoader loader = HoconConfigurationLoader.builder().setSink(() -> new BufferedWriter(sink))
                             .build();
                     try {
-                        ConfigurationNode node = DataTranslators.CONFIGURATION_NODE.translate(plr.getItemInHand(HandTypes.MAIN_HAND).get().toContainer());
-                        //node.getNode("data").setValue(null);
+                        System.out.println(plr.getItemInHand(HandTypes.MAIN_HAND).get().toContainer());
+                        ConfigurationNode node = loader.createEmptyNode();
+                        node.setValue(TypeToken.of(ItemStack.class),plr.getItemInHand(HandTypes.MAIN_HAND).get());
                         loader.save(node);
                         System.out.println(sink.toString());
-                        ItemStack deserial = ItemStack.builder()
-                                .fromContainer(DataTranslators.CONFIGURATION_NODE.translate(node))
-                                .build();
+                        System.out.println(DataTranslators.CONFIGURATION_NODE.translate(node));
+                        ItemStack deserial = null;
                         System.out.println(deserial.getItem().getName());
                     } catch (Exception e) {
                         e.printStackTrace();
