@@ -49,7 +49,7 @@ crate {
       #  "&9Blue!!!"
       #]
       #enchants {
-      #  16=255 #sharpness lvl 255
+      #  sharpness=255 #sharpness lvl 255
       #}
       #attribute modifiers not implemented, not sure what they are
       #skullowner="lokio27"
