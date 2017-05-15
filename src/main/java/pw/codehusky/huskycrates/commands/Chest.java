@@ -19,7 +19,6 @@ public class Chest implements CommandExecutor {
     @Override public CommandResult execute(CommandSource commandSource, CommandContext commandContext) throws CommandException {
         String type = commandContext.<String>getOne("type").get();
         Optional<Player> player = commandContext.getOne("player");
-        Optional<String> key = commandContext.getOne("key");
         VirtualCrate virtualCrate = HuskyCrates.instance.getCrateUtilities().getVirtualCrate(type);
         int quantity = commandContext.getOne("quantity").isPresent() ? commandContext.<Integer>getOne("quantity").get() : 1;
         if (virtualCrate == null) {
@@ -27,34 +26,10 @@ public class Chest implements CommandExecutor {
             return CommandResult.empty();
         }
 
-        // TODO: THIS SHOULD BE REMOVED SOON
-        if (key.isPresent()) {
-            HuskyCrates.instance.logger.info("---------------------------------");
-            HuskyCrates.instance.logger.info("Please change the husky command from /crate " + type + " key to be in the new format.");
-            HuskyCrates.instance.logger.info("/crate key " + type + " [player]  - the old format will be removed soon!!!!");
-            HuskyCrates.instance.logger.info("---------------------------------");
-
-            if (!player.isPresent()) {
-                commandSource.sendMessage(Text.of("You need to be in game or specify a player for this command to work."));
-                return CommandResult.empty();
-            }
-
-            ItemStack keyItemStack = virtualCrate.getCrateKey(1);
-
-            if (!player.get().getInventory().offer(keyItemStack.copy()).getType().equals(InventoryTransactionResult.Type.SUCCESS) &&
-                    !player.get().getEnderChestInventory().offer(keyItemStack.copy()).getType().equals(InventoryTransactionResult.Type.SUCCESS)) {
-                HuskyCrates.instance.logger
-                        .info("Couldn't give key to " + player.get().getName() + " because of a full inventory and enderchest");
-            }
-            return CommandResult.success();
-        }
-        // TODO: THIS SHOULD BE REMOVED SOON END
-
         if (!player.isPresent()) {
             commandSource.sendMessage(Text.of("You need to either specify a player or be in game"));
             return CommandResult.empty();
         }
-
 
         ItemStack chestItemStack = virtualCrate.getCrateItem(quantity);
         player.get().getInventory().offer(chestItemStack);
