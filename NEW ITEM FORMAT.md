@@ -3,12 +3,12 @@
 
 ```
 crate {
-  formatversion=1
   items = [
     {
       ##Display, but by default also reward item.
       id="minecraft:dirt"
       count=1
+      formatversion=1
       huskydata{
         weight=10 #higher weight = higher chance
         
