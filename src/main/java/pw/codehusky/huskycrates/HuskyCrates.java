@@ -53,21 +53,21 @@ public class HuskyCrates {
     public static HuskyCrates instance;
     private final String huskyCrateIdentifier = "☼1☼2☼3HUSKYCRATE-";
     private final String armorStandIdentifier = "ABABABAB-CDDE-0000-8374-CAAAECAAAECA";
+    public Cause genericCause;
+    private CrateUtilities crateUtilities = new CrateUtilities();
+
     @Inject
     public Logger logger;
     @Inject
     @DefaultConfig(sharedRoot = false)
     public ConfigurationLoader<CommentedConfigurationNode> crateConfig;
-    public Cause genericCause;
-    public Scheduler scheduler;
-    private CrateUtilities crateUtilities = new CrateUtilities(this);
     @Inject
     private PluginContainer pC;
-    private boolean hasInitialized = false;
 
     @Listener
     public void gameStarted(GameStartedServerEvent event) {
         instance = this;
+
         CommandSpec reload = CommandSpec.builder()
                 .description(Text.of("Reload command for crates"))
                 .permission("huskycrates.reload")
@@ -106,12 +106,10 @@ public class HuskyCrates {
                 .child(chest, "chest")
                 .build();
 
-        scheduler = Sponge.getScheduler();
         genericCause = Cause.of(NamedCause.of("PluginContainer", pC));
         Sponge.getCommandManager().register(this, crateSpec, "crate");
         crateUtilities.generateVirtualCrates(crateConfig);
         logger.info("Crates has initialized started.");
-        hasInitialized = true;
     }
 
     @Listener
@@ -188,10 +186,11 @@ public class HuskyCrates {
                                             plr.setItemInHand(HandTypes.MAIN_HAND, tobe);
                                         }
                                     }
+                                    Scheduler scheduler = Sponge.getScheduler();
                                     Task.Builder upcoming = scheduler.createTaskBuilder();
 
                                     upcoming.execute(() -> {
-                                        crateUtilities.launchCrateForPlayer(crateType, plr, this);
+                                        crateUtilities.launchCrateForPlayer(crateType, plr);
                                     }).delayTicks(1).submit(this);
                                     return;
                                 }

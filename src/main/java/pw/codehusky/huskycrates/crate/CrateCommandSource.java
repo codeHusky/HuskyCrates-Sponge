@@ -13,9 +13,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-/**
- * Created by lokio on 1/16/2017.
- */
 public class CrateCommandSource implements CommandSource {
 
     @Override

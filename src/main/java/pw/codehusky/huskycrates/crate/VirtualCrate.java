@@ -133,16 +133,16 @@ public class VirtualCrate {
         return maxProb;
     }
 
-    public CrateView generateViewForCrate(HuskyCrates plugin, Player plr) {
+    public CrateView generateViewForCrate(Player plr) {
         if (invalidCrate) {
-            return new NullCrateView(plugin, plr, this);
+            return new NullCrateView(HuskyCrates.instance, plr, this);
         }
         if (crateType.equalsIgnoreCase("spinner")) {
-            return new CSGOCrateView(plugin, plr, this);
+            return new CSGOCrateView(plr, this);
         } else {
             invalidCrate = true;
         }
-        return new NullCrateView(plugin, plr, this);
+        return new NullCrateView(HuskyCrates.instance, plr, this);
     }
 
 

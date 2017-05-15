@@ -17,9 +17,6 @@ import pw.codehusky.huskycrates.HuskyCrates;
 
 import java.util.UUID;
 
-/**
- * Created by lokio on 1/2/2017.
- */
 
 public class PhysicalCrate {
 

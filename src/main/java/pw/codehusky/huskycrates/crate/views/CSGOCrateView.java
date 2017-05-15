@@ -37,7 +37,6 @@ public class CSGOCrateView implements CrateView {
     int itemNum = -1;
     float updateMax = 1;
     int waitCurrent = 0;
-    private HuskyCrates plugin;
     private ArrayList<Object[]> items;
     private Inventory disp;
     private Task updater;
@@ -51,10 +50,9 @@ public class CSGOCrateView implements CrateView {
     private double dampening = 1.05;
     private int tickerState = 0;
 
-    public CSGOCrateView(HuskyCrates plugin, Player runner, VirtualCrate virtualCrate) {
+    public CSGOCrateView(Player runner, VirtualCrate virtualCrate) {
         this.vc = virtualCrate;
         ourplr = runner;
-        this.plugin = plugin;
 
         items = virtualCrate.getItemSet();
         //offsetBase = (int)Math.floor(gg);
@@ -79,11 +77,11 @@ public class CSGOCrateView implements CrateView {
                 .of(InventoryArchetypes.CHEST)
                 .listener(ClickInventoryEvent.class, evt -> evt.setCancelled(true))
                 .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName)))
-                .build(plugin);
+                .build(HuskyCrates.instance);
         updateInv(0);
         Scheduler scheduler = Sponge.getScheduler();
         Task.Builder taskBuilder = scheduler.createTaskBuilder();
-        updater = taskBuilder.execute(this::updateTick).intervalTicks(1).submit(plugin);
+        updater = taskBuilder.execute(this::updateTick).intervalTicks(1).submit(HuskyCrates.instance);
 
 
     }
@@ -120,7 +118,7 @@ public class CSGOCrateView implements CrateView {
             slotnum++;
         }
         if (!ourplr.isViewingInventory()) {
-            ourplr.openInventory(disp, plugin.genericCause);
+            ourplr.openInventory(disp, HuskyCrates.instance.genericCause);
         }
     }
 
@@ -158,7 +156,7 @@ public class CSGOCrateView implements CrateView {
             if (waitCurrent == Math.round(updateMax)) {
                 Text specialText = null;
                 updater.cancel();
-                ourplr.closeInventory(plugin.genericCause);
+                ourplr.closeInventory(HuskyCrates.instance.genericCause);
 
                 Text name = Text.of(TextColors.YELLOW, giveToPlayer.createSnapshot().getType().getTranslation().get());
                 if (giveToPlayer.get(Keys.DISPLAY_NAME).isPresent()) {

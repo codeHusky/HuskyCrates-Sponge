@@ -6,17 +6,11 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -36,22 +30,19 @@ public class CrateUtilities {
 
     private HashMap<String, VirtualCrate> crateTypes;
     private HashMap<Location<World>, PhysicalCrate> physicalCrates;
-    private HashMap<String, ItemStack> keys;
-    private HuskyCrates plugin;
     private ArrayList<Location<World>> toCheck;
     private HashMap<World, Vector3i> toCheckChunk;
     private Task runner = null;
 
-    public CrateUtilities(HuskyCrates plugin) {
-        this.plugin = plugin;
+    public CrateUtilities() {
     }
 
-    public void launchCrateForPlayer(String crateType, Player target, HuskyCrates plugin) {
+    public void launchCrateForPlayer(String crateType, Player target) {
         crateType = crateType.toLowerCase();
         if (!crateTypes.containsKey(crateType)) {
-            target.openInventory(new NullCrateView(plugin, target, null).getInventory(), plugin.genericCause);
+            target.openInventory(new NullCrateView(HuskyCrates.instance, target, null).getInventory(), HuskyCrates.instance.genericCause);
         } else {
-            target.openInventory(crateTypes.get(crateType).generateViewForCrate(plugin, target).getInventory(), plugin.genericCause);
+            target.openInventory(crateTypes.get(crateType).generateViewForCrate(target).getInventory(), HuskyCrates.instance.genericCause);
         }
     }
 
@@ -79,7 +70,7 @@ public class CrateUtilities {
             e.printStackTrace();
         }
         try {
-            CommentedConfigurationNode root = plugin.crateConfig.load();
+            CommentedConfigurationNode root = HuskyCrates.instance.crateConfig.load();
             for (CommentedConfigurationNode cached : root.getNode("cachedCrates").getChildrenList()) {
                 try {
                     String[] stringList = ((String) cached.getValue()).split(":");
@@ -140,7 +131,7 @@ public class CrateUtilities {
         }
         Scheduler scheduler = Sponge.getScheduler();
         Task.Builder taskBuilder = scheduler.createTaskBuilder();
-        runner = taskBuilder.execute(this::particleRunner).intervalTicks(1).submit(plugin);
+        runner = taskBuilder.execute(this::particleRunner).intervalTicks(1).submit(HuskyCrates.instance);
     }
 
     public VirtualCrate getTypeFromLocation(Location<World> location) {
@@ -188,7 +179,7 @@ public class CrateUtilities {
     public void updateConfig() {
         try {
 
-            CommentedConfigurationNode root = plugin.crateConfig.load();
+            CommentedConfigurationNode root = HuskyCrates.instance.crateConfig.load();
             CommentedConfigurationNode node = root.getNode("cachedCrates");
             ArrayList<String> cached = new ArrayList<>();
             for (Location<World> b : physicalCrates.keySet()) {
@@ -196,7 +187,7 @@ public class CrateUtilities {
             }
 
             node.setValue(cached);
-            plugin.crateConfig.save(root);
+            HuskyCrates.instance.crateConfig.save(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -231,7 +222,7 @@ public class CrateUtilities {
     }
 
     public List<String> getCrateTypes() {
-        return new ArrayList<String>(crateTypes.keySet());
+        return new ArrayList<>(crateTypes.keySet());
     }
 
 }
