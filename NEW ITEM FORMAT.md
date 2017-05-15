@@ -1,5 +1,5 @@
-# Upcoming config format for items
-### Please note that this format has not been implemented anywhere.
+# New item format for items
+### This is for 0.10.0 and higher only.
 
 ```
 crate {
@@ -41,16 +41,17 @@ crate {
           }
         }
       }
+      #commented out values aren't implemented if i recall correctly
       ## Below are optional values you would use if you wanted to have some fun. ##
       #damage=0
       #unbreakable=false
-      #name="&5woah so cool :)"
-      #lore = [
-      #  "&9Blue!!!"
-      #]
-      #enchants {
-      #  sharpness=255 #sharpness lvl 255
-      #}
+      name="&5woah so cool :)"
+      lore = [
+        "&9Blue!!!"
+      ]
+      enchants {
+        sharpness=255 #sharpness lvl 255
+      }
       #attribute modifiers not implemented, not sure what they are
       #skullowner="lokio27"
       #life=6000 # 5 minutes before despawn
