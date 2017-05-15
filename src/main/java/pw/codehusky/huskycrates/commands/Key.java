@@ -20,7 +20,7 @@ public class Key implements CommandExecutor {
         String type = commandContext.<String>getOne("type").get();
         Optional<Player> player = commandContext.getOne("player");
         VirtualCrate virtualCrate = HuskyCrates.instance.getCrateUtilities().getVirtualCrate(type);
-
+        int quantity = commandContext.getOne("quantity").isPresent() ? commandContext.<Integer>getOne("quantity").get() : 1;
         if (virtualCrate == null) {
             HuskyCrates.instance.logger.info("Invalid crate id. Please check your config.");
             return CommandResult.empty();
@@ -32,7 +32,7 @@ public class Key implements CommandExecutor {
         }
 
 
-        ItemStack keyItemStack = virtualCrate.getCrateKey(1);
+        ItemStack keyItemStack = virtualCrate.getCrateKey(quantity);
         if (!player.get().getInventory().offer(keyItemStack.copy()).getType().equals(InventoryTransactionResult.Type.SUCCESS) &&
                 !player.get().getEnderChestInventory().offer(keyItemStack.copy()).getType().equals(InventoryTransactionResult.Type.SUCCESS)) {
             HuskyCrates.instance.logger

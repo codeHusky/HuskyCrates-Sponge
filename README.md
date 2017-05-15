@@ -10,7 +10,9 @@ It can be [downloaded on my CI server](http://ci.communitybuilt.net/job/HuskyCra
  - Using a poppy instead of a nether star
  - Send the gifts to the enderChest if their inventory is full.
  - Possible to change the colors in the crate.
- - Performance changes 
+ - Performance changes
+ - Changed format of the commands for getting keys/chests to be `/crate key <crate id>` and `/crate <crate id>` instead of `/crate <crate id> chest/key`, this is making it way easier to manage internally.
+ - Possible to add quantity parameter to the key and chest commands
 
 # Forum Topic
 [Go here.](https://forums.spongepowered.org/t/huskycrates-cratesreloaded-but-free-or-something/16433)
@@ -56,7 +58,7 @@ Please note that if you want a chance maximum other than 100 right now, you cann
 # Commands
 - `/crate` - does nothing
 - `/crate reload` - Reload your configuration
-- `/crate <crate id>` - Gives you a placeable crate block. Will look weird but trust me, it's the right thing.
+- `/crate <crate id> [quantity]` - Gives you a placeable crate block. Will look weird but trust me, it's the right thing.
 - `/crate key <crate id> [player]` - Give you, or someone you choose, a crate key.
 
 Crate IDs are the values you put first inside of the crates{} in the config. So like, command in the example would be the crate id.

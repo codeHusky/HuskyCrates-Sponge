@@ -21,7 +21,7 @@ public class Chest implements CommandExecutor {
         Optional<Player> player = commandContext.getOne("player");
         Optional<String> key = commandContext.getOne("key");
         VirtualCrate virtualCrate = HuskyCrates.instance.getCrateUtilities().getVirtualCrate(type);
-
+        int quantity = commandContext.getOne("quantity").isPresent() ? commandContext.<Integer>getOne("quantity").get() : 1;
         if (virtualCrate == null) {
             HuskyCrates.instance.logger.info("Invalid crate id. Please check your config.");
             return CommandResult.empty();
@@ -56,7 +56,7 @@ public class Chest implements CommandExecutor {
         }
 
 
-        ItemStack chestItemStack = virtualCrate.getCrateItem();
+        ItemStack chestItemStack = virtualCrate.getCrateItem(quantity);
         player.get().getInventory().offer(chestItemStack);
 
         return CommandResult.success();

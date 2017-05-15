@@ -80,7 +80,8 @@ public class HuskyCrates {
                 .description(Text.of("Get a key for a specified crate "))
                 .arguments(
                         new CrateElement(Text.of("type")),
-                        GenericArguments.playerOrSource(Text.of("player"))
+                        GenericArguments.playerOrSource(Text.of("player")),
+                        GenericArguments.optional(GenericArguments.integer(Text.of("quantity")))
                 )
                 .permission("huskycrates")
                 .executor(new Key())
@@ -92,7 +93,8 @@ public class HuskyCrates {
                 .permission("huskycrates")
                 .arguments(new CrateElement(Text.of("type")),
                         GenericArguments.optional(GenericArguments.string(Text.of("key"))),
-                        GenericArguments.playerOrSource(Text.of("player"))
+                        GenericArguments.playerOrSource(Text.of("player")),
+                        GenericArguments.optional(GenericArguments.integer(Text.of("quantity")))
                 ).executor(new Chest())
                 .child(reload, "reload")
                 .child(key, "key")

@@ -159,10 +159,10 @@ public class VirtualCrate {
 
     }
 
-    public ItemStack getCrateItem() {
+    public ItemStack getCrateItem(int quantity) {
             return ItemStack.builder()
                     .itemType(ItemTypes.CHEST)
-                    .quantity(1)
+                    .quantity(quantity)
                     .add(Keys.DISPLAY_NAME, Text.of(HuskyCrates.instance.getHuskyCrateIdentifier() + id)).build();
     }
 
