@@ -58,7 +58,7 @@ Please note that if you want a chance maximum other than 100 right now, you cann
 # Commands
 - `/crate` - does nothing
 - `/crate reload` - Reload your configuration
-- `/crate <crate id> [quantity]` - Gives you a placeable crate block. Will look weird but trust me, it's the right thing.
+- `/crate crate <crate id> [quantity]` - Gives you a placeable crate block. Will look weird but trust me, it's the right thing.
 - `/crate key <crate id> [player]` - Give you, or someone you choose, a crate key.
 
 Crate IDs are the values you put first inside of the crates{} in the config. So like, command in the example would be the crate id.

@@ -88,16 +88,25 @@ public class HuskyCrates {
                 .build();
 
 
-        CommandSpec crateSpec = CommandSpec.builder()
+        CommandSpec chest = CommandSpec.builder()
                 .description(Text.of("Main crates command"))
                 .permission("huskycrates")
-                .arguments(new CrateElement(Text.of("type")),
-                        GenericArguments.optional(GenericArguments.string(Text.of("key"))),
+                .arguments(
+                        new CrateElement(Text.of("type")),
                         GenericArguments.playerOrSource(Text.of("player")),
                         GenericArguments.optional(GenericArguments.integer(Text.of("quantity")))
                 ).executor(new Chest())
                 .child(reload, "reload")
                 .child(key, "key")
+                .build();
+
+
+        CommandSpec crateSpec = CommandSpec.builder()
+                .description(Text.of("Main crates command"))
+                .permission("huskycrates")
+                .child(reload, "reload")
+                .child(key, "key")
+                .child(chest, "chest")
                 .build();
 
         scheduler = Sponge.getScheduler();
