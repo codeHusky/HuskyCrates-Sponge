@@ -53,7 +53,7 @@ public class CSGOCrateView implements CrateView {
         float random = new Random().nextFloat()*vc.getMaxProb();
         float cummProb = 0;
         for(int i = 0; i < items.size(); i++){
-            cummProb += (float)items.get(i)[0];
+            cummProb += (float)((double)items.get(i)[0]);
             if(random <= cummProb && offset == null){
                 offset = i;
                 clicks = -maxTicks + i;
@@ -129,7 +129,9 @@ public class CSGOCrateView implements CrateView {
         waitCurrent++;
         //int revolutions = (int) Math.floor(clicks / items.size());
         //once clicks is greater than offset we stop the spinner
-        if (waitCurrent == Math.round(updateMax) && clicks < offset && tickerState == 0) {
+        if (waitCurrent == Math.round(updateMax) &&
+                clicks < offset &&
+                tickerState == 0) {
             //System.out.println(clicks + " : " + offset);
 
             waitCurrent = 0;
@@ -137,7 +139,11 @@ public class CSGOCrateView implements CrateView {
             updateInv(-1);
             ourplr.playSound(SoundTypes.UI_BUTTON_CLICK,ourplr.getLocation().getPosition(),0.25);
             clicks++;
-        }else if(clicks >= offset && updateMax != 100 && tickerState == 0){
+        }else if(clicks
+                >=
+                offset &&
+                updateMax != 100 &&
+                tickerState == 0){
             ourplr.openInventory(disp,plugin.genericCause);
             tickerState = 1;
             ourplr.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH,ourplr.getLocation().getPosition(),1);

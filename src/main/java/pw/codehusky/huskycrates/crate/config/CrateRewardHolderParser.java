@@ -2,6 +2,7 @@ package pw.codehusky.huskycrates.crate.config;
 
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.ItemEnchantment;
@@ -15,11 +16,13 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CrateRewardHolderParser {
     public static CrateRewardHolder fromConfig(ConfigurationNode holderNode){
         ItemStack dispItem = itemFromNode(holderNode);
         CrateReward reward = new CrateReward(null,"CODE ERROR, CONTACT DEVELOPER",false);
+        boolean dispAwardSimilar = false;
         String name;
         boolean single = false;
         //System.out.println(dispItem.get(Keys.DISPLAY_NAME));
@@ -47,6 +50,7 @@ public class CrateRewardHolderParser {
 
                 }
                 reward=new CrateReward(rr,name,single);
+                dispAwardSimilar = true;
             }else{
                 reward=new CrateReward(itemFromNode(holderNode.getNode("huskydata","reward","overrideItem")),name,single);
             }
@@ -56,7 +60,55 @@ public class CrateRewardHolderParser {
             System.out.println("?! Invalid Reward Type !? " + holderNode.getNode("huskydata","reward","type").getString());
         }
 
-        return new CrateRewardHolder(dispItem,reward,holderNode.getNode("huskydata","weight").getDouble(-1));
+        return new CrateRewardHolder(dispItem,reward,holderNode.getNode("huskydata","weight").getDouble(-1),dispAwardSimilar);
+    }
+    public static ConfigurationNode toConfig(CrateRewardHolder holder){
+        ConfigurationNode toOverwrite = HoconConfigurationLoader.builder().build().createEmptyNode();
+        toOverwrite.setValue(itemToNode(holder.getDisplayItem()));
+        ConfigurationNode hd = toOverwrite.getNode("huskydata");
+        if(holder.getReward().getReward() instanceof String){
+            hd.getNode("reward","overrideRewardName").setValue(holder.getReward().getRewardName());
+            hd.getNode("reward","command").setValue(holder.getReward().getReward());
+            hd.getNode("reward","type").setValue("command");
+        }else {
+            if (holder.isDispRewardSimilar()) {
+                if (holder.getDisplayItem().getQuantity() != ((ItemStack) holder.getReward().getReward()).getQuantity()) {
+                    // we are overriding the count, but not the item! :)
+                    hd.getNode("reward", "overrideCount").setValue(((ItemStack) holder.getReward().getReward()).getQuantity());
+                }
+            } else {
+                hd.getNode("reward", "overrideItem").setValue(itemToNode((ItemStack) holder.getReward().getReward()));
+            }
+
+            String checkAgainst;
+            if (holder.getDisplayItem().get(Keys.DISPLAY_NAME).isPresent()) {
+                checkAgainst = holder.getDisplayItem().get(Keys.DISPLAY_NAME).get().toPlain();
+            } else {
+                checkAgainst = holder.getDisplayItem().getItem().getName();
+            }
+
+            if (!checkAgainst.equals(holder.getReward().getRewardName())) {
+                hd.getNode("reward", "overrideRewardName").setValue(holder.getReward().getRewardName());
+            }
+            hd.getNode("reward","type").setValue("item");
+        }
+        hd.getNode("weight",holder.getChance());
+        return toOverwrite;
+    }
+    public static CrateRewardHolder v0_to_v1(ItemStack stack, String command, float chance){
+        CrateReward rew;
+        String name;
+        if(stack.get(Keys.DISPLAY_NAME).isPresent()){
+            name = stack.get(Keys.DISPLAY_NAME).get().toPlain();
+        }else{
+            name = stack.getItem().getName();
+        }
+        if(command.equals("")) {
+            rew = new CrateReward(stack,name,false);
+        }else{
+            rew = new CrateReward(command,name,false);
+        }
+        return new CrateRewardHolder(stack,rew,chance,command.equals(""));
     }
     private static ItemStack itemFromNode(ConfigurationNode itemRoot){
         try {
@@ -99,6 +151,31 @@ public class CrateRewardHolderParser {
             e.printStackTrace();
         }
         return null;
+    }
+    private static ConfigurationNode itemToNode(ItemStack stack){
+        ConfigurationNode node = HoconConfigurationLoader.builder().build().createEmptyNode();
+        if(stack.get(Keys.DISPLAY_NAME).isPresent()){
+            node.getNode("name").setValue(TextSerializers.FORMATTING_CODE.serialize(stack.get(Keys.DISPLAY_NAME).get()));
+        }else{
+            node.getNode("name").setValue(stack.getItem().getName());
+        }
+        node.getNode("id").setValue(stack.getItem().getId());
+        if(stack.get(Keys.ITEM_LORE).isPresent()){
+            ArrayList<Text> lore = (ArrayList<Text>) stack.get(Keys.ITEM_LORE).get();
+            ArrayList<String> loreStrings = new ArrayList<>();
+            for(Text e: lore){
+                loreStrings.add(TextSerializers.FORMATTING_CODE.serialize(e));
+            }
+            node.getNode("lore").setValue(loreStrings);
+        }
+        node.getNode("count").setValue(stack.getQuantity());
+        if(stack.get(Keys.ITEM_ENCHANTMENTS).isPresent()){
+            List<ItemEnchantment> encs = stack.get(Keys.ITEM_ENCHANTMENTS).get();
+            for(ItemEnchantment e: encs){
+                node.getNode("enchants",e.getEnchantment().getId()).setValue(e.getLevel());
+            }
+        }
+        return node;
     }
     private static TreeType getTreeType(String id){
         switch(id){
