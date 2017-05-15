@@ -23,6 +23,7 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.game.GameReloadEvent;
+import org.spongepowered.api.event.game.state.GameAboutToStartServerEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
@@ -65,8 +66,12 @@ public class HuskyCrates {
     private PluginContainer pC;
 
     @Listener
-    public void gameStarted(GameStartedServerEvent event) {
+    public void gameAboutToStart(GameAboutToStartServerEvent event) {
         instance = this;
+    }
+
+    @Listener
+    public void gameStarted(GameStartedServerEvent event) {
 
         CommandSpec reload = CommandSpec.builder()
                 .description(Text.of("Reload command for crates"))

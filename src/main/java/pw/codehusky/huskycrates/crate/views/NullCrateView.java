@@ -12,15 +12,10 @@ import org.spongepowered.api.text.format.TextColors;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 
-/**
- * Created by lokio on 12/29/2016.
- */
 public class NullCrateView implements CrateView {
 
-    private HuskyCrates plugin;
 
-    public NullCrateView(HuskyCrates plugin, Player runner, VirtualCrate virtualCrate) {
-        this.plugin = plugin;
+    public NullCrateView(Player runner, VirtualCrate virtualCrate) {
     }
 
     @Override
@@ -29,7 +24,7 @@ public class NullCrateView implements CrateView {
                 .property(InventoryDimension.PROPERTY_NAM, InventoryDimension.of(9, 1))
                 .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(Text.of(TextColors.DARK_RED, "INVALID CRATE TYPE!")))
                 .listener(ClickInventoryEvent.class, evt -> evt.setCancelled(true))
-                .build(plugin);
+                .build(HuskyCrates.instance);
         woop.offer(ItemStack.of(ItemTypes.BARRIER, 256 * 2 + 64));
         for (Inventory e : woop.slots()) {
             ItemStack b = e.peek().get();

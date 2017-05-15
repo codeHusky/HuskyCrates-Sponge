@@ -135,14 +135,14 @@ public class VirtualCrate {
 
     public CrateView generateViewForCrate(Player plr) {
         if (invalidCrate) {
-            return new NullCrateView(HuskyCrates.instance, plr, this);
+            return new NullCrateView(plr, this);
         }
         if (crateType.equalsIgnoreCase("spinner")) {
             return new CSGOCrateView(plr, this);
         } else {
             invalidCrate = true;
         }
-        return new NullCrateView(HuskyCrates.instance, plr, this);
+        return new NullCrateView(plr, this);
     }
 
 

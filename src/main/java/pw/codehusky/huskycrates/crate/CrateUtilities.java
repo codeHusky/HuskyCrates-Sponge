@@ -40,7 +40,7 @@ public class CrateUtilities {
     public void launchCrateForPlayer(String crateType, Player target) {
         crateType = crateType.toLowerCase();
         if (!crateTypes.containsKey(crateType)) {
-            target.openInventory(new NullCrateView(HuskyCrates.instance, target, null).getInventory(), HuskyCrates.instance.genericCause);
+            target.openInventory(new NullCrateView(target, null).getInventory(), HuskyCrates.instance.genericCause);
         } else {
             target.openInventory(crateTypes.get(crateType).generateViewForCrate(target).getInventory(), HuskyCrates.instance.genericCause);
         }
@@ -131,6 +131,7 @@ public class CrateUtilities {
         }
         Scheduler scheduler = Sponge.getScheduler();
         Task.Builder taskBuilder = scheduler.createTaskBuilder();
+
         runner = taskBuilder.execute(this::particleRunner).intervalTicks(1).submit(HuskyCrates.instance);
     }
 
