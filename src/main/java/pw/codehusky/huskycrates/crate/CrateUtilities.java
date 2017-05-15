@@ -80,12 +80,9 @@ public class CrateUtilities {
         }
         try {
             CommentedConfigurationNode root = plugin.crateConfig.load();
-            HuskyCrates.instance.logger.info(root.getNode("cachedCrates").getChildrenList().size() + "");
             for (CommentedConfigurationNode cached : root.getNode("cachedCrates").getChildrenList()) {
                 try {
-
                     String[] stringList = ((String) cached.getValue()).split(":");
-
                     World world = Sponge.getServer().getWorld(stringList[0]).get();
                     Location loc = world.getLocation(Double.parseDouble(stringList[1]), Double.parseDouble(stringList[2]),
                             Double.parseDouble(stringList[3]));

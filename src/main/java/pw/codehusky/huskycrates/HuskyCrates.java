@@ -96,8 +96,6 @@ public class HuskyCrates {
                         GenericArguments.playerOrSource(Text.of("player")),
                         GenericArguments.optional(GenericArguments.integer(Text.of("quantity")))
                 ).executor(new Chest())
-                .child(reload, "reload")
-                .child(key, "key")
                 .build();
 
 
@@ -113,7 +111,7 @@ public class HuskyCrates {
         genericCause = Cause.of(NamedCause.of("PluginContainer", pC));
         Sponge.getCommandManager().register(this, crateSpec, "crate");
         crateUtilities.generateVirtualCrates(crateConfig);
-        logger.info("Crates has been started.");
+        logger.info("Crates has initialized started.");
         hasInitialized = true;
     }
 
