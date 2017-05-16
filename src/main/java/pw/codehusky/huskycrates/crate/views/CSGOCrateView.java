@@ -50,10 +50,10 @@ public class CSGOCrateView implements CrateView {
 
         items = virtualCrate.getItemSet();
         //offsetBase = (int)Math.floor(gg);
-        float random = new Random().nextFloat()*vc.getMaxProb();
-        float cummProb = 0;
+        double random = new Random().nextFloat()*vc.getMaxProb();
+        double cummProb = 0;
         for(int i = 0; i < items.size(); i++){
-            cummProb += (float)((double)items.get(i)[0]);
+            cummProb += ((double)items.get(i)[0]);
             if(random <= cummProb && offset == null){
                 offset = i;
                 clicks = -maxTicks + i;
@@ -120,7 +120,7 @@ public class CSGOCrateView implements CrateView {
         return g;
     }
     private CrateRewardHolder giveToPlayer;
-    float updateMax = 1;
+    double updateMax = 1;
     int waitCurrent = 0;
     private double dampening = 1.05;
     private int tickerState = 0;

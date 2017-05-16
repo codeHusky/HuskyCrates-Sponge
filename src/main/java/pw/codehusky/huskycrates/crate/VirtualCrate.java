@@ -18,7 +18,6 @@ import pw.codehusky.huskycrates.crate.views.CSGOCrateView;
 import pw.codehusky.huskycrates.crate.views.CrateView;
 import pw.codehusky.huskycrates.crate.views.NullCrateView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -75,24 +74,15 @@ public class VirtualCrate {
                 String potentialCommand = e.getNode("command").getString("");
                 float chance = e.getNode("chance").getFloat(1);
                 e.setValue(CrateRewardHolderParser.toConfig(CrateRewardHolderParser.v0_to_v1(ourChild,potentialCommand,chance)));
-                try {
-                    config.save(node);
-                } catch (IOException e1) {
-                    e1.printStackTrace();
-                }
                 e.getNode("formatversion").setValue(1);
             }
             rewardHolder = CrateRewardHolderParser.fromConfig(e);
 
 
-            if(rewardHolder.getChance() != -1){
-                Object[] t = {rewardHolder};
-                equality.add(t);
-            }else{
-                Object[] t = {rewardHolder.getChance(), rewardHolder};
-                currentProb += rewardHolder.getChance();
-                itemSet.add(t);
-            }
+            Object[] t = {rewardHolder.getChance(), rewardHolder};
+            currentProb += rewardHolder.getChance();
+            itemSet.add(t);
+
 
 
         }
@@ -114,11 +104,7 @@ public class VirtualCrate {
             System.out.println("This only fires if you have assumed probability. If you remove assumed chance, this error will be fixed.");
             System.out.println("If everything looks right in your config, contact @codeHusky on Sponge Forums.");
         }
-        try {
-            config.save(node.getParent());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
         //Self resolving crate
     }
     public ArrayList<Object[]> getItemSet(){

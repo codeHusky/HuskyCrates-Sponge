@@ -60,7 +60,7 @@ public class CrateRewardHolderParser {
             System.out.println("?! Invalid Reward Type !? " + holderNode.getNode("huskydata","reward","type").getString());
         }
 
-        return new CrateRewardHolder(dispItem,reward,holderNode.getNode("huskydata","weight").getDouble(-1),dispAwardSimilar);
+        return new CrateRewardHolder(dispItem,reward,holderNode.getNode("huskydata","weight").getDouble(1),dispAwardSimilar);
     }
     public static ConfigurationNode toConfig(CrateRewardHolder holder){
         ConfigurationNode toOverwrite = HoconConfigurationLoader.builder().build().createEmptyNode();
@@ -92,7 +92,7 @@ public class CrateRewardHolderParser {
             }
             hd.getNode("reward","type").setValue("item");
         }
-        hd.getNode("weight",holder.getChance());
+        hd.getNode("weight").setValue(holder.getChance());
         return toOverwrite;
     }
     public static CrateRewardHolder v0_to_v1(ItemStack stack, String command, float chance){
