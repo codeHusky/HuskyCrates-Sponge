@@ -8,8 +8,10 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
@@ -30,10 +32,12 @@ public class VirtualCrate {
     private ArrayList<Object[]> itemSet;
     private HashMap<ItemStack, String> commandSet;
     public String displayName;
+    public String id;
     public String crateType;
     private float maxProb = 100;
     public boolean invalidCrate = false;
     public VirtualCrate(String id, ConfigurationLoader<CommentedConfigurationNode> config, CommentedConfigurationNode node){
+        this.id = id;
         displayName = node.getNode("name").getString();
         crateType = node.getNode("type").getString();
         List<? extends CommentedConfigurationNode> items = node.getNode("items").getChildrenList();
@@ -125,5 +129,39 @@ public class VirtualCrate {
             invalidCrate = true;
         }
         return new NullCrateView(plugin,plr,this);
+    }
+
+
+
+    /***
+     * Retrieve the crate item
+     * @since 0.10.2
+     * @param quantity the quantity of keys you want.
+     * @return the ItemStack with the keys.
+     */
+    public ItemStack getCrateKey(int quantity){
+        ItemStack key = ItemStack.builder()
+                .itemType(ItemTypes.NETHER_STAR)
+                .quantity(quantity)
+                .add(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(displayName + " Key")).build();
+        ArrayList<Text> itemLore = new ArrayList<>();
+        itemLore.add(Text.of(TextColors.WHITE, "A key for a ", TextSerializers.FORMATTING_CODE.deserialize(displayName), TextColors.WHITE, "."));
+        itemLore.add(Text.of(TextColors.WHITE, "crate_" + id));
+        key.offer(Keys.ITEM_LORE, itemLore);
+        return key;
+
+    }
+
+    /***
+     * Retrieve the crate chest.
+     * @since 0.10.2
+     * @param quantity the quantity of chests you want.
+     * @return the ItemStack with the chest.
+     */
+    public ItemStack getCrateItem(int quantity) {
+        return ItemStack.builder()
+                .itemType(ItemTypes.CHEST)
+                .quantity(quantity)
+                .add(Keys.DISPLAY_NAME, Text.of(HuskyCrates.instance.getHuskyCrateIdentifier() + id)).build();
     }
 }
