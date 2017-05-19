@@ -44,9 +44,9 @@ public class VirtualCrate {
         System.out.println("???");
         for(CommentedConfigurationNode e : items){
             CrateRewardHolder rewardHolder = null;
-            System.out.println(e.getNode("formatversion").getValue());
+//            System.out.println(e.getNode("formatversion").getValue());
             if(e.getNode("formatversion").isVirtual()){
-                System.out.println("??");
+               // System.out.println("??");
                 //Old, deprecated format. Convert!!
                 String name = e.getNode("name").getString("");
                 String itemID = e.getNode("id").getString("").toUpperCase();

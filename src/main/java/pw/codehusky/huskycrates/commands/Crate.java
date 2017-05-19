@@ -70,7 +70,7 @@ public class Crate implements CommandExecutor {
                             plr.getInventory().offer(poss);
                             plr.sendMessage(Text.of("Giving a crate to " + plr.getName() + "."));
                         } else {
-                            System.out.println(plr.getItemInHand(HandTypes.MAIN_HAND).get().toContainer());
+                            //System.out.println(plr.getItemInHand(HandTypes.MAIN_HAND).get().toContainer());
                             plr.sendMessage(Text.of("Invalid crate id. Please check your config."));
                         }
                     }

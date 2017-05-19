@@ -27,14 +27,14 @@ public class CrateRewardHolderParser {
         boolean single = false;
         //System.out.println(dispItem.get(Keys.DISPLAY_NAME));
         if(holderNode.getNode("huskydata","reward").getNode("overrideRewardName").isVirtual()){
-            System.out.println("Virtual");
+            //System.out.println("Virtual");
             if(dispItem.get(Keys.DISPLAY_NAME).isPresent()){
                 name = dispItem.get(Keys.DISPLAY_NAME).get().toPlain();
             }else{
                 name = dispItem.getItem().getName();
             }
         }else{
-            System.out.println("Real");
+            //System.out.println("Real");
             name = holderNode.getNode("huskydata","reward").getNode("overrideRewardName").getString("strings, please.");
         }
         if(!holderNode.getNode("huskydata","reward").getNode("treatAsSingle").isVirtual()){
@@ -162,11 +162,13 @@ public class CrateRewardHolderParser {
         node.getNode("id").setValue(stack.getItem().getId());
         if(stack.get(Keys.ITEM_LORE).isPresent()){
             ArrayList<Text> lore = (ArrayList<Text>) stack.get(Keys.ITEM_LORE).get();
-            ArrayList<String> loreStrings = new ArrayList<>();
-            for(Text e: lore){
-                loreStrings.add(TextSerializers.FORMATTING_CODE.serialize(e));
+            if(lore.size() > 0) {
+                ArrayList<String> loreStrings = new ArrayList<>();
+                for (Text e : lore) {
+                    loreStrings.add(TextSerializers.FORMATTING_CODE.serialize(e));
+                }
+                node.getNode("lore").setValue(loreStrings);
             }
-            node.getNode("lore").setValue(loreStrings);
         }
         node.getNode("count").setValue(stack.getQuantity());
         if(stack.get(Keys.ITEM_ENCHANTMENTS).isPresent()){
