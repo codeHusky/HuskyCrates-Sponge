@@ -159,4 +159,12 @@ public class CrateUtilities {
 
         }
     }
+
+    /***
+     * Get the different Types of crate types.
+     * @return a ArrayList of the different keys for crates.
+     */
+    public List<String> getCrateTypes() {
+        return new ArrayList<>(crateTypes.keySet());
+    }
 }

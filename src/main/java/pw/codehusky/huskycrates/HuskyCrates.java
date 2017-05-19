@@ -41,7 +41,10 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import pw.codehusky.huskycrates.commands.Chest;
 import pw.codehusky.huskycrates.commands.Crate;
+import pw.codehusky.huskycrates.commands.Key;
+import pw.codehusky.huskycrates.commands.elements.CrateElement;
 import pw.codehusky.huskycrates.crate.CrateUtilities;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 
@@ -56,6 +59,7 @@ public class HuskyCrates {
     @Inject
     public Logger logger;
 
+
     @Inject
     private PluginContainer pC;
     @Inject
@@ -67,18 +71,52 @@ public class HuskyCrates {
     public CrateUtilities crateUtilities = new CrateUtilities(this);
     public String huskyCrateIdentifier = "☼1☼2☼3HUSKYCRATE-";
     public String armorStandIdentifier = "ABABABAB-CDDE-0000-8374-CAAAECAAAECA";
+    public static HuskyCrates instance;
     @Listener
     public void gameInit(GamePreInitializationEvent event){
         logger.info("Let's not init VCrates here anymore. ://)");
+        instance = this;
     }
     @Listener
     public void gameStarted(GameStartedServerEvent event){
+
+
+
+        CommandSpec key = CommandSpec.builder()
+                .description(Text.of("Get a key for a specified crate "))
+                .arguments(
+                        new CrateElement(Text.of("type")),
+                        GenericArguments.playerOrSource(Text.of("player")),
+                        GenericArguments.optional(GenericArguments.integer(Text.of("quantity")))
+                )
+                .permission("huskycrates")
+                .executor(new Key())
+                .build();
+
+
+        CommandSpec chest = CommandSpec.builder()
+                .description(Text.of("Main crates command"))
+                .permission("huskycrates")
+                .arguments(
+                        new CrateElement(Text.of("type")),
+                        GenericArguments.playerOrSource(Text.of("player")),
+                        GenericArguments.optional(GenericArguments.integer(Text.of("quantity")))
+                ).executor(new Chest())
+                .build();
+
         CommandSpec crateSpec = CommandSpec.builder()
                 .description(Text.of("Main crates command"))
                 .permission("huskycrates")
-                .arguments(GenericArguments.optional(GenericArguments.string(Text.of("param1"))),GenericArguments.optional(GenericArguments.string(Text.of("param2"))),GenericArguments.optional(GenericArguments.player(Text.of("player"))))
+                .arguments(
+                        GenericArguments.optional(GenericArguments.string(Text.of("param1"))),
+                        GenericArguments.optional(GenericArguments.string(Text.of("param2"))),
+                        GenericArguments.optional(GenericArguments.player(Text.of("player")))
+                )
+                .child(key, "key")
+                .child(chest, "chest")
                 .executor(new Crate(this))
                 .build();
+
         scheduler = Sponge.getScheduler();
         genericCause = Cause.of(NamedCause.of("PluginContainer",pC));
         Sponge.getCommandManager().register(this, crateSpec, "crate");
@@ -187,5 +225,14 @@ public class HuskyCrates {
 
 
         }
+    }
+
+
+    public CrateUtilities getCrateUtilities() {
+        return crateUtilities;
+    }
+
+    public String getHuskyCrateIdentifier() {
+        return huskyCrateIdentifier;
     }
 }
