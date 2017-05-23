@@ -15,11 +15,13 @@ To configure crates, check the reference in `NEW CRATE FORMAT.md`.
 Please note that if you want a chance maximum other than 100 right now, you cannot have any assumed chances. Make sure your numbers work out in the end.
 
 # Commands
-- `/crate` - does nothing
-- `/crate chest <crate id> [quantity]` - Gives you a placeable crate block. Will look weird but trust me, it's the right thing.
-- `/crate key <crate id> [player] [quantity]` - Give you, or someone you choose, a crate key.
-
+- `/crate <crate id>` - Gives you a placeable crate block.
+- `/crate <crate id>  key [player]` - Give the player indicated in the command a crate key.
 Crate IDs are the values you put first inside of the crates{} in the config. So like, command in the example would be the crate id.
+- **Commands To Be Implemented**
+ - `/crate chest <crate id> [quantity]` - Gives you a placeable crate block. Will look weird but trust me, it's the right thing.
+ - `/crate key <crate id> [player] [quantity]` - Give you, or someone you choose, a crate key.
+Once implemented the old command form will still be functional.
 
 # Permissions
 - `huskycrates.tester` - Allows a user to override the key removal in the inventory.
