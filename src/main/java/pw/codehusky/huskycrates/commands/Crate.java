@@ -1,17 +1,11 @@
 package pw.codehusky.huskycrates.commands;
 
-import com.google.common.reflect.TypeToken;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.persistence.DataTranslators;
-import org.spongepowered.api.data.type.HandTypes;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
@@ -20,8 +14,6 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 
-import java.io.BufferedWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 
 /**
@@ -35,7 +27,7 @@ public class Crate implements CommandExecutor {
     }
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-
+            /*
             if(args.getOne(Text.of("param1")).isPresent()) {
                 if(args.getOne(Text.of("param1")).get().toString().equalsIgnoreCase("confitemgen")) {
                     Player plr = null;
@@ -94,7 +86,10 @@ public class Crate implements CommandExecutor {
                     }
                 }
             }
-
+*/
+        src.sendMessage(Text.of(TextColors.YELLOW,"HuskyCrates Commands"));
+        src.sendMessage(Text.of("/crate chest <id> [player]"));
+        src.sendMessage(Text.of("/crate key <id> [player] [count]"));
         return CommandResult.success();
     }
     public ItemStack getCrateItem(String id){

@@ -6,12 +6,10 @@ import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import pw.codehusky.huskycrates.HuskyCrates;
 
-import java.util.List;
-
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * Created By KasperFranz.
@@ -27,11 +25,7 @@ public class CrateElement extends CommandElement {
     @Nullable
     @Override
     protected Object parseValue(CommandSource commandSource, CommandArgs commandArgs) throws ArgumentParseException {
-        String arg = commandArgs.next();
-        if (HuskyCrates.instance.getCrateUtilities().getCrateTypes().contains(arg)) {
-            return arg;
-        }
-        throw commandArgs.createError(Text.of(TextColors.RED, arg, " is not a valid Crate!"));
+        return commandArgs.next();
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -56,7 +57,7 @@ import java.util.List;
 @SuppressWarnings("deprecation")
 @Plugin(id="huskycrates", name = "HuskyCrates", version = "0.10.1", description = "A CratesReloaded Replacement for Sponge? lol")
 public class HuskyCrates {
-    @Inject
+    //@Inject
     public Logger logger;
 
 
@@ -74,6 +75,7 @@ public class HuskyCrates {
     public static HuskyCrates instance;
     @Listener
     public void gameInit(GamePreInitializationEvent event){
+        logger = LoggerFactory.getLogger(pC.getName());
         logger.info("Let's not init VCrates here anymore. ://)");
         instance = this;
     }
@@ -83,20 +85,20 @@ public class HuskyCrates {
 
 
         CommandSpec key = CommandSpec.builder()
-                .description(Text.of("Get a key for a specified crate "))
+                .description(Text.of("Get a key for a specified crate."))
                 .arguments(
                         new CrateElement(Text.of("type")),
                         GenericArguments.playerOrSource(Text.of("player")),
                         GenericArguments.optional(GenericArguments.integer(Text.of("quantity")))
                 )
-                .permission("huskycrates")
+                .permission("huskycrates.key")
                 .executor(new Key())
                 .build();
 
 
         CommandSpec chest = CommandSpec.builder()
-                .description(Text.of("Main crates command"))
-                .permission("huskycrates")
+                .description(Text.of("Get the placeable crate item."))
+                .permission("huskycrates.chest")
                 .arguments(
                         new CrateElement(Text.of("type")),
                         GenericArguments.playerOrSource(Text.of("player")),
@@ -107,13 +109,9 @@ public class HuskyCrates {
         CommandSpec crateSpec = CommandSpec.builder()
                 .description(Text.of("Main crates command"))
                 .permission("huskycrates")
-                .arguments(
-                        GenericArguments.optional(GenericArguments.string(Text.of("param1"))),
-                        GenericArguments.optional(GenericArguments.string(Text.of("param2"))),
-                        GenericArguments.optional(GenericArguments.player(Text.of("player")))
-                )
                 .child(key, "key")
                 .child(chest, "chest")
+                .arguments(GenericArguments.optional(GenericArguments.remainingRawJoinedStrings(Text.of(""))))
                 .executor(new Crate(this))
                 .build();
 
