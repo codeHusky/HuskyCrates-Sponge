@@ -45,12 +45,14 @@ public class VirtualCrate {
         float currentProb = 0;
         itemSet = new ArrayList<>();
         commandSet = new HashMap<>();
-        System.out.println("???");
+        ///System.out.println("???");
         for(CommentedConfigurationNode e : items){
             CrateRewardHolder rewardHolder = null;
 //            System.out.println(e.getNode("formatversion").getValue());
             if(e.getNode("formatversion").isVirtual()){
                // System.out.println("??");
+                System.out.println("------------------------------------------------");
+                System.out.println("Starting conversion on crate " + id + " item #" + (((int)e.getKey())+1));
                 //Old, deprecated format. Convert!!
                 String name = e.getNode("name").getString("");
                 String itemID = e.getNode("id").getString("").toUpperCase();
@@ -79,6 +81,7 @@ public class VirtualCrate {
                 float chance = e.getNode("chance").getFloat(1);
                 e.setValue(CrateRewardHolderParser.toConfig(CrateRewardHolderParser.v0_to_v1(ourChild,potentialCommand,chance)));
                 e.getNode("formatversion").setValue(1);
+                System.out.println("Finished conversion on crate " + id + " item #" + (((int)e.getKey())+1));
             }
             rewardHolder = CrateRewardHolderParser.fromConfig(e);
 

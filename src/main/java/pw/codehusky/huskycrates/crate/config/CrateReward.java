@@ -16,7 +16,7 @@ public class CrateReward<T> {
         }
         this.rewardName = name;
         this.treatAsSingle = treatAsSingle;
-        System.out.println(treatAsSingle);
+        //System.out.println(treatAsSingle);
     }
     public T getReward() {
         if(reward instanceof ItemStack)

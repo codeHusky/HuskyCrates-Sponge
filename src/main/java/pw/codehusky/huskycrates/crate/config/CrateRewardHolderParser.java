@@ -120,8 +120,8 @@ public class CrateRewardHolderParser {
 
             if(!itemRoot.getNode("variant").isVirtual()) {
                 //if(Sponge.getRegistry().getType(TreeType.class,itemRoot.getNode("variant").getString()).isPresent()) {
-                System.out.println(item.offer(Keys.TREE_TYPE,getTreeType(itemRoot.getNode("variant").getString("oak"))));
-                System.out.println(itemRoot.getNode("variant").getValue());
+                //System.out.println(item.offer(Keys.TREE_TYPE,getTreeType(itemRoot.getNode("variant").getString("oak"))));
+                //System.out.println(itemRoot.getNode("variant").getValue());
                 //}
             }
             if(!itemRoot.getNode("lore").isVirtual()) {
