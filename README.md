@@ -21,7 +21,7 @@ Crate IDs are the values you put first inside of the crates{} in the config. So 
 - **Commands To Be Implemented**
  - `/crate chest <crate id> [quantity]` - Gives you a placeable crate block. Will look weird but trust me, it's the right thing.
  - `/crate key <crate id> [player] [quantity]` - Give you, or someone you choose, a crate key.
-Once implemented the old command form will still be functional.
+Once implemented the old command format will no longer be functional.
 
 # Permissions
 - `huskycrates.tester` - Allows a user to override the key removal in the inventory.
