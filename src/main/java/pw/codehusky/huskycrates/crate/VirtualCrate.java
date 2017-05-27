@@ -18,9 +18,9 @@ import org.spongepowered.api.util.Color;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolderParser;
-import pw.codehusky.huskycrates.crate.views.SpinnerCrateView;
 import pw.codehusky.huskycrates.crate.views.CrateView;
 import pw.codehusky.huskycrates.crate.views.NullCrateView;
+import pw.codehusky.huskycrates.crate.views.SpinnerCrateView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,12 +38,14 @@ public class VirtualCrate {
     public String crateType;
     private float maxProb = 100;
     private HashMap<String,Object> options = new HashMap<>();
+    private ItemType keyType;
     public VirtualCrate(String id, ConfigurationLoader<CommentedConfigurationNode> config, CommentedConfigurationNode node){
         this.id = id;
         displayName = node.getNode("name").getString();
         if(node.getNode("type").isVirtual()){
             node.getNode("type").setValue("Spinner");
         }
+        keyType = ItemTypes.NETHER_STAR;//default
         crateType = node.getNode("type").getString("null");
         if(crateType.equalsIgnoreCase("spinner")){
             if(!node.getNode("spinnerOptions").isVirtual()){
@@ -102,6 +104,13 @@ public class VirtualCrate {
                     } catch (ObjectMappingException e) {
                         e.printStackTrace();
                     }
+                }
+            }
+            if(!gops.getNode("keyID").isVirtual()){
+                try {
+                    keyType = gops.getNode("keyID").getValue(TypeToken.of(ItemType.class));
+                } catch (ObjectMappingException e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -205,7 +214,7 @@ public class VirtualCrate {
      */
     public ItemStack getCrateKey(int quantity){
         ItemStack key = ItemStack.builder()
-                .itemType(ItemTypes.NETHER_STAR)
+                .itemType(keyType)
                 .quantity(quantity)
                 .add(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(displayName + " Key")).build();
         ArrayList<Text> itemLore = new ArrayList<>();
@@ -214,6 +223,10 @@ public class VirtualCrate {
         key.offer(Keys.ITEM_LORE, itemLore);
         return key;
 
+    }
+
+    public ItemType getKeyType() {
+        return keyType;
     }
 
     /***

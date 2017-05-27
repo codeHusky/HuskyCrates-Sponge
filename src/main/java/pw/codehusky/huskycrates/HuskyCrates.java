@@ -30,7 +30,6 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.event.world.chunk.LoadChunkEvent;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
@@ -181,10 +180,11 @@ public class HuskyCrates {
             if(name.contains(huskyCrateIdentifier)){
                 event.setCancelled(true);
                 String crateType = name.replace(huskyCrateIdentifier, "");
+                VirtualCrate vc = crateUtilities.getVirtualCrate(crateType);
                 crateUtilities.recognizeChest(te.getLocation());
                 if(plr.getItemInHand(HandTypes.MAIN_HAND).isPresent()) {
                     ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
-                    if(inhand.getItem() == ItemTypes.NETHER_STAR && inhand.get(Keys.ITEM_LORE).isPresent()) {
+                    if(inhand.getItem() == vc.getKeyType() && inhand.get(Keys.ITEM_LORE).isPresent()) {
                         List<Text> lore = inhand.get(Keys.ITEM_LORE).get();
                         if(lore.size() > 1) {
                             String idline = lore.get(1).toPlain();
@@ -211,7 +211,6 @@ public class HuskyCrates {
                     }
 
                 }
-                VirtualCrate vc = crateUtilities.getVirtualCrate(crateType);
                 plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,plr.getLocation().getPosition(),0.5);
                 try {
                     plr.sendMessage(Text.of("You need a ", TextSerializers.FORMATTING_CODE.deserialize(vc.displayName + " Key"), " to open this crate."));

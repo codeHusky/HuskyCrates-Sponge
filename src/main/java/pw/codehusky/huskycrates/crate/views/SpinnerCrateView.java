@@ -157,7 +157,7 @@ public class SpinnerCrateView implements CrateView {
             ourplr.playSound(SoundTypes.UI_BUTTON_CLICK,ourplr.getLocation().getPosition(),0.25);
             clicks++;
             trueclicks++;
-            HuskyCrates.instance.logger.info(maxClicks + " : " + trueclicks);
+            //HuskyCrates.instance.logger.info(maxClicks + " : " + trueclicks);
         }else if(clicks
                 >=
                 offset &&
