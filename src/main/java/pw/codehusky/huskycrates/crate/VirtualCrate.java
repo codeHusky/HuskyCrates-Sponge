@@ -14,6 +14,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.util.Color;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolderParser;
@@ -56,6 +57,51 @@ public class VirtualCrate {
                 if(!ops.getNode("minClickModifier").isVirtual() || !ops.getNode("maxClickModifier").isVirtual()){
                     options.put("minClickModifier",ops.getNode("minClickModifier").getInt(0));
                     options.put("maxClickModifier",ops.getNode("maxClickModifier").getInt(0));
+                }
+            }
+        }
+        if(!node.getNode("options").isVirtual()){
+            ConfigurationNode gops = node.getNode("options");
+            if(!gops.getNode("particle1").isVirtual()){
+                HashMap<String,Integer> color = new HashMap<>();
+                if(!gops.getNode("particle1","color").isVirtual()){
+                    List<Integer> arr;
+                    try {
+                        arr = gops.getNode("particle1","color").getList(TypeToken.of(Integer.class));
+                        if(arr.size() == 3) {
+                            options.put("clr1",
+                                    Color.ofRgb(
+                                            arr.get(0),
+                                            arr.get(1),
+                                            arr.get(2)));
+                        }else{
+                            HuskyCrates.instance.logger.warn("Invalid color for particle1! crate:" + id);
+                        }
+                    } catch (ObjectMappingException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+
+            }
+            if(!gops.getNode("particle2").isVirtual()){
+                HashMap<String,Integer> color = new HashMap<>();
+                if(!gops.getNode("particle2","color").isVirtual()){
+                    List<Integer> arr;
+                    try {
+                        arr = gops.getNode("particle2","color").getList(TypeToken.of(Integer.class));
+                        if(arr.size() == 3) {
+                            options.put("clr2",
+                                    Color.ofRgb(
+                                            arr.get(0),
+                                            arr.get(1),
+                                            arr.get(2)));
+                        }else{
+                            HuskyCrates.instance.logger.warn("Invalid color for particle2! crate:" + id);
+                        }
+                    } catch (ObjectMappingException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

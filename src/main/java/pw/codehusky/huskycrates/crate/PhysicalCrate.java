@@ -24,6 +24,7 @@ import java.util.UUID;
 public class PhysicalCrate {
     public Location<World> location;
     private String crateId;
+    private VirtualCrate vc;
     public ArmorStand as = null;
     private HuskyCrates huskyCrates;
     public static Vector3d offset = new Vector3d(0.5,1,0.5);
@@ -31,6 +32,7 @@ public class PhysicalCrate {
         this.location = crateLocation;
         this.crateId = crateId;
         this.huskyCrates = huskyCrates;
+        this.vc = huskyCrates.crateUtilities.getVirtualCrate(crateId);
         createHologram();
     }
     public void createHologram() {
@@ -77,10 +79,18 @@ public class PhysicalCrate {
             double x = Math.sin(time) * size;
             double y = Math.sin(time * 2) * 0.2 - 0.45;
             double z = Math.cos(time) * size;
+            Color clr1 = Color.ofRgb(100,100,100);
+            Color clr2 = Color.ofRgb(255, 0, 0);
+            if(vc.getOptions().containsKey("clr1")){
+                clr1 = (Color) vc.getOptions().get("clr1");
+            }
+            if(vc.getOptions().containsKey("clr2")){
+                clr2 = (Color) vc.getOptions().get("clr2");
+            }
             as.getWorld().spawnParticles(
                     ParticleEffect.builder()
                             .type(ParticleTypes.REDSTONE_DUST)
-                            .option(ParticleOptions.COLOR, Color.ofRgb(100, 100, 100))
+                            .option(ParticleOptions.COLOR, clr1)
                             .build(),
                     as.getLocation()
                             .getPosition()
@@ -92,7 +102,7 @@ public class PhysicalCrate {
             as.getWorld().spawnParticles(
                     ParticleEffect.builder()
                             .type(ParticleTypes.REDSTONE_DUST)
-                            .option(ParticleOptions.COLOR, Color.ofRgb(255, 0, 0))
+                            .option(ParticleOptions.COLOR, clr2)
                             .build(),
                     as.getLocation()
                             .getPosition()
