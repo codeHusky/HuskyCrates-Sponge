@@ -1,6 +1,7 @@
 package pw.codehusky.huskycrates.crate;
 
 import com.google.common.reflect.TypeToken;
+import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -35,11 +36,29 @@ public class VirtualCrate {
     public String id;
     public String crateType;
     private float maxProb = 100;
-    public boolean invalidCrate = false;
+    private HashMap<String,Object> options = new HashMap<>();
     public VirtualCrate(String id, ConfigurationLoader<CommentedConfigurationNode> config, CommentedConfigurationNode node){
         this.id = id;
         displayName = node.getNode("name").getString();
-        crateType = node.getNode("type").getString();
+        if(node.getNode("type").isVirtual()){
+            node.getNode("type").setValue("Spinner");
+        }
+        crateType = node.getNode("type").getString("null");
+        if(crateType.equalsIgnoreCase("spinner")){
+            if(!node.getNode("spinnerOptions").isVirtual()){
+                ConfigurationNode ops = node.getNode("spinnerOptions");
+                if(!ops.getNode("dampening").isVirtual()){
+                    options.put("dampening",ops.getNode("dampening").getDouble(1.05));
+                }
+                if(!ops.getNode("maxClicks").isVirtual()){
+                    options.put("maxClicks",ops.getNode("maxClicks").getInt(45));
+                }
+                if(!ops.getNode("minClickModifier").isVirtual() || !ops.getNode("maxClickModifier").isVirtual()){
+                    options.put("minClickModifier",ops.getNode("minClickModifier").getInt(0));
+                    options.put("maxClickModifier",ops.getNode("maxClickModifier").getInt(0));
+                }
+            }
+        }
         List<? extends CommentedConfigurationNode> items = node.getNode("items").getChildrenList();
         ArrayList<Object[]> equality = new ArrayList<>();
         float currentProb = 0;
@@ -124,12 +143,8 @@ public class VirtualCrate {
         return maxProb;
     }
     public CrateView generateViewForCrate(HuskyCrates plugin,Player plr){
-        if(invalidCrate)
-            return new NullCrateView(plugin,plr,this);
         if(crateType.equalsIgnoreCase("spinner")){
             return new CSGOCrateView(plugin,plr,this);
-        }else{
-            invalidCrate = true;
         }
         return new NullCrateView(plugin,plr,this);
     }
@@ -166,5 +181,9 @@ public class VirtualCrate {
                 .itemType(ItemTypes.CHEST)
                 .quantity(quantity)
                 .add(Keys.DISPLAY_NAME, Text.of(HuskyCrates.instance.getHuskyCrateIdentifier() + id)).build();
+    }
+
+    public HashMap<String, Object> getOptions() {
+        return options;
     }
 }

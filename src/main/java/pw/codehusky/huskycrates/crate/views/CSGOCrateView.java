@@ -42,13 +42,29 @@ public class CSGOCrateView implements CrateView {
     private Player ourplr;
     private VirtualCrate vc;
     private int clicks = 0;
-    private int maxTicks = 45; // maximum times the spinner "clicks" in one spin
+    private double dampening = 1.05;
+    private int maxClicks = 45; // maximum times the spinner "clicks" in one spin
     public CSGOCrateView(HuskyCrates plugin,Player runner, VirtualCrate virtualCrate){
         this.vc = virtualCrate;
         ourplr = runner;
         this.plugin = plugin;
 
         items = virtualCrate.getItemSet();
+
+        if(virtualCrate.getOptions().containsKey("dampening")) {
+            dampening = (double) virtualCrate.getOptions().get("dampening");
+            HuskyCrates.instance.logger.info("dampening override: " + dampening);
+        }
+        if(virtualCrate.getOptions().containsKey("maxClicks")) {
+            maxClicks = (int) virtualCrate.getOptions().get("maxClicks");
+            HuskyCrates.instance.logger.info("maxClicks override: " + maxClicks);
+        }
+        if(virtualCrate.getOptions().containsKey("minClickModifier") || virtualCrate.getOptions().containsKey("maxClickModifier")){
+            int min = (int)virtualCrate.getOptions().get("minClickModifier");
+            int max = (int)virtualCrate.getOptions().get("maxClickModifier");
+            Random rand = new Random();
+            maxClicks += Math.round((max*rand.nextDouble())+(min*rand.nextDouble()));
+        }
         //offsetBase = (int)Math.floor(gg);
         double random = new Random().nextFloat()*vc.getMaxProb();
         double cummProb = 0;
@@ -56,7 +72,7 @@ public class CSGOCrateView implements CrateView {
             cummProb += ((double)items.get(i)[0]);
             if(random <= cummProb && offset == null){
                 offset = i;
-                clicks = -maxTicks + i;
+                clicks = -maxClicks + i;
                 itemNum = i;
             }
         }
@@ -122,8 +138,9 @@ public class CSGOCrateView implements CrateView {
     private CrateRewardHolder giveToPlayer;
     double updateMax = 1;
     int waitCurrent = 0;
-    private double dampening = 1.05;
+
     private int tickerState = 0;
+    int trueclicks = 0;
     private void updateTick() {
         //revDampening = 1.15;
         waitCurrent++;
@@ -139,6 +156,8 @@ public class CSGOCrateView implements CrateView {
             updateInv(-1);
             ourplr.playSound(SoundTypes.UI_BUTTON_CLICK,ourplr.getLocation().getPosition(),0.25);
             clicks++;
+            trueclicks++;
+            HuskyCrates.instance.logger.info(maxClicks + " : " + trueclicks);
         }else if(clicks
                 >=
                 offset &&
