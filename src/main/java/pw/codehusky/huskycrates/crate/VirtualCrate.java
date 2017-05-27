@@ -18,7 +18,7 @@ import org.spongepowered.api.util.Color;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolderParser;
-import pw.codehusky.huskycrates.crate.views.CSGOCrateView;
+import pw.codehusky.huskycrates.crate.views.SpinnerCrateView;
 import pw.codehusky.huskycrates.crate.views.CrateView;
 import pw.codehusky.huskycrates.crate.views.NullCrateView;
 
@@ -190,7 +190,7 @@ public class VirtualCrate {
     }
     public CrateView generateViewForCrate(HuskyCrates plugin,Player plr){
         if(crateType.equalsIgnoreCase("spinner")){
-            return new CSGOCrateView(plugin,plr,this);
+            return new SpinnerCrateView(plugin,plr,this);
         }
         return new NullCrateView(plugin,plr,this);
     }

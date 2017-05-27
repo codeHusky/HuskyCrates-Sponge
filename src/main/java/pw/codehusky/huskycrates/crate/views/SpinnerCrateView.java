@@ -31,7 +31,7 @@ import java.util.Random;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-public class CSGOCrateView implements CrateView {
+public class SpinnerCrateView implements CrateView {
     private HuskyCrates plugin;
 
     Integer offset = null;
@@ -44,7 +44,7 @@ public class CSGOCrateView implements CrateView {
     private int clicks = 0;
     private double dampening = 1.05;
     private int maxClicks = 45; // maximum times the spinner "clicks" in one spin
-    public CSGOCrateView(HuskyCrates plugin,Player runner, VirtualCrate virtualCrate){
+    public SpinnerCrateView(HuskyCrates plugin, Player runner, VirtualCrate virtualCrate){
         this.vc = virtualCrate;
         ourplr = runner;
         this.plugin = plugin;
