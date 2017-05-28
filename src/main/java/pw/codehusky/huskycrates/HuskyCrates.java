@@ -3,6 +3,7 @@ package pw.codehusky.huskycrates;
 import com.google.inject.Inject;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Sponge;
@@ -48,13 +49,15 @@ import pw.codehusky.huskycrates.commands.elements.CrateElement;
 import pw.codehusky.huskycrates.crate.CrateUtilities;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.0.0", description = "A CratesReloaded Replacement for Sponge? lol")
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.0.1", description = "A CratesReloaded Replacement for Sponge? lol")
 public class HuskyCrates {
     //@Inject
     public Logger logger;
@@ -121,6 +124,41 @@ public class HuskyCrates {
             crateUtilities.generateVirtualCrates(crateConfig);
         }
         logger.info("Crates has been started.");
+    }
+
+    @Listener(order = Order.POST)
+    public void postGameStart(GameStartedServerEvent event){
+        Sponge.getScheduler().createTaskBuilder().async().execute(new Consumer<Task>() {
+            @Override
+            public void accept(Task task) {
+                try {
+                    JSONObject obj = JsonReader.readJsonFromUrl("https://api.github.com/repos/codehusky/HuskyCrates-Sponge/releases");
+                    String[] thisVersion = pC.getVersion().get().split("\\.");
+                    String[] remoteVersion = obj.getJSONArray("releases").getJSONObject(0).getString("tag_name").replace("v","").split("\\.");
+                    for(int i = 0; i < Math.min(remoteVersion.length,thisVersion.length); i++){
+                        if(!thisVersion[i].equals(remoteVersion[i])){
+                            if(Integer.parseInt(thisVersion[i]) > Integer.parseInt(remoteVersion[i])){
+                                //we're ahead
+                                logger.warn("----------------------------------------------------");
+                                logger.warn("Running unreleased version. (Developer build?)");
+                                logger.warn("----------------------------------------------------");
+                            }else{
+                                //we're behind
+                                logger.warn("----------------------------------------------------");
+                                logger.warn("Your version of HuskyCrates is out of date!");
+                                logger.warn("Your version: v" + pC.getVersion().get());
+                                logger.warn("Latest version: " + obj.getJSONArray("releases").getJSONObject(0).getString("tag_name"));
+                                logger.warn("Update here: https://goo.gl/hgtPMR");
+                                logger.warn("----------------------------------------------------");
+                            }
+                            return;
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).submit(this);
     }
 
     @Listener(order = Order.POST)
