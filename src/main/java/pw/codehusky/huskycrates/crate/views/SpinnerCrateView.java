@@ -35,7 +35,7 @@ public class SpinnerCrateView implements CrateView {
     private HuskyCrates plugin;
 
     Integer offset = null;
-    int itemNum = -1;
+    int itemNum;
     private ArrayList<Object[]> items;
     private Inventory disp;
     private Task updater;
@@ -67,15 +67,19 @@ public class SpinnerCrateView implements CrateView {
         }
         //offsetBase = (int)Math.floor(gg);
         double random = new Random().nextFloat()*vc.getMaxProb();
+        System.out.println(random + ":" + vc.getMaxProb());
         double cummProb = 0;
         for(int i = 0; i < items.size(); i++){
             cummProb += ((double)items.get(i)[0]);
             if(random <= cummProb && offset == null){
-//                System.out.println(((CrateRewardHolder)items.get(i)[1]).getReward().getRewardName());
-                offset = i -1;
+                System.out.println(((CrateRewardHolder)items.get(i)[1]).getReward().getRewardName());
+                offset = i;
                 clicks = -maxClicks + i;
-                itemNum = i;
+                System.out.println(clicks + " | " + offset);
+                System.out.println(clicks + maxClicks);
+                System.out.println(i);
             }
+
         }
         if(offset == null){
             System.out.println("--------------------------------");
@@ -109,7 +113,9 @@ public class SpinnerCrateView implements CrateView {
             if(state == 0 && (slotnum == 4 || slotnum == 22 )){
                 e.set(selector);
             }else if(slotnum > 9 && slotnum < 17 && state != 2){
-                int itemNum = items.size() - 1 - Math.abs(((slotnum - 10) + (clicks)) % items.size());
+                //int itemNum = items.size() - 1 - Math.abs(((slotnum - 10) + (clicks)) % items.size());
+                int itemNum = Math.abs((clicks + (slotnum-9) - 3) % items.size());
+                //System.out.println(itemNum);
                 e.set(((CrateRewardHolder)items.get(itemNum)[1]).getDisplayItem());
                 if(slotnum == 13) {
                     giveToPlayer = (CrateRewardHolder)items.get(itemNum)[1];
@@ -161,6 +167,7 @@ public class SpinnerCrateView implements CrateView {
             clicks++;
             trueclicks++;
             //HuskyCrates.instance.logger.info(maxClicks + " : " + trueclicks);
+
         }else if(clicks
                 >=
                 offset &&
