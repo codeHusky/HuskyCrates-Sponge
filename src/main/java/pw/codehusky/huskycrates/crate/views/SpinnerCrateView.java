@@ -53,11 +53,11 @@ public class SpinnerCrateView implements CrateView {
 
         if(virtualCrate.getOptions().containsKey("dampening")) {
             dampening = (double) virtualCrate.getOptions().get("dampening");
-            HuskyCrates.instance.logger.info("dampening override: " + dampening);
+            //HuskyCrates.instance.logger.info("dampening override: " + dampening);
         }
         if(virtualCrate.getOptions().containsKey("maxClicks")) {
             maxClicks = (int) virtualCrate.getOptions().get("maxClicks");
-            HuskyCrates.instance.logger.info("maxClicks override: " + maxClicks);
+            //HuskyCrates.instance.logger.info("maxClicks override: " + maxClicks);
         }
         if(virtualCrate.getOptions().containsKey("minClickModifier") || virtualCrate.getOptions().containsKey("maxClickModifier")){
             int min = (int)virtualCrate.getOptions().get("minClickModifier");
@@ -71,7 +71,7 @@ public class SpinnerCrateView implements CrateView {
         for(int i = 0; i < items.size(); i++){
             cummProb += ((double)items.get(i)[0]);
             if(random <= cummProb && offset == null){
-                System.out.println(((CrateRewardHolder)items.get(i)[1]).getReward().getRewardName());
+//                System.out.println(((CrateRewardHolder)items.get(i)[1]).getReward().getRewardName());
                 offset = i -1;
                 clicks = -maxClicks + i;
                 itemNum = i;
@@ -185,23 +185,23 @@ public class SpinnerCrateView implements CrateView {
                 boolean mult = false;
                 if (!giveToPlayer.getReward().treatAsSingle() &&  giveToPlayer.getReward().getReward() instanceof ItemStack) {
                     if(((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() > 1) {
-                        ourplr.sendMessage(Text.of(TextColors.BLUE,"Crate> ",TextColors.GRAY,"You won ", TextColors.YELLOW,
+                        ourplr.sendMessage(Text.of("You won ", TextColors.YELLOW,
                                 ((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() + " ",
-                                TextSerializers.FORMATTING_CODE.stripCodes(giveToPlayer.getReward().getRewardName()), TextColors.GRAY, " from a ",TextColors.YELLOW,
-                                TextSerializers.FORMATTING_CODE.stripCodes(vc.displayName), TextColors.GRAY, "!"));
+                                TextSerializers.FORMATTING_CODE.deserialize(giveToPlayer.getReward().getRewardName()), TextColors.RESET, " from a ",
+                                TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
                         mult = true;
                     }
                 }
                 if(!mult){
                     String[] vowels = {"a", "e", "i", "o", "u"};
                     if (Arrays.asList(vowels).contains(giveToPlayer.getReward().getRewardName().substring(0, 1).toLowerCase())) {
-                        ourplr.sendMessage(Text.of(TextColors.BLUE,"Crate> ",TextColors.GRAY,"You won an ", TextColors.YELLOW,
-                                TextSerializers.FORMATTING_CODE.stripCodes(giveToPlayer.getReward().getRewardName()), TextColors.GRAY, " from a ",TextColors.YELLOW,
-                                TextSerializers.FORMATTING_CODE.stripCodes(vc.displayName), TextColors.GRAY, "!"));
+                        ourplr.sendMessage(Text.of("You won an ",
+                                TextSerializers.FORMATTING_CODE.deserialize(giveToPlayer.getReward().getRewardName()), TextColors.RESET, " from a ",
+                                TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
                     } else {
-                        ourplr.sendMessage(Text.of(TextColors.BLUE,"Crate> ",TextColors.GRAY,"You won a ", TextColors.YELLOW,
-                                TextSerializers.FORMATTING_CODE.stripCodes(giveToPlayer.getReward().getRewardName()), TextColors.GRAY, " from a ",TextColors.YELLOW,
-                                TextSerializers.FORMATTING_CODE.stripCodes(vc.displayName), TextColors.GRAY, "!"));
+                        ourplr.sendMessage(Text.of("You won a ",
+                                TextSerializers.FORMATTING_CODE.deserialize(giveToPlayer.getReward().getRewardName()), TextColors.RESET, " from a ",
+                                TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
                     }
                 }
                 ourplr.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP,ourplr.getLocation().getPosition(),1);
