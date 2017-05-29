@@ -9,10 +9,10 @@ You can download development builds from my [CI server](http://ci.communitybuilt
 ## Changes made to this fork.:
  - Using a poppy instead of a nether star
  - Send the gifts to the enderChest if their inventory is full.
- - Possible to change the colors in the crate.
  - Performance changes
- - Changed format of the commands for getting keys/chests to be `/crate key <crate id>` and `/crate <crate id>` instead of `/crate <crate id> chest/key`, this is making it way easier to manage internally.
- - Possible to add quantity parameter to the key and chest commands
+ - ~Changed format of the commands for getting keys/chests to be `/crate key <crate id>` and `/crate <crate id>` instead of `/crate <crate id> chest/key`, this is making it way easier to manage internally.~  (this was made as a PR to @codeHusky)
+ - ~Possible to change the colors in the crate.~ (this was later implemented in the main branch by @CodeHusky)
+ - ~Possible to add quantity parameter to the key and chest commands~ (this was made as a PR to @codeHusky)
 
 # Config
 HuskyCrates might not create a config automatically for itself, so make sure to make one if it doesn't.
