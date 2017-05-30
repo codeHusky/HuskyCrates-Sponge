@@ -64,7 +64,7 @@ public class CrateRewardHolderParser {
 
         return new CrateRewardHolder(dispItem,reward,holderNode.getNode("huskydata","weight").getDouble(1),dispAwardSimilar);
     }
-    public static ConfigurationNode toConfig(CrateRewardHolder holder){
+    public static ConfigurationNode toConfig(CrateRewardHolder holder){ //pretty much just for conversion
         ConfigurationNode toOverwrite = HoconConfigurationLoader.builder().build().createEmptyNode();
         toOverwrite.setValue(itemToNode(holder.getDisplayItem()));
         ConfigurationNode hd = toOverwrite.getNode("huskydata");

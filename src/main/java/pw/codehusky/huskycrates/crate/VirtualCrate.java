@@ -6,6 +6,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.apache.commons.lang3.ArrayUtils;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
@@ -39,6 +40,7 @@ public class VirtualCrate {
     private float maxProb = 100;
     private HashMap<String,Object> options = new HashMap<>();
     private ItemType keyType;
+    private Integer keyDamage= null;
     public VirtualCrate(String id, ConfigurationLoader<CommentedConfigurationNode> config, CommentedConfigurationNode node){
         this.id = id;
         displayName = node.getNode("name").getString();
@@ -112,6 +114,9 @@ public class VirtualCrate {
                 } catch (ObjectMappingException e) {
                     e.printStackTrace();
                 }
+            }
+            if(!gops.getNode("damage").isVirtual()){
+                keyDamage = gops.getNode("damage").getInt(0);
             }
         }
         List<? extends CommentedConfigurationNode> items = node.getNode("items").getChildrenList();
@@ -221,6 +226,9 @@ public class VirtualCrate {
         itemLore.add(Text.of(TextColors.WHITE, "A key for a ", TextSerializers.FORMATTING_CODE.deserialize(displayName), TextColors.WHITE, "."));
         itemLore.add(Text.of(TextColors.WHITE, "crate_" + id));
         key.offer(Keys.ITEM_LORE, itemLore);
+        if(keyDamage != null){
+            return ItemStack.builder().fromContainer(key.toContainer().set(DataQuery.of("UnsafeDamage"),keyDamage)).build();
+        }
         return key;
 
     }
