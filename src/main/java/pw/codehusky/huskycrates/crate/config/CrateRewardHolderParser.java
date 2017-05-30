@@ -4,6 +4,7 @@ import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.type.TreeType;
@@ -14,6 +15,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import pw.codehusky.huskycrates.HuskyCrates;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -144,6 +146,12 @@ public class CrateRewardHolderParser {
                     enchantments.add(itemEnchantment);
                 }
                 item.offer(Keys.ITEM_ENCHANTMENTS, enchantments);
+            }
+            if(!itemRoot.getNode("damage").isVirtual()){
+                HuskyCrates.instance.logger.info("damage override called");
+                return ItemStack.builder()
+                        .fromContainer(item.toContainer().set(DataQuery.of("UnsafeDamage"),itemRoot.getNode("damage").getInt(0))) //OVERRIDE DAMAGE VAL! :)
+                        .build();
             }
             //item.offer(Keys.PICKUP_DELAY,itemRoot.getNode("pickupdelay").getInt())
             return item;

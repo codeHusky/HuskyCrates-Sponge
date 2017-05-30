@@ -206,6 +206,10 @@ public class HuskyCrates {
 
     @Listener
     public void crateInteract(InteractBlockEvent.Secondary.MainHand event){
+        /*Player pp = (Player) event.getCause().root();
+
+        ItemStack ss = pp.getItemInHand(HandTypes.MAIN_HAND).get();
+        pp.getInventory().offer(ItemStack.builder().fromContainer(ss.toContainer().set(DataQuery.of("UnsafeDamage"),3)).build());*/
         if(!event.getTargetBlock().getLocation().isPresent())
             return;
 
