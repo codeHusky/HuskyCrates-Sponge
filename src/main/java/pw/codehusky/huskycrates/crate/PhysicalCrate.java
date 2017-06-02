@@ -15,6 +15,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import pw.codehusky.huskycrates.HuskyCrates;
 
+import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -27,6 +28,7 @@ public class PhysicalCrate {
     private VirtualCrate vc;
     public ArmorStand as = null;
     private HuskyCrates huskyCrates;
+    double randomTimeOffset = new Random().nextDouble()*2000;
     public static Vector3d offset = new Vector3d(0.5,1,0.5);
     public PhysicalCrate(Location<World> crateLocation, String crateId, HuskyCrates huskyCrates){
         this.location = crateLocation;
@@ -73,7 +75,7 @@ public class PhysicalCrate {
     }
     public void runParticles() {
         try {
-            double time = Sponge.getServer().getRunningTimeTicks() * 0.25;
+            double time = randomTimeOffset + (Sponge.getServer().getRunningTimeTicks() * 0.25);
             double size = 0.8;
 
             double x = Math.sin(time) * size;
