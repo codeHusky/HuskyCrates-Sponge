@@ -253,7 +253,7 @@ public class HuskyCrates {
                     }
 
                 }
-                plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,plr.getLocation().getPosition(),0.5);
+                plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,blk.getPosition(),0.3);
                 try {
                     plr.sendMessage(Text.of("You need a ", TextSerializers.FORMATTING_CODE.deserialize(vc.displayName + " Key"), " to open this crate."));
                 }catch(Exception e){

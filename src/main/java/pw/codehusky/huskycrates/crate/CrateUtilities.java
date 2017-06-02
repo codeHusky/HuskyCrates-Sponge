@@ -122,7 +122,7 @@ public class CrateUtilities {
         }
         Scheduler scheduler = Sponge.getScheduler();
         Task.Builder taskBuilder = scheduler.createTaskBuilder();
-        runner = taskBuilder.execute(this::particleRunner).intervalTicks(1).submit(plugin);
+        runner = taskBuilder.execute(this::particleRunner).intervalTicks(1).async().submit(plugin);
     }
     public String getTypeFromLocation(Location<World> location) {
         if(!location.getTileEntity().isPresent()) {
