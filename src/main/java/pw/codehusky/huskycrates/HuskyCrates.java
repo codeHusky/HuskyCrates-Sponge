@@ -42,6 +42,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.extent.Extent;
 import pw.codehusky.huskycrates.commands.Chest;
 import pw.codehusky.huskycrates.commands.Crate;
 import pw.codehusky.huskycrates.commands.Key;
@@ -50,6 +51,7 @@ import pw.codehusky.huskycrates.crate.CrateUtilities;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -69,6 +71,7 @@ public class HuskyCrates {
     @DefaultConfig(sharedRoot = false)
     public ConfigurationLoader<CommentedConfigurationNode> crateConfig;
 
+    private ArrayList<Extent> pendingExtents = new ArrayList<>();
     public Cause genericCause;
     public Scheduler scheduler;
     public CrateUtilities crateUtilities = new CrateUtilities(this);
@@ -120,9 +123,6 @@ public class HuskyCrates {
         scheduler = Sponge.getScheduler();
         genericCause = Cause.of(NamedCause.of("PluginContainer",pC));
         Sponge.getCommandManager().register(this, crateSpec, "crate");
-        if(!crateUtilities.hasInitalizedVirtualCrates){
-            crateUtilities.generateVirtualCrates(crateConfig);
-        }
         logger.info("Crates has been started.");
     }
 
@@ -159,27 +159,50 @@ public class HuskyCrates {
                 }
             }
         }).submit(this);
+        Sponge.getScheduler().createTaskBuilder().execute(new Consumer<Task>() {
+            @Override
+            public void accept(Task task) {
+                logger.info("Initalizing config...");
+                if(!crateUtilities.hasInitalizedVirtualCrates){
+                    crateUtilities.generateVirtualCrates(crateConfig);
+                }
+                crateUtilities.hasInitalizedVirtualCrates = true; // doublecheck
+                logger.info("Done initalizing config.");
+                logger.info("Populating physical crates...");
+                double count = 0;
+                for(Extent e : pendingExtents){
+                    count++;
+                    crateUtilities.populatePhysicalCrates(e);
+                    logger.info("Progress: " + Math.round((count / pendingExtents.size())*100)+ "%");
+                }
+                logger.info("Done populating physical crates.");
+                logger.info("Initalization complete.");
+            }
+        }).delayTicks(1).async().submit(this);
     }
 
     @Listener(order = Order.POST)
     public void chunkLoad(LoadChunkEvent event){
-        if(!crateUtilities.hasInitalizedVirtualCrates){
-            crateUtilities.generateVirtualCrates(crateConfig);
-        }
-        for(Entity e : event.getTargetChunk().getEntities()){
-            if(e instanceof ArmorStand){
-                crateUtilities.populatePhysicalCrates(event.getTargetChunk());
-                return;
+
+            for (Entity e : event.getTargetChunk().getEntities()) {
+                if (e instanceof ArmorStand) {
+                    if(crateUtilities.hasInitalizedVirtualCrates) {
+                        crateUtilities.populatePhysicalCrates(event.getTargetChunk());
+                    }else{
+                        pendingExtents.add(event.getTargetChunk());
+                    }
+                    return;
+                }
             }
-        }
     }
 
     @Listener(order = Order.POST)
     public void worldLoaded(LoadWorldEvent event){
-        if(!crateUtilities.hasInitalizedVirtualCrates){
-            crateUtilities.generateVirtualCrates(crateConfig);
+        if(crateUtilities.hasInitalizedVirtualCrates) {
+            crateUtilities.populatePhysicalCrates(event.getTargetWorld());
+        }else{
+            pendingExtents.add(event.getTargetWorld());
         }
-        crateUtilities.populatePhysicalCrates(event.getTargetWorld());
     }
     @Listener
     public void gameReloaded(GameReloadEvent event){
