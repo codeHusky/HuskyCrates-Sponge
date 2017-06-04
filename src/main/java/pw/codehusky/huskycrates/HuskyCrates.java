@@ -29,6 +29,7 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
@@ -61,7 +62,7 @@ import java.util.function.Consumer;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.2.0", description = "A CratesReloaded Replacement for Sponge? lol")
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.2.1", description = "A CratesReloaded Replacement for Sponge? lol")
 public class HuskyCrates {
     //@Inject
     public Logger logger;
@@ -127,7 +128,7 @@ public class HuskyCrates {
                 .executor(new KeyAll())
                 .build();
         CommandSpec wand = CommandSpec.builder()
-                .description(Text.of("Give yourself a block/entity wand for crates."))
+                .description(Text.of("Give yourself an entity wand for crates."))
                 .arguments(
                         new CrateElement(Text.of("type"))
                 )
@@ -261,6 +262,18 @@ public class HuskyCrates {
     }
     @Listener
     public void gameReloaded(GameReloadEvent event){
+        for(World bit: Sponge.getServer().getWorlds()) {
+            for (Entity ent : bit.getEntities()) {
+                if (ent instanceof ArmorStand) {
+                    ArmorStand arm = (ArmorStand) ent;
+                    if (arm.getCreator().isPresent()) {
+                        if (arm.getCreator().get().equals(UUID.fromString(armorStandIdentifier))) {
+                            arm.remove();
+                        }
+                    }
+                }
+            }
+        }
         langData = new SharedLangData("", "You won %a %R&rfrom a %C&r!","&e%p just won %a %R&r&e from a %C&r!","You need a %K&r to open this crate.");
         CommentedConfigurationNode conf = null;
         try {
@@ -287,9 +300,7 @@ public class HuskyCrates {
         } catch (ObjectMappingException e) {
             e.printStackTrace();
         }
-        for(World e: Sponge.getServer().getWorlds()){
-            crateUtilities.populatePhysicalCrates(e);
-        }
+        crateUtilities.startParticleEffects();
 
     }
     private boolean blockCanBeCrate(BlockType type){
@@ -446,7 +457,12 @@ public class HuskyCrates {
 
         }
     }
-
+    @Listener
+    public void entityMove(MoveEntityEvent event){
+        if(crateUtilities.physicalCrates.containsKey(event.getFromTransform().getLocation())){
+            event.setCancelled(true);
+        }
+    }
     @Listener
     public void entityInteract(InteractEntityEvent.Secondary.MainHand event){
         //event.getTargetEntity().(event.getTargetEntity().toContainer().set(DataQuery.of("UnsafeData","crateID"),"blap"));
@@ -454,18 +470,22 @@ public class HuskyCrates {
         //System.out.println(event.getTargetEntity().toContainer().get(DataQuery.of("UnsafeData","crateID")));
         if(event.getCause().root() instanceof Player) {
             Player plr = (Player) event.getCause().root();
-            if(plr.getItemInHand(HandTypes.MAIN_HAND).isPresent()) {
+            if(plr.getItemInHand(HandTypes.MAIN_HAND).isPresent() && plr.hasPermission("huskycrates.wand")) {
                 ItemStack hand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
                 if(hand.getItem() == ItemTypes.BLAZE_ROD) {
                     if(hand.toContainer().get(DataQuery.of("UnsafeData","crateID")).isPresent()) {
-                        if(crateUtilities.physicalCrates.containsKey(event.getTargetEntity().getLocation())){
+                        if(!crateUtilities.physicalCrates.containsKey(event.getTargetEntity().getLocation())){
+                            //System.out.println(event.getTargetEntity().getLocation().getBlockPosition());
                             event.getTargetEntity().offer(Keys.AI_ENABLED,false);
-                            event.getTargetEntity().offer(Keys.HAS_GRAVITY,false);
-                            event.getTargetEntity().offer(Keys.)
-                        }else {
-                            System.out.println(event.getTargetEntity().getLocation().getBlockPosition());
+                            event.getTargetEntity().offer(Keys.IS_SILENT,true);
                             crateUtilities.physicalCrates.put(event.getTargetEntity().getLocation(), new PhysicalCrate(event.getTargetEntity().getLocation(), hand.toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString(), this));
                             crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()).createHologram();
+                            updatePhysicalCrates();
+                        }else{
+                            event.getTargetEntity().offer(Keys.AI_ENABLED,true);
+                            event.getTargetEntity().offer(Keys.IS_SILENT,false);
+                            crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()).as.remove();
+                            crateUtilities.physicalCrates.remove(event.getTargetEntity().getLocation());
                             updatePhysicalCrates();
                         }
                         event.setCancelled(true);

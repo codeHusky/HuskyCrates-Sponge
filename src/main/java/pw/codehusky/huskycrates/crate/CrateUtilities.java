@@ -7,6 +7,7 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -87,24 +88,10 @@ public class CrateUtilities {
     }
     private Task runner = null;
     public void populatePhysicalCrates(Extent bit) {
-        ArrayList<Location<World>> eep = new ArrayList<>();
-        for(Entity ent : bit.getEntities()){
-            if(ent instanceof ArmorStand){
-                ArmorStand arm = (ArmorStand) ent;
-                if(arm.getCreator().isPresent()){
-                    if(arm.getCreator().get().equals(UUID.fromString(plugin.armorStandIdentifier))){
-                        Location woot = arm.getLocation().copy().sub(PhysicalCrate.offset);
-                        arm.remove();
-                        if(physicalCrates.containsKey(woot))
-                            continue;
-                        eep.add(woot);
+        //ArrayList<Location<World>> eep = new ArrayList<>();
 
-                    }
-                }
-            }
-        }
 
-        for(Location<World> loco : eep){
+        /*for(Location<World> loco : eep){
             if(!bit.containsBlock(loco.getBlockPosition())) {
                 return;
             }
@@ -114,9 +101,9 @@ public class CrateUtilities {
                     continue;
                 physicalCrates.put(loco, new PhysicalCrate(loco, id, plugin));
             }
-        }
-        startParticleEffects();
-        HuskyCrates.instance.updatePhysicalCrates();
+        }*/
+        //
+        //HuskyCrates.instance.updatePhysicalCrates();
     }
     public void startParticleEffects(){
         if(runner != null){
@@ -168,10 +155,9 @@ public class CrateUtilities {
             }
             for(World w : invalidLocationWorlds) {
                 for (Entity e : w.getEntities()) {
-                    if (invalidLocations.contains(e.getLocation())) {
+                    if (invalidLocations.contains(e.getLocation()) && e.getType() != EntityTypes.ARMOR_STAND) {
                         //System.out.println("woah");
                         invalidLocations.remove(e.getLocation());
-                        //System.out.println("A");
                         physicalCrates.get(e.getLocation()).runParticles();
 
                     }

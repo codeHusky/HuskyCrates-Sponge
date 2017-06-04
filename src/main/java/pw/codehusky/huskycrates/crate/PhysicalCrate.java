@@ -7,7 +7,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOptions;
 import org.spongepowered.api.effect.particle.ParticleTypes;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -39,31 +38,16 @@ public class PhysicalCrate {
         createHologram();
     }
     public void createHologram() {
-        //System.out.println(as == null);
-        if(as == null) {
-            for (Entity e : location.getExtent().getEntities()) {
-                if (e instanceof ArmorStand) {
-                    Vector3d newpos = e.getLocation().copy().sub(offset).getPosition();
-                    if (e.getLocation().copy().sub(offset).getPosition().equals(location.getPosition())) {
-                        ArmorStand ass = (ArmorStand) e;
-                        if (ass.getCreator().isPresent()) {
-                            if (ass.getCreator().get().equals(UUID.fromString(huskyCrates.armorStandIdentifier))) {
-//                            System.out.println("Found an armor stand");
-//                            System.out.println(location);
-                                as = ass;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        //System.out.println(as);
         if(as == null || !as.isLoaded()) {
             as = (ArmorStand)  location.getExtent().createEntity(EntityTypes.ARMOR_STAND,location.getPosition());
-            if(location.getBlock().getType() != BlockTypes.AIR)
+            //System.out.println(location.getBlock().getType());
+            if(location.getBlock().getType() != BlockTypes.AIR) {
                 as.setLocation(location.copy().add(offset));
-            else
-                as.setLocation(location.copy().add(0,1,0));
+                //System.out.println("BLOCK");
+            }else {
+                //System.out.println("AIR");
+                as.setLocation(location.copy().add(0, 1, 0));
+            }
             location.getExtent().spawnEntity(as,huskyCrates.genericCause);
         }
         as.setCreator(UUID.fromString(huskyCrates.armorStandIdentifier));
