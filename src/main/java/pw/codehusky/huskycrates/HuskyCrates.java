@@ -212,7 +212,7 @@ public class HuskyCrates {
                             ee = node.getNode("location").getValue(TypeToken.of(Location.class));
                         }catch(InvalidDataException err2){
                             logger.warn("Bug sponge developers about world UUIDs!");
-                            ee = new Location<World>(Sponge.getServer().getWorld(node.getNode("location","WorldName").getString()).get(),node.getNode("location","X").getInt(),node.getNode("location","Y").getInt(),node.getNode("location","Z").getInt());
+                            ee = new Location<World>(Sponge.getServer().getWorld(node.getNode("location","WorldName").getString()).get(),node.getNode("location","X").getDouble(),node.getNode("location","Y").getDouble(),node.getNode("location","Z").getDouble());
                         }
                         if(!crateUtilities.physicalCrates.containsKey(ee))
                             crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance));
@@ -231,6 +231,7 @@ public class HuskyCrates {
                     crateUtilities.populatePhysicalCrates(e);
                     logger.info("Progress: " + Math.round((count / pendingExtents.size())*100)+ "%");
                 }
+                crateUtilities.startParticleEffects();
                 logger.info("Done populating physical crates.");
                 logger.info("Initalization complete.");
             }
@@ -296,7 +297,7 @@ public class HuskyCrates {
                     ee = node.getNode("location").getValue(TypeToken.of(Location.class));
                 }catch(InvalidDataException err2){
                     logger.warn("Bug sponge developers about world UUIDs!");
-                    ee = new Location<World>(Sponge.getServer().getWorld(node.getNode("location","WorldName").getString()).get(),node.getNode("location","X").getInt(),node.getNode("location","Y").getInt(),node.getNode("location","Z").getInt());
+                    ee = new Location<World>(Sponge.getServer().getWorld(node.getNode("location","WorldName").getString()).get(),node.getNode("location","X").getDouble(),node.getNode("location","Y").getDouble(),node.getNode("location","Z").getDouble());
                 }
                 if(!crateUtilities.physicalCrates.containsKey(ee))
                     crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance));
