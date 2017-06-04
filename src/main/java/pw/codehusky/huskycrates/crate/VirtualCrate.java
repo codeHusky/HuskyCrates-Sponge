@@ -256,6 +256,26 @@ public class VirtualCrate {
         return ItemStack.builder().fromContainer(key.toContainer().set(DataQuery.of("UnsafeData","crateID"),id)).build();//
 
     }
+    /***
+     * Retrieve the crate item
+     * @since 1.2.1
+     * @return the ItemStack with the keys.
+     */
+    public ItemStack getCrateWand(){
+        ItemStack key = ItemStack.builder()
+                .itemType(ItemTypes.BLAZE_ROD)
+                .add(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(displayName + " Wand")).build();
+        ArrayList<Text> itemLore = new ArrayList<>();
+        itemLore.add(Text.of(TextColors.WHITE, "A wand for a ", TextSerializers.FORMATTING_CODE.deserialize(displayName), TextColors.WHITE, "."));
+        itemLore.add(Text.of(TextColors.DARK_GRAY, "HuskyCrates"));
+        key.offer(Keys.ITEM_LORE, itemLore);
+        if(keyDamage != null){
+            key = ItemStack.builder().fromContainer(key.toContainer().set(DataQuery.of("UnsafeDamage"),keyDamage)).build();
+        }
+
+        return ItemStack.builder().fromContainer(key.toContainer().set(DataQuery.of("UnsafeData","crateID"),id)).build();//
+
+    }
 
     public ItemType getKeyType() {
         return keyType;

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>pw.codehusky</groupId>
     <artifactId>HuskyCrates</artifactId>
-    <version>1.1.1</version>
+    <version>1.2.0</version>
     <repositories>
         <repository>
             <id>sponge</id>

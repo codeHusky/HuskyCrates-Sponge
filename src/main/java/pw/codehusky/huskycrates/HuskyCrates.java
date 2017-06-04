@@ -15,6 +15,7 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.effect.sound.SoundTypes;
@@ -27,11 +28,13 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.event.world.chunk.LoadChunkEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -43,10 +46,7 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
-import pw.codehusky.huskycrates.commands.Chest;
-import pw.codehusky.huskycrates.commands.Crate;
-import pw.codehusky.huskycrates.commands.Key;
-import pw.codehusky.huskycrates.commands.KeyAll;
+import pw.codehusky.huskycrates.commands.*;
 import pw.codehusky.huskycrates.commands.elements.CrateElement;
 import pw.codehusky.huskycrates.crate.CrateUtilities;
 import pw.codehusky.huskycrates.crate.PhysicalCrate;
@@ -61,7 +61,7 @@ import java.util.function.Consumer;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.1.1", description = "A CratesReloaded Replacement for Sponge? lol")
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.2.0", description = "A CratesReloaded Replacement for Sponge? lol")
 public class HuskyCrates {
     //@Inject
     public Logger logger;
@@ -126,7 +126,14 @@ public class HuskyCrates {
                 .permission("huskycrates.keyAll")
                 .executor(new KeyAll())
                 .build();
-
+        CommandSpec wand = CommandSpec.builder()
+                .description(Text.of("Give yourself a block/entity wand for crates."))
+                .arguments(
+                        new CrateElement(Text.of("type"))
+                )
+                .permission("huskycrates.wand")
+                .executor(new Wand())
+                .build();
 
         CommandSpec chest = CommandSpec.builder()
                 .description(Text.of("Get the placeable crate item."))
@@ -142,7 +149,8 @@ public class HuskyCrates {
                 .description(Text.of("Main crates command"))
                 .child(key, "key")
                 .child(chest, "chest")
-                .child(keyAll,"keyAll")
+                .child(keyAll, "keyAll")
+                .child(wand, "wand")
                 .arguments(GenericArguments.optional(GenericArguments.remainingRawJoinedStrings(Text.of(""))))
                 .executor(new Crate(this))
                 .build();
@@ -372,15 +380,17 @@ public class HuskyCrates {
     @Listener
     public void crateInteract(InteractBlockEvent.Secondary.MainHand event){
         //System.out.println(crateUtilities.physicalCrates.keySet());
-        /*Player pp = (Player) event.getCause().root();
+        //Player pp = (Player) event.getCause().root();
 
-        ItemStack ss = pp.getItemInHand(HandTypes.MAIN_HAND).get();
-        System.out.println(ss.toContainer().get(DataQuery.of("UnsafeData")).get());
+        //ItemStack ss = pp.getItemInHand(HandTypes.MAIN_HAND).get();
+        //System.out.println(ss.toContainer().get(DataQuery.of("UnsafeData")).get());
+
         //pp.getInventory().offer(ItemStack.builder().fromContainer(ss.toContainer().set(DataQuery.of("UnsafeDamage"),3)).build());*/
         if(!event.getTargetBlock().getLocation().isPresent())
             return;
 
         Location<World> blk = event.getTargetBlock().getLocation().get();
+        //System.out.println(blk.getBlock().getType());
         if(validCrateBlocks.contains(blk.getBlockType())) {
             Player plr = (Player)event.getCause().root();
 
@@ -437,6 +447,80 @@ public class HuskyCrates {
         }
     }
 
+    @Listener
+    public void entityInteract(InteractEntityEvent.Secondary.MainHand event){
+        //event.getTargetEntity().(event.getTargetEntity().toContainer().set(DataQuery.of("UnsafeData","crateID"),"blap"));
+        //event.getTargetEntity().()
+        //System.out.println(event.getTargetEntity().toContainer().get(DataQuery.of("UnsafeData","crateID")));
+        if(event.getCause().root() instanceof Player) {
+            Player plr = (Player) event.getCause().root();
+            if(plr.getItemInHand(HandTypes.MAIN_HAND).isPresent()) {
+                ItemStack hand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
+                if(hand.getItem() == ItemTypes.BLAZE_ROD) {
+                    if(hand.toContainer().get(DataQuery.of("UnsafeData","crateID")).isPresent()) {
+                        if(crateUtilities.physicalCrates.containsKey(event.getTargetEntity().getLocation())){
+                            event.getTargetEntity().offer(Keys.AI_ENABLED,false);
+                            event.getTargetEntity().offer(Keys.HAS_GRAVITY,false);
+                            event.getTargetEntity().offer(Keys.)
+                        }else {
+                            System.out.println(event.getTargetEntity().getLocation().getBlockPosition());
+                            crateUtilities.physicalCrates.put(event.getTargetEntity().getLocation(), new PhysicalCrate(event.getTargetEntity().getLocation(), hand.toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString(), this));
+                            crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()).createHologram();
+                            updatePhysicalCrates();
+                        }
+                        event.setCancelled(true);
+                        return;
+                    }
+                }
+            }
+
+            if(crateUtilities.physicalCrates.containsKey(event.getTargetEntity().getLocation())){
+                String crateType = crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()).vc.id;
+                VirtualCrate vc = crateUtilities.getVirtualCrate(crateType);
+                crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()).createHologram();
+                //crateUtilities.recognizeChest(te.getLocation());
+                event.setCancelled(true);
+                if(plr.getItemInHand(HandTypes.MAIN_HAND).isPresent()) {
+                    ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
+                    if(inhand.getItem() == vc.getKeyType()) {
+
+                        if(inhand.toContainer().get(DataQuery.of("UnsafeData","crateID")).isPresent()) {
+                            String id = inhand.toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString();
+                            if (id.equals(crateType)) {
+                                if (!plr.hasPermission("huskycrates.tester")) {
+                                    if (inhand.getQuantity() == 1)
+                                        plr.setItemInHand(HandTypes.MAIN_HAND, null);
+                                    else {
+                                        ItemStack tobe = inhand.copy();
+                                        tobe.setQuantity(tobe.getQuantity() - 1);
+                                        plr.setItemInHand(HandTypes.MAIN_HAND, tobe);
+                                    }
+                                }
+                                Task.Builder upcoming = scheduler.createTaskBuilder();
+
+                                upcoming.execute(() -> {
+                                    crateUtilities.launchCrateForPlayer(crateType, plr, this);
+                                }).delayTicks(1).submit(this);
+                                return;
+                            }
+                        }
+
+                    }
+
+                }
+                plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,event.getTargetEntity().getLocation().getPosition(),0.3);
+                try {
+                    plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                            vc.langData.formatter(vc.langData.prefix + vc.langData.noKeyMessage,null,plr,vc,null)
+                    ));
+                }catch(Exception e){
+                    plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
+                    e.printStackTrace();
+                }
+            }
+        }
+
+    }
 
     public CrateUtilities getCrateUtilities() {
         return crateUtilities;

@@ -2,6 +2,7 @@ package pw.codehusky.huskycrates.crate;
 
 import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOptions;
@@ -59,7 +60,10 @@ public class PhysicalCrate {
         //System.out.println(as);
         if(as == null || !as.isLoaded()) {
             as = (ArmorStand)  location.getExtent().createEntity(EntityTypes.ARMOR_STAND,location.getPosition());
-            as.setLocation(location.copy().add(offset));
+            if(location.getBlock().getType() != BlockTypes.AIR)
+                as.setLocation(location.copy().add(offset));
+            else
+                as.setLocation(location.copy().add(0,1,0));
             location.getExtent().spawnEntity(as,huskyCrates.genericCause);
         }
         as.setCreator(UUID.fromString(huskyCrates.armorStandIdentifier));

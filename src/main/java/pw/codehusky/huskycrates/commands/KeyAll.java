@@ -14,11 +14,7 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 
-/**
- * Created By KasperFranz.
- *
- * This CommandExecutor is used to get the crate item.
- */
+
 public class KeyAll implements CommandExecutor {
 
     @Override public CommandResult execute(CommandSource commandSource, CommandContext commandContext) throws CommandException {

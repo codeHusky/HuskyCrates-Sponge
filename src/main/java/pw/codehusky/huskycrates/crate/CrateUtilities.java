@@ -152,19 +152,37 @@ public class CrateUtilities {
         if(flag)
             return;
         try {
+            ArrayList<Location<World>> invalidLocations = new ArrayList<>();
+            HashSet<World> invalidLocationWorlds = new HashSet<>();
             for (Location<World> b : physicalCrates.keySet()) {
                 PhysicalCrate c = physicalCrates.get(b);
 
                 if (c.vc.crateBlockType != c.location.getBlock().getType() && c.location.getExtent().isLoaded() && c.location.getExtent().getChunk(c.location.getChunkPosition()).isPresent()) {
                     if(c.location.getExtent().getChunk(c.location.getChunkPosition()).get().isLoaded()) {
-                        HuskyCrates.instance.logger.warn("Removing crate that no longer exists! " + c.location.getPosition().toString());
-                        c.as.remove();
-                        physicalCrates.remove(b);
-                        flag = true;
+                        invalidLocations.add(c.location);
+                        invalidLocationWorlds.add(c.location.getExtent());
                         continue;
                     }
                 }
                 c.runParticles();
+            }
+            for(World w : invalidLocationWorlds) {
+                for (Entity e : w.getEntities()) {
+                    if (invalidLocations.contains(e.getLocation())) {
+                        //System.out.println("woah");
+                        invalidLocations.remove(e.getLocation());
+                        //System.out.println("A");
+                        physicalCrates.get(e.getLocation()).runParticles();
+
+                    }
+                }
+            }
+            for(Location<World> l : invalidLocations){
+                PhysicalCrate c = physicalCrates.get(l);
+                HuskyCrates.instance.logger.warn("Removing crate that no longer exists! " + c.location.getPosition().toString());
+                c.as.remove();
+                physicalCrates.remove(l);
+                flag = true;
             }
         }catch(Exception e){
 
