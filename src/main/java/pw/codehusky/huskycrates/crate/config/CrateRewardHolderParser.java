@@ -1,5 +1,6 @@
 package pw.codehusky.huskycrates.crate.config;
 
+import com.google.common.collect.BiMap;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -16,17 +17,24 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
+import pw.codehusky.huskycrates.crate.VirtualCrate;
+import pw.codehusky.huskycrates.lang.SharedLangData;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class CrateRewardHolderParser {
-    public static CrateRewardHolder fromConfig(ConfigurationNode holderNode){
+    public static CrateRewardHolder fromConfig(ConfigurationNode holderNode, VirtualCrate vc){
         ItemStack dispItem = itemFromNode(holderNode);
         CrateReward reward = new CrateReward(null,"CODE ERROR, CONTACT DEVELOPER",false);
         boolean dispAwardSimilar = false;
         String name;
         boolean single = false;
+        SharedLangData langData = HuskyCrates.instance.langData;
+        if(!holderNode.getNode("lang").isVirtual()){
+            langData = new SharedLangData(vc.langData,holderNode.getNode("lang"));
+        }
         //System.out.println(dispItem.get(Keys.DISPLAY_NAME));
         if(holderNode.getNode("huskydata","reward").getNode("overrideRewardName").isVirtual()){
             //System.out.println("Virtual");
@@ -62,7 +70,7 @@ public class CrateRewardHolderParser {
             System.out.println("?! Invalid Reward Type !? " + holderNode.getNode("huskydata","reward","type").getString());
         }
 
-        return new CrateRewardHolder(dispItem,reward,holderNode.getNode("huskydata","weight").getDouble(1),dispAwardSimilar);
+        return new CrateRewardHolder(dispItem,reward,holderNode.getNode("huskydata","weight").getDouble(1),dispAwardSimilar,langData);
     }
     public static ConfigurationNode toConfig(CrateRewardHolder holder){ //pretty much just for conversion
         ConfigurationNode toOverwrite = HoconConfigurationLoader.builder().build().createEmptyNode();
@@ -110,7 +118,7 @@ public class CrateRewardHolderParser {
         }else{
             rew = new CrateReward(command,name,false);
         }
-        return new CrateRewardHolder(stack,rew,chance,command.equals(""));
+        return new CrateRewardHolder(stack,rew,chance,command.equals(""),HuskyCrates.instance.langData);
     }
     private static ItemStack itemFromNode(ConfigurationNode itemRoot){
         try {
@@ -149,10 +157,24 @@ public class CrateRewardHolderParser {
             }
             if(!itemRoot.getNode("damage").isVirtual()){
                 HuskyCrates.instance.logger.info("damage override called");
-                return ItemStack.builder()
+                item = ItemStack.builder()
                         .fromContainer(item.toContainer().set(DataQuery.of("UnsafeDamage"),itemRoot.getNode("damage").getInt(0))) //OVERRIDE DAMAGE VAL! :)
                         .build();
             }
+
+            if(!itemRoot.getNode("nbt").isVirtual()){
+                //nbt overrrides
+                LinkedHashMap items = (LinkedHashMap) itemRoot.getNode("nbt").getValue();
+                if(item.toContainer().get(DataQuery.of("UnsafeData")).isPresent()) {
+                    BiMap real = ((BiMap) item.toContainer().getMap(DataQuery.of("UnsafeData")).get());
+                    items.putAll(real);
+                }
+                //System.out.println(item.toContainer().get(DataQuery.of("UnsafeData")).get().getClass());
+                item = ItemStack.builder()
+                        .fromContainer(item.toContainer().set(DataQuery.of("UnsafeData"),items))
+                        .build();
+            }
+
             //item.offer(Keys.PICKUP_DELAY,itemRoot.getNode("pickupdelay").getInt())
             return item;
         } catch (ObjectMappingException e) {

@@ -5,7 +5,6 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
@@ -28,7 +27,7 @@ import java.util.*;
 @SuppressWarnings("deprecation")
 public class CrateUtilities {
     private HashMap<String,VirtualCrate> crateTypes = new HashMap<>();
-    private HashMap<Location<World>,PhysicalCrate> physicalCrates = new HashMap<>();
+    public HashMap<Location<World>,PhysicalCrate> physicalCrates = new HashMap<>();
     private HashMap<String,ItemStack> keys = new HashMap<>();
     public boolean hasInitalizedVirtualCrates = false;
     private HuskyCrates plugin;
@@ -115,6 +114,7 @@ public class CrateUtilities {
             }
         }
         startParticleEffects();
+        HuskyCrates.instance.updatePhysicalCrates();
     }
     public void startParticleEffects(){
         if(runner != null){
@@ -134,24 +134,26 @@ public class CrateUtilities {
         return prego.replace(plugin.huskyCrateIdentifier,"");
     }
     public void recognizeChest(Location<World> location){
-        if(location.getTileEntity().isPresent()){
-            if(physicalCrates.containsKey(location)) return;
-            String id = null;
-            try {
-                id = getTypeFromLocation(location);
-            } catch (Exception e) {}
-            if(id != null){
-                physicalCrates.put(location,new PhysicalCrate(location,id,plugin));
-            }
+        if(physicalCrates.containsKey(location)) return;
+        String id = null;
+        try {
+            id = getTypeFromLocation(location);
+        } catch (Exception e) {}
+        if(id != null){
+            physicalCrates.put(location,new PhysicalCrate(location,id,plugin));
+            HuskyCrates.instance.updatePhysicalCrates();
         }
+
     }
     private void particleRunner(){
+        boolean flag = false;
         try {
             for (Location<World> b : physicalCrates.keySet()) {
                 PhysicalCrate c = physicalCrates.get(b);
-                if (c.location.getBlock().getType() != BlockTypes.CHEST) {
+                if (c.vc.crateBlockType != c.location.getBlock().getType()) {
                     c.as.remove();
                     physicalCrates.remove(b);
+                    flag = true;
                     continue;
                 }
                 c.runParticles();
@@ -159,6 +161,8 @@ public class CrateUtilities {
         }catch(Exception e){
 
         }
+        if(flag)
+            HuskyCrates.instance.updatePhysicalCrates();
     }
 
     /***

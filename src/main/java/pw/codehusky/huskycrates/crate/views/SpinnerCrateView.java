@@ -15,7 +15,6 @@ import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
@@ -192,23 +191,26 @@ public class SpinnerCrateView implements CrateView {
                 boolean mult = false;
                 if (!giveToPlayer.getReward().treatAsSingle() &&  giveToPlayer.getReward().getReward() instanceof ItemStack) {
                     if(((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() > 1) {
-                        ourplr.sendMessage(Text.of("You won ", TextColors.YELLOW,
+                        /*ourplr.sendMessage(Text.of("You won ", TextColors.YELLOW,
                                 ((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() + " ",
                                 TextSerializers.FORMATTING_CODE.deserialize(giveToPlayer.getReward().getRewardName()), TextColors.RESET, " from a ",
-                                TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
+                                TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));*/
+                        ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                                vc.langData.formatter(vc.langData.prefix + vc.langData.rewardMessage,((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() + "",ourplr,vc,giveToPlayer)
+                        ));
                         mult = true;
                     }
                 }
                 if(!mult){
                     String[] vowels = {"a", "e", "i", "o", "u"};
                     if (Arrays.asList(vowels).contains(giveToPlayer.getReward().getRewardName().substring(0, 1).toLowerCase())) {
-                        ourplr.sendMessage(Text.of("You won an ",
-                                TextSerializers.FORMATTING_CODE.deserialize(giveToPlayer.getReward().getRewardName()), TextColors.RESET, " from a ",
-                                TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
+                        ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                                vc.langData.formatter(vc.langData.prefix + vc.langData.rewardMessage,"an",ourplr,vc,giveToPlayer)
+                        ));
                     } else {
-                        ourplr.sendMessage(Text.of("You won a ",
-                                TextSerializers.FORMATTING_CODE.deserialize(giveToPlayer.getReward().getRewardName()), TextColors.RESET, " from a ",
-                                TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));
+                        ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                                vc.langData.formatter(vc.langData.prefix + vc.langData.rewardMessage,"a",ourplr,vc,giveToPlayer)
+                        ));
                     }
                 }
                 ourplr.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP,ourplr.getLocation().getPosition(),1);

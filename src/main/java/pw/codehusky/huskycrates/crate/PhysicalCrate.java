@@ -25,7 +25,7 @@ import java.util.UUID;
 public class PhysicalCrate {
     public Location<World> location;
     private String crateId;
-    private VirtualCrate vc;
+    public VirtualCrate vc;
     public ArmorStand as = null;
     private HuskyCrates huskyCrates;
     double randomTimeOffset = new Random().nextDouble()*2000;

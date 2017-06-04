@@ -6,6 +6,8 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.apache.commons.lang3.ArrayUtils;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
@@ -22,6 +24,7 @@ import pw.codehusky.huskycrates.crate.config.CrateRewardHolderParser;
 import pw.codehusky.huskycrates.crate.views.CrateView;
 import pw.codehusky.huskycrates.crate.views.NullCrateView;
 import pw.codehusky.huskycrates.crate.views.SpinnerCrateView;
+import pw.codehusky.huskycrates.lang.SharedLangData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,17 +39,22 @@ public class VirtualCrate {
     private HashMap<ItemStack, String> commandSet;
     public String displayName;
     public String id;
+    public BlockType crateBlockType;
+    public ItemType crateBlockItemType;
     public String crateType;
     private float maxProb = 100;
     private HashMap<String,Object> options = new HashMap<>();
     private ItemType keyType;
     private Integer keyDamage= null;
+    public SharedLangData langData;
     public VirtualCrate(String id, ConfigurationLoader<CommentedConfigurationNode> config, CommentedConfigurationNode node){
         this.id = id;
         displayName = node.getNode("name").getString();
         if(node.getNode("type").isVirtual()){
             node.getNode("type").setValue("Spinner");
         }
+        crateBlockType = BlockTypes.CHEST;
+        crateBlockItemType = ItemTypes.CHEST;
         keyType = ItemTypes.NETHER_STAR;//default
         crateType = node.getNode("type").getString("null");
         if(crateType.equalsIgnoreCase("spinner")){
@@ -64,8 +72,22 @@ public class VirtualCrate {
                 }
             }
         }
+        if(!node.getNode("lang").isVirtual()){
+            langData = new SharedLangData(node.getNode("lang"));
+        }else{
+            langData = HuskyCrates.instance.langData;
+        }
         if(!node.getNode("options").isVirtual()){
             ConfigurationNode gops = node.getNode("options");
+            if(!gops.getNode("crateBlockID").isVirtual()){
+                try {
+                    crateBlockItemType = gops.getNode("crateBlockID").getValue(TypeToken.of(ItemType.class));
+                    crateBlockType = crateBlockItemType.getBlock().get();
+                } catch (ObjectMappingException e) {
+                    HuskyCrates.instance.logger.error("Invalid crate block ID in options.");
+                    e.printStackTrace();
+                }
+            }
             if(!gops.getNode("particle1").isVirtual()){
                 HashMap<String,Integer> color = new HashMap<>();
                 if(!gops.getNode("particle1","color").isVirtual()){
@@ -119,6 +141,7 @@ public class VirtualCrate {
                 keyDamage = gops.getNode("damage").getInt(0);
             }
         }
+        HuskyCrates.instance.validCrateBlocks.add(crateBlockType);
         List<? extends CommentedConfigurationNode> items = node.getNode("items").getChildrenList();
         ArrayList<Object[]> equality = new ArrayList<>();
         float currentProb = 0;
@@ -162,7 +185,7 @@ public class VirtualCrate {
                 e.getNode("formatversion").setValue(1);
                 System.out.println("Finished conversion on crate " + id + " item #" + (((int)e.getKey())+1));
             }
-            rewardHolder = CrateRewardHolderParser.fromConfig(e);
+            rewardHolder = CrateRewardHolderParser.fromConfig(e,this);
 
 
             Object[] t = {rewardHolder.getChance(), rewardHolder};
@@ -227,7 +250,7 @@ public class VirtualCrate {
         itemLore.add(Text.of(TextColors.WHITE, "crate_" + id));
         key.offer(Keys.ITEM_LORE, itemLore);
         if(keyDamage != null){
-            return ItemStack.builder().fromContainer(key.toContainer().set(DataQuery.of("UnsafeDamage"),keyDamage)).build();
+            return ItemStack.builder().fromContainer(key.toContainer().set(DataQuery.of("UnsafeDamage"),keyDamage).set(DataQuery.of("UnsafeData","crateID"),id)).build();
         }
         return key;
 
@@ -244,10 +267,11 @@ public class VirtualCrate {
      * @return the ItemStack with the chest.
      */
     public ItemStack getCrateItem(int quantity) {
-        return ItemStack.builder()
-                .itemType(ItemTypes.CHEST)
+        ItemStack stacky = ItemStack.builder()
+                .itemType(crateBlockItemType)
                 .quantity(quantity)
                 .add(Keys.DISPLAY_NAME, Text.of(HuskyCrates.instance.getHuskyCrateIdentifier() + id)).build();
+        return ItemStack.builder().fromContainer(stacky.toContainer().set(DataQuery.of("UnsafeData","crateID"),id)).build();
     }
 
     public HashMap<String, Object> getOptions() {

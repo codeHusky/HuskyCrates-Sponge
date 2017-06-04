@@ -90,6 +90,8 @@ public class Crate implements CommandExecutor {
         src.sendMessage(Text.of(TextColors.YELLOW,"HuskyCrates Commands"));
         src.sendMessage(Text.of("/crate chest <id> [player]"));
         src.sendMessage(Text.of("/crate key <id> [player] [count]"));
+        src.sendMessage(Text.of("/crate keyAll <id> [count]"));
+        //HuskyCrates.instance.updatePhysicalCrates();
         return CommandResult.success();
     }
     public ItemStack getCrateItem(String id){
