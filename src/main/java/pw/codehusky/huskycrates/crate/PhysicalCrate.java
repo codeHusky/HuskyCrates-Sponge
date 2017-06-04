@@ -38,16 +38,19 @@ public class PhysicalCrate {
         createHologram();
     }
     public void createHologram() {
-        for(Entity e: location.getExtent().getEntities()){
-            if(e instanceof ArmorStand) {
-                Vector3d newpos = e.getLocation().copy().sub(offset).getPosition();
-                if(e.getLocation().copy().sub(offset).getPosition().equals(location.getPosition())){
-                    ArmorStand ass = (ArmorStand)e;
-                    if(ass.getCreator().isPresent()){
-                        if(ass.getCreator().get().equals(UUID.fromString(huskyCrates.armorStandIdentifier))){
+        //System.out.println(as == null);
+        if(as == null) {
+            for (Entity e : location.getExtent().getEntities()) {
+                if (e instanceof ArmorStand) {
+                    Vector3d newpos = e.getLocation().copy().sub(offset).getPosition();
+                    if (e.getLocation().copy().sub(offset).getPosition().equals(location.getPosition())) {
+                        ArmorStand ass = (ArmorStand) e;
+                        if (ass.getCreator().isPresent()) {
+                            if (ass.getCreator().get().equals(UUID.fromString(huskyCrates.armorStandIdentifier))) {
 //                            System.out.println("Found an armor stand");
 //                            System.out.println(location);
-                            as = ass;
+                                as = ass;
+                            }
                         }
                     }
                 }
@@ -75,6 +78,7 @@ public class PhysicalCrate {
     }
     public void runParticles() {
         try {
+            createHologram();
             double time = randomTimeOffset + (Sponge.getServer().getRunningTimeTicks() * 0.25);
             double size = 0.8;
 

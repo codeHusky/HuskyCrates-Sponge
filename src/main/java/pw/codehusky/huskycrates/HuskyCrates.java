@@ -203,7 +203,7 @@ public class HuskyCrates {
                             ee = node.getNode("location").getValue(TypeToken.of(Location.class));
                         }catch(InvalidDataException err2){
                             logger.warn("Bug sponge developers about world UUIDs!");
-                            ee = new Location<World>(Sponge.getServer().getWorld(node.getNode("location","WorldName").getString()).get(),node.getNode("location","x").getInt(),node.getNode("location","y").getInt(),node.getNode("location","z").getInt());
+                            ee = new Location<World>(Sponge.getServer().getWorld(node.getNode("location","WorldName").getString()).get(),node.getNode("location","X").getInt(),node.getNode("location","Y").getInt(),node.getNode("location","Z").getInt());
                         }
                         if(!crateUtilities.physicalCrates.containsKey(ee))
                             crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance));
@@ -306,6 +306,10 @@ public class HuskyCrates {
                             Optional<Object> tt = plr.getItemInHand(HandTypes.MAIN_HAND).get().toContainer().get(DataQuery.of("UnsafeData", "crateID"));
                             if (tt.isPresent()) {
                                 String crateID = tt.get().toString();
+                                if(!plr.hasPermission("huskycrates.tester")) {
+                                    event.setCancelled(true);
+                                    return;
+                                }
                                 if(!crateUtilities.physicalCrates.containsKey(location))
                                     crateUtilities.physicalCrates.put(location, new PhysicalCrate(location, crateID, this));
 
@@ -313,13 +317,19 @@ public class HuskyCrates {
                                 updatePhysicalCrates();
                             }
                         }
-                    }else{
-                        //break
-                        if(crateUtilities.physicalCrates.containsKey(location)){
-                            crateUtilities.physicalCrates.get(location).as.remove();
-                            crateUtilities.physicalCrates.remove(location);
-                            updatePhysicalCrates();
+                    }
+                }else{
+                    //break
+
+                    if(crateUtilities.physicalCrates.containsKey(location)){
+                        if(!plr.hasPermission("huskycrates.tester")) {
+                            event.setCancelled(true);
+                            return;
                         }
+                        crateUtilities.flag = true;
+                        crateUtilities.physicalCrates.get(location).as.remove();
+                        crateUtilities.physicalCrates.remove(location);
+                        updatePhysicalCrates();
                     }
                 }
             }
@@ -341,6 +351,9 @@ public class HuskyCrates {
                 try {
                     node.getNode("crateID").setValue(crateUtilities.physicalCrates.get(e).vc.id);
                 }catch(NullPointerException err){
+                    System.out.println("removing a crate!");
+                    node.setValue(null);
+                    crateUtilities.physicalCrates.remove(ob);
                     logger.warn("Invalid crate at (" + e.getPosition().getFloorX() + ", " + e.getPosition().getFloorY() + ", " + e.getPosition().getFloorZ() + ")!");
                 }
             }
@@ -352,6 +365,7 @@ public class HuskyCrates {
         } catch (ObjectMappingException e) {
             e.printStackTrace();
         }
+        crateUtilities.flag = false;
         updating = false;
     }
 
@@ -361,8 +375,8 @@ public class HuskyCrates {
         /*Player pp = (Player) event.getCause().root();
 
         ItemStack ss = pp.getItemInHand(HandTypes.MAIN_HAND).get();
-        System.out.println(((MemoryDataView)ss.toContainer().get(DataQuery.of("UnsafeData")).get()).get(DataQuery.of("type")));*/
-        //pp.getInventory().offer(ItemStack.builder().fromContainer(ss.toContainer().set(DataQuery.of("UnsafeDamage"),3)).build());
+        System.out.println(ss.toContainer().get(DataQuery.of("UnsafeData")).get());
+        //pp.getInventory().offer(ItemStack.builder().fromContainer(ss.toContainer().set(DataQuery.of("UnsafeDamage"),3)).build());*/
         if(!event.getTargetBlock().getLocation().isPresent())
             return;
 

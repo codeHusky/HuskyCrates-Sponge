@@ -32,8 +32,8 @@ public class CrateRewardHolderParser {
         String name;
         boolean single = false;
         SharedLangData langData = HuskyCrates.instance.langData;
-        if(!holderNode.getNode("lang").isVirtual()){
-            langData = new SharedLangData(vc.langData,holderNode.getNode("lang"));
+        if(!holderNode.getNode("huskydata","lang").isVirtual()){
+            langData = new SharedLangData(vc.langData,holderNode.getNode("huskydata","lang"));
         }
         //System.out.println(dispItem.get(Keys.DISPLAY_NAME));
         if(holderNode.getNode("huskydata","reward").getNode("overrideRewardName").isVirtual()){
@@ -127,6 +127,7 @@ public class CrateRewardHolderParser {
                     .quantity(itemRoot.getNode("count").getInt(1))
                     .add(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(itemRoot.getNode("name").getString()))
                     .build();
+
 
             if(!itemRoot.getNode("variant").isVirtual()) {
                 //if(Sponge.getRegistry().getType(TreeType.class,itemRoot.getNode("variant").getString()).isPresent()) {

@@ -94,11 +94,11 @@ public class CrateUtilities {
                 if(arm.getCreator().isPresent()){
                     if(arm.getCreator().get().equals(UUID.fromString(plugin.armorStandIdentifier))){
                         Location woot = arm.getLocation().copy().sub(PhysicalCrate.offset);
-
+                        arm.remove();
                         if(physicalCrates.containsKey(woot))
                             continue;
                         eep.add(woot);
-                        //arm.remove();
+
                     }
                 }
             }
@@ -124,7 +124,7 @@ public class CrateUtilities {
         }
         Scheduler scheduler = Sponge.getScheduler();
         Task.Builder taskBuilder = scheduler.createTaskBuilder();
-        runner = taskBuilder.execute(this::particleRunner).intervalTicks(1).async().submit(plugin);
+        runner = taskBuilder.execute(this::particleRunner).intervalTicks(1).submit(plugin);
     }
     public String getTypeFromLocation(Location<World> location) {
         if(!location.getTileEntity().isPresent()) {
@@ -147,16 +147,22 @@ public class CrateUtilities {
         }
 
     }
+    public boolean flag = false;
     private void particleRunner(){
-        boolean flag = false;
+        if(flag)
+            return;
         try {
             for (Location<World> b : physicalCrates.keySet()) {
                 PhysicalCrate c = physicalCrates.get(b);
-                if (c.vc.crateBlockType != c.location.getBlock().getType()) {
-                    c.as.remove();
-                    physicalCrates.remove(b);
-                    flag = true;
-                    continue;
+
+                if (c.vc.crateBlockType != c.location.getBlock().getType() && c.location.getExtent().isLoaded() && c.location.getExtent().getChunk(c.location.getChunkPosition()).isPresent()) {
+                    if(c.location.getExtent().getChunk(c.location.getChunkPosition()).get().isLoaded()) {
+                        HuskyCrates.instance.logger.warn("Removing crate that no longer exists! " + c.location.getPosition().toString());
+                        c.as.remove();
+                        physicalCrates.remove(b);
+                        flag = true;
+                        continue;
+                    }
                 }
                 c.runParticles();
             }
