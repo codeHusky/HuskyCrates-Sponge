@@ -66,17 +66,17 @@ public class SpinnerCrateView implements CrateView {
         }
         //offsetBase = (int)Math.floor(gg);
         double random = new Random().nextFloat()*vc.getMaxProb();
-        System.out.println(random + ":" + vc.getMaxProb());
+        //System.out.println(random + ":" + vc.getMaxProb());
         double cummProb = 0;
         for(int i = 0; i < items.size(); i++){
             cummProb += ((double)items.get(i)[0]);
             if(random <= cummProb && offset == null){
-                System.out.println(((CrateRewardHolder)items.get(i)[1]).getReward().getRewardName());
+                //System.out.println(((CrateRewardHolder)items.get(i)[1]).getReward().getRewardName());
                 offset = i;
                 clicks = -maxClicks + i;
-                System.out.println(clicks + " | " + offset);
-                System.out.println(clicks + maxClicks);
-                System.out.println(i);
+               // System.out.println(clicks + " | " + offset);
+                //System.out.println(clicks + maxClicks);
+                //System.out.println(i);
             }
 
         }
@@ -184,7 +184,7 @@ public class SpinnerCrateView implements CrateView {
                 if (giveToPlayer.getReward().getReward() instanceof String){
                     Sponge.getCommandManager().process(new CrateCommandSource(), giveToPlayer.getReward().getReward().toString().replace("%p", ourplr.getName()));
                 }else {
-                    System.out.println(giveToPlayer.getReward().treatAsSingle());
+                    //System.out.println(giveToPlayer.getReward().treatAsSingle());
 
                     ourplr.getInventory().offer((ItemStack) giveToPlayer.getReward().getReward());
                 }

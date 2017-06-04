@@ -203,7 +203,7 @@ public class HuskyCrates {
                             ee = node.getNode("location").getValue(TypeToken.of(Location.class));
                         }catch(InvalidDataException err2){
                             logger.warn("Bug sponge developers about world UUIDs!");
-                            ee = new Location<World>((World)Sponge.getServer().getWorlds().toArray()[0],node.getNode("location","x").getInt(),node.getNode("location","y").getInt(),node.getNode("location","z").getInt());
+                            ee = new Location<World>(Sponge.getServer().getWorld(node.getNode("location","WorldName").getString()).get(),node.getNode("location","x").getInt(),node.getNode("location","y").getInt(),node.getNode("location","z").getInt());
                         }
                         if(!crateUtilities.physicalCrates.containsKey(ee))
                             crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance));
