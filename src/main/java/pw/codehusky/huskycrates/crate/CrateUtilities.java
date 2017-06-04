@@ -56,7 +56,7 @@ public class CrateUtilities {
     public void generateVirtualCrates(ConfigurationLoader<CommentedConfigurationNode> config){
         toCheck = new ArrayList<>();
         physicalCrates = new HashMap<>();
-        System.out.println("GEN VC CALLED");
+        //System.out.println("GEN VC CALLED");
         try {
             CommentedConfigurationNode configRoot = config.load();
             crateTypes = new HashMap<>();

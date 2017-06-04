@@ -156,7 +156,7 @@ public class CrateRewardHolderParser {
                 item.offer(Keys.ITEM_ENCHANTMENTS, enchantments);
             }
             if(!itemRoot.getNode("damage").isVirtual()){
-                HuskyCrates.instance.logger.info("damage override called");
+                //HuskyCrates.instance.logger.info("damage override called");
                 item = ItemStack.builder()
                         .fromContainer(item.toContainer().set(DataQuery.of("UnsafeDamage"),itemRoot.getNode("damage").getInt(0))) //OVERRIDE DAMAGE VAL! :)
                         .build();
