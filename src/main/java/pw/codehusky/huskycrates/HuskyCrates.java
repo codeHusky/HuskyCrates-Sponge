@@ -291,7 +291,13 @@ public class HuskyCrates {
         try {
             root = crateConfig.load();
             for(CommentedConfigurationNode node : root.getNode("positions").getChildrenList()){
-                Location<World> ee = node.getNode("location").getValue(TypeToken.of(Location.class));
+                Location<World> ee;
+                try {
+                    ee = node.getNode("location").getValue(TypeToken.of(Location.class));
+                }catch(InvalidDataException err2){
+                    logger.warn("Bug sponge developers about world UUIDs!");
+                    ee = new Location<World>(Sponge.getServer().getWorld(node.getNode("location","WorldName").getString()).get(),node.getNode("location","X").getInt(),node.getNode("location","Y").getInt(),node.getNode("location","Z").getInt());
+                }
                 if(!crateUtilities.physicalCrates.containsKey(ee))
                     crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance));
             }
