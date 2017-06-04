@@ -247,7 +247,7 @@ public class VirtualCrate {
                 .add(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(displayName + " Key")).build();
         ArrayList<Text> itemLore = new ArrayList<>();
         itemLore.add(Text.of(TextColors.WHITE, "A key for a ", TextSerializers.FORMATTING_CODE.deserialize(displayName), TextColors.WHITE, "."));
-        itemLore.add(Text.of(TextColors.WHITE, "crate_" + id));
+        itemLore.add(Text.of(TextColors.DARK_GRAY, "HuskyCrates"));
         key.offer(Keys.ITEM_LORE, itemLore);
         if(keyDamage != null){
             return ItemStack.builder().fromContainer(key.toContainer().set(DataQuery.of("UnsafeDamage"),keyDamage).set(DataQuery.of("UnsafeData","crateID"),id)).build();
@@ -270,7 +270,11 @@ public class VirtualCrate {
         ItemStack stacky = ItemStack.builder()
                 .itemType(crateBlockItemType)
                 .quantity(quantity)
-                .add(Keys.DISPLAY_NAME, Text.of(HuskyCrates.instance.getHuskyCrateIdentifier() + id)).build();
+                .add(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(displayName)).build();
+        ArrayList<Text> itemLore = new ArrayList<>();
+        itemLore.add(Text.of(TextColors.WHITE, "A placeable ", TextSerializers.FORMATTING_CODE.deserialize(displayName), TextColors.WHITE, " crate."));
+        itemLore.add(Text.of(TextColors.DARK_GRAY, "HuskyCrates"));
+        stacky.offer(Keys.ITEM_LORE, itemLore);
         return ItemStack.builder().fromContainer(stacky.toContainer().set(DataQuery.of("UnsafeData","crateID"),id)).build();
     }
 
