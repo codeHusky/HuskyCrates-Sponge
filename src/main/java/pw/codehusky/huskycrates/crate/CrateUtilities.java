@@ -110,6 +110,8 @@ public class CrateUtilities {
             }
             String id = getTypeFromLocation(loco);
             if(id != null) {
+                if(physicalCrates.containsKey(loco))
+                    continue;
                 physicalCrates.put(loco, new PhysicalCrate(loco, id, plugin));
             }
         }

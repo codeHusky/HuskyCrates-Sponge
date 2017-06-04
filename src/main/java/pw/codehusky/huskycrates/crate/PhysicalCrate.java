@@ -53,8 +53,8 @@ public class PhysicalCrate {
                 }
             }
         }
-
-        if(as == null) {
+        //System.out.println(as);
+        if(as == null || !as.isLoaded()) {
             as = (ArmorStand)  location.getExtent().createEntity(EntityTypes.ARMOR_STAND,location.getPosition());
             as.setLocation(location.copy().add(offset));
             location.getExtent().spawnEntity(as,huskyCrates.genericCause);

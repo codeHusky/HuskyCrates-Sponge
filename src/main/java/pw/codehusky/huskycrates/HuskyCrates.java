@@ -15,6 +15,7 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.Entity;
@@ -53,10 +54,7 @@ import pw.codehusky.huskycrates.crate.VirtualCrate;
 import pw.codehusky.huskycrates.lang.SharedLangData;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -200,8 +198,15 @@ public class HuskyCrates {
                 try {
                     root = crateConfig.load();
                     for(CommentedConfigurationNode node : root.getNode("positions").getChildrenList()){
-                        Location<World> ee = node.getNode("location").getValue(TypeToken.of(Location.class));
-                        crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance));
+                        Location<World> ee;
+                        try {
+                            ee = node.getNode("location").getValue(TypeToken.of(Location.class));
+                        }catch(InvalidDataException err2){
+                            logger.warn("Bug sponge developers about world UUIDs!");
+                            ee = new Location<World>((World)Sponge.getServer().getWorlds().toArray()[0],node.getNode("location","x").getInt(),node.getNode("location","y").getInt(),node.getNode("location","z").getInt());
+                        }
+                        if(!crateUtilities.physicalCrates.containsKey(ee))
+                            crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance));
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -266,7 +271,8 @@ public class HuskyCrates {
             root = crateConfig.load();
             for(CommentedConfigurationNode node : root.getNode("positions").getChildrenList()){
                 Location<World> ee = node.getNode("location").getValue(TypeToken.of(Location.class));
-                crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance));
+                if(!crateUtilities.physicalCrates.containsKey(ee))
+                    crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -300,13 +306,17 @@ public class HuskyCrates {
                             Optional<Object> tt = plr.getItemInHand(HandTypes.MAIN_HAND).get().toContainer().get(DataQuery.of("UnsafeData", "crateID"));
                             if (tt.isPresent()) {
                                 String crateID = tt.get().toString();
-                                crateUtilities.physicalCrates.put(location, new PhysicalCrate(location, crateID, this));
+                                if(!crateUtilities.physicalCrates.containsKey(location))
+                                    crateUtilities.physicalCrates.put(location, new PhysicalCrate(location, crateID, this));
+
+                                crateUtilities.physicalCrates.get(location).createHologram();
                                 updatePhysicalCrates();
                             }
                         }
                     }else{
                         //break
                         if(crateUtilities.physicalCrates.containsKey(location)){
+                            crateUtilities.physicalCrates.get(location).as.remove();
                             crateUtilities.physicalCrates.remove(location);
                             updatePhysicalCrates();
                         }
@@ -323,11 +333,16 @@ public class HuskyCrates {
         try {
             CommentedConfigurationNode root = crateConfig.load();
             root.getNode("positions").setValue(null);
-            for(Location<World> e: crateUtilities.physicalCrates.keySet()) {
+            for(Object ob: ((HashMap)crateUtilities.physicalCrates.clone()).keySet()) {
+                Location<World> e = (Location<World>)ob;
                 CommentedConfigurationNode node = root.getNode("positions").getAppendedNode();
                 node.getNode("location").setValue(TypeToken.of(Location.class),e);
                 //System.out.println("echo");
-                node.getNode("crateID").setValue(crateUtilities.physicalCrates.get(e).vc.id);
+                try {
+                    node.getNode("crateID").setValue(crateUtilities.physicalCrates.get(e).vc.id);
+                }catch(NullPointerException err){
+                    logger.warn("Invalid crate at (" + e.getPosition().getFloorX() + ", " + e.getPosition().getFloorY() + ", " + e.getPosition().getFloorZ() + ")!");
+                }
             }
             crateConfig.save(root);
         } catch (IOException e) {
@@ -342,6 +357,7 @@ public class HuskyCrates {
 
     @Listener
     public void crateInteract(InteractBlockEvent.Secondary.MainHand event){
+        //System.out.println(crateUtilities.physicalCrates.keySet());
         /*Player pp = (Player) event.getCause().root();
 
         ItemStack ss = pp.getItemInHand(HandTypes.MAIN_HAND).get();
@@ -357,6 +373,7 @@ public class HuskyCrates {
             if(crateUtilities.physicalCrates.containsKey(blk)){
                 String crateType = crateUtilities.physicalCrates.get(blk).vc.id;
                 VirtualCrate vc = crateUtilities.getVirtualCrate(crateType);
+                crateUtilities.physicalCrates.get(blk).createHologram();
                 if(vc.crateBlockType == blk.getBlockType()){
                     event.setCancelled(true);
                 }else{
