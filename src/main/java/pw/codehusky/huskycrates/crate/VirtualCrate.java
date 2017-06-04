@@ -250,9 +250,10 @@ public class VirtualCrate {
         itemLore.add(Text.of(TextColors.DARK_GRAY, "HuskyCrates"));
         key.offer(Keys.ITEM_LORE, itemLore);
         if(keyDamage != null){
-            return ItemStack.builder().fromContainer(key.toContainer().set(DataQuery.of("UnsafeDamage"),keyDamage).set(DataQuery.of("UnsafeData","crateID"),id)).build();
+            key = ItemStack.builder().fromContainer(key.toContainer().set(DataQuery.of("UnsafeDamage"),keyDamage)).build();
         }
-        return key;
+
+        return ItemStack.builder().fromContainer(key.toContainer().set(DataQuery.of("UnsafeData","crateID"),id)).build();//
 
     }
 

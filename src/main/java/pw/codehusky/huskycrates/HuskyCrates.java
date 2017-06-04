@@ -15,7 +15,6 @@ import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.Entity;
@@ -54,7 +53,10 @@ import pw.codehusky.huskycrates.crate.VirtualCrate;
 import pw.codehusky.huskycrates.lang.SharedLangData;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -218,7 +220,7 @@ public class HuskyCrates {
                 logger.info("Done populating physical crates.");
                 logger.info("Initalization complete.");
             }
-        }).delayTicks(1).async().submit(this);
+        }).delayTicks(1).submit(this);
     }
 
     @Listener(order = Order.POST)
@@ -363,30 +365,29 @@ public class HuskyCrates {
                 //crateUtilities.recognizeChest(te.getLocation());
                 if(plr.getItemInHand(HandTypes.MAIN_HAND).isPresent()) {
                     ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
-                    if(inhand.getItem() == vc.getKeyType() && inhand.get(Keys.ITEM_LORE).isPresent()) {
-                        List<Text> lore = inhand.get(Keys.ITEM_LORE).get();
-                        if(lore.size() > 1) {
-                            String idline = lore.get(1).toPlain();
-                            if(idline.contains("crate_")) {
-                                if(idline.replace("crate_","").equalsIgnoreCase(crateType)) {
-                                    if(!plr.hasPermission("huskycrates.tester")){
-                                        if(inhand.getQuantity() == 1)
-                                            plr.setItemInHand(HandTypes.MAIN_HAND,null);
-                                        else{
-                                            ItemStack tobe = inhand.copy();
-                                            tobe.setQuantity(tobe.getQuantity()-1);
-                                            plr.setItemInHand(HandTypes.MAIN_HAND,tobe);
-                                        }
-                                    }
-                                    Task.Builder upcoming = scheduler.createTaskBuilder();
+                    if(inhand.getItem() == vc.getKeyType()) {
 
-                                    upcoming.execute(() -> {
-                                        crateUtilities.launchCrateForPlayer(crateType, plr, this);
-                                    }).delayTicks(1).submit(this);
-                                    return;
+                        if(inhand.toContainer().get(DataQuery.of("UnsafeData","crateID")).isPresent()) {
+                            String id = inhand.toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString();
+                            if (id.equals(crateType)) {
+                                if (!plr.hasPermission("huskycrates.tester")) {
+                                    if (inhand.getQuantity() == 1)
+                                        plr.setItemInHand(HandTypes.MAIN_HAND, null);
+                                    else {
+                                        ItemStack tobe = inhand.copy();
+                                        tobe.setQuantity(tobe.getQuantity() - 1);
+                                        plr.setItemInHand(HandTypes.MAIN_HAND, tobe);
+                                    }
                                 }
+                                Task.Builder upcoming = scheduler.createTaskBuilder();
+
+                                upcoming.execute(() -> {
+                                    crateUtilities.launchCrateForPlayer(crateType, plr, this);
+                                }).delayTicks(1).submit(this);
+                                return;
                             }
                         }
+
                     }
 
                 }
