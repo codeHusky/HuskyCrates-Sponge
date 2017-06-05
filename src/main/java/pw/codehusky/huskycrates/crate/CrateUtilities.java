@@ -14,7 +14,6 @@ import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.extent.Extent;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.views.NullCrateView;
 
@@ -35,16 +34,12 @@ public class CrateUtilities {
         this.plugin = plugin;
     }
     public void launchCrateForPlayer(String crateType, Player target,HuskyCrates plugin){
-        crateType = crateType.toLowerCase();
         if(!crateTypes.containsKey(crateType)) {
             System.out.println(crateType);
             target.openInventory(new NullCrateView(plugin,target,null).getInventory(), plugin.genericCause);
         }else{
             target.openInventory(crateTypes.get(crateType).generateViewForCrate(plugin, target).getInventory(), plugin.genericCause);
         }
-    }
-    public ItemStack getCrateItemStack(String crateType){
-        return null;
     }
     public VirtualCrate getVirtualCrate(String id){
         if(crateTypes.containsKey(id)){
@@ -86,24 +81,6 @@ public class CrateUtilities {
         hasInitalizedVirtualCrates = true;
     }
     private Task runner = null;
-    public void populatePhysicalCrates(Extent bit) {
-        //ArrayList<Location<World>> eep = new ArrayList<>();
-
-
-        /*for(Location<World> loco : eep){
-            if(!bit.containsBlock(loco.getBlockPosition())) {
-                return;
-            }
-            String id = getTypeFromLocation(loco);
-            if(id != null) {
-                if(physicalCrates.containsKey(loco))
-                    continue;
-                physicalCrates.put(loco, new PhysicalCrate(loco, id, plugin));
-            }
-        }*/
-        //
-        //HuskyCrates.instance.updatePhysicalCrates();
-    }
     public void startParticleEffects(){
         if(runner != null){
             runner.cancel();

@@ -44,6 +44,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
@@ -199,14 +200,33 @@ public class HuskyCrates {
         Sponge.getScheduler().createTaskBuilder().execute(new Consumer<Task>() {
             @Override
             public void accept(Task task) {
+                logger.info("Deleting existing armor stands...");
+                for(World bit: Sponge.getServer().getWorlds()) {
+                    for (Entity ent : bit.getEntities()) {
+                        if (ent instanceof ArmorStand) {
+                            ArmorStand arm = (ArmorStand) ent;
+                            if (arm.getCreator().isPresent()) {
+                                if (arm.getCreator().get().equals(UUID.fromString(armorStandIdentifier))) {
+                                    arm.remove();
+                                }
+                            }
+                        }
+                    }
+                }
                 logger.info("Initalizing config...");
                 if(!crateUtilities.hasInitalizedVirtualCrates){
                     crateUtilities.generateVirtualCrates(crateConfig);
                 }
+                crateUtilities.hasInitalizedVirtualCrates = true; // doublecheck
+                logger.info("Done initalizing config.");
+                logger.info("Populating physical crates...");
                 CommentedConfigurationNode root = null;
                 try {
                     root = crateConfig.load();
+                    double max = root.getNode("positions").getChildrenList().size();
+                    double count = 0;
                     for(CommentedConfigurationNode node : root.getNode("positions").getChildrenList()){
+                        count++;
                         Location<World> ee;
                         try {
                             ee = node.getNode("location").getValue(TypeToken.of(Location.class));
@@ -216,20 +236,12 @@ public class HuskyCrates {
                         }
                         if(!crateUtilities.physicalCrates.containsKey(ee))
                             crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance));
+                        logger.info("PROGRESS: "  + Math.round((count/max)*100) + "%");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (ObjectMappingException e) {
                     e.printStackTrace();
-                }
-                crateUtilities.hasInitalizedVirtualCrates = true; // doublecheck
-                logger.info("Done initalizing config.");
-                logger.info("Populating physical crates...");
-                double count = 0;
-                for(Extent e : pendingExtents){
-                    count++;
-                    crateUtilities.populatePhysicalCrates(e);
-                    logger.info("Progress: " + Math.round((count / pendingExtents.size())*100)+ "%");
                 }
                 crateUtilities.startParticleEffects();
                 logger.info("Done populating physical crates.");
@@ -240,25 +252,31 @@ public class HuskyCrates {
 
     @Listener(order = Order.POST)
     public void chunkLoad(LoadChunkEvent event){
-
-            for (Entity e : event.getTargetChunk().getEntities()) {
-                if (e instanceof ArmorStand) {
-                    if(crateUtilities.hasInitalizedVirtualCrates) {
-                        crateUtilities.populatePhysicalCrates(event.getTargetChunk());
-                    }else{
-                        pendingExtents.add(event.getTargetChunk());
+        Chunk bit = event.getTargetChunk();
+        for (Entity ent : bit.getEntities()) {
+            if (ent instanceof ArmorStand) {
+                ArmorStand arm = (ArmorStand) ent;
+                if (arm.getCreator().isPresent()) {
+                    if (arm.getCreator().get().equals(UUID.fromString(armorStandIdentifier))) {
+                        arm.remove();
                     }
-                    return;
                 }
             }
+        }
     }
 
     @Listener(order = Order.POST)
     public void worldLoaded(LoadWorldEvent event){
-        if(crateUtilities.hasInitalizedVirtualCrates) {
-            crateUtilities.populatePhysicalCrates(event.getTargetWorld());
-        }else{
-            pendingExtents.add(event.getTargetWorld());
+        World bit = event.getTargetWorld();
+        for (Entity ent : bit.getEntities()) {
+            if (ent instanceof ArmorStand) {
+                ArmorStand arm = (ArmorStand) ent;
+                if (arm.getCreator().isPresent()) {
+                    if (arm.getCreator().get().equals(UUID.fromString(armorStandIdentifier))) {
+                        arm.remove();
+                    }
+                }
+            }
         }
     }
     @Listener
