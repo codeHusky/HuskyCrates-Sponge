@@ -23,6 +23,7 @@ import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolderParser;
 import pw.codehusky.huskycrates.crate.views.CrateView;
 import pw.codehusky.huskycrates.crate.views.NullCrateView;
+import pw.codehusky.huskycrates.crate.views.RouletteCrateView;
 import pw.codehusky.huskycrates.crate.views.SpinnerCrateView;
 import pw.codehusky.huskycrates.lang.SharedLangData;
 
@@ -228,6 +229,8 @@ public class VirtualCrate {
     public CrateView generateViewForCrate(HuskyCrates plugin,Player plr){
         if(crateType.equalsIgnoreCase("spinner")){
             return new SpinnerCrateView(plugin,plr,this);
+        }else if(crateType.equalsIgnoreCase("roulette")){
+            return  new RouletteCrateView(plugin,plr,this);
         }
         return new NullCrateView(plugin,plr,this);
     }

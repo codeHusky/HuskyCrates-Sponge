@@ -18,7 +18,7 @@ import java.util.Random;
 /**
  * Created by lokio on 12/29/2016.
  */
-public class TemplateCrateView implements CrateView {
+public class TemplateCrateView extends CrateView {
     private HuskyCrates plugin;
     private VirtualCrate vc;
     private ArrayList<Object[]> items;

@@ -18,19 +18,17 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
-import pw.codehusky.huskycrates.crate.CrateCommandSource;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 /**
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-public class SpinnerCrateView implements CrateView {
+public class SpinnerCrateView extends CrateView {
     private HuskyCrates plugin;
 
     Integer offset = null;
@@ -43,6 +41,7 @@ public class SpinnerCrateView implements CrateView {
     private int clicks = 0;
     private double dampening = 1.05;
     private int maxClicks = 45; // maximum times the spinner "clicks" in one spin
+    private int planned = -1;
     public SpinnerCrateView(HuskyCrates plugin, Player runner, VirtualCrate virtualCrate){
         this.vc = virtualCrate;
         ourplr = runner;
@@ -66,20 +65,23 @@ public class SpinnerCrateView implements CrateView {
         }
         //offsetBase = (int)Math.floor(gg);
         double random = new Random().nextFloat()*vc.getMaxProb();
-        //System.out.println(random + ":" + vc.getMaxProb());
+        //System.out.println("clicks: " +maxClicks);
+        //System.out.println("item count: " +items.size());
+
         double cummProb = 0;
         for(int i = 0; i < items.size(); i++){
             cummProb += ((double)items.get(i)[0]);
             if(random <= cummProb && offset == null){
-                //System.out.println(((CrateRewardHolder)items.get(i)[1]).getReward().getRewardName());
-                offset = i;
-                clicks = -maxClicks + i;
-               // System.out.println(clicks + " | " + offset);
-                //System.out.println(clicks + maxClicks);
-                //System.out.println(i);
+                offset =  i - (maxClicks % items.size());
+                clicks = offset;
+                planned = i;
+                //System.out.println(((CrateRewardHolder)items.get(i)[1]).getDisplayItem().getQuantity());
+                //System.out.println("goal: " + i);
+                //System.out.println("offset:" + offset);
             }
 
         }
+        //System.out.println("calc target: " + ((offset + maxClicks) % items.size()));
         if(offset == null){
             System.out.println("--------------------------------");
             System.out.println("--------------------------------");
@@ -110,13 +112,15 @@ public class SpinnerCrateView implements CrateView {
         int slotnum = 0;
         for(Inventory e : disp.slots()){
             if(state == 0 && (slotnum == 4 || slotnum == 22 )){
+
                 e.set(selector);
             }else if(slotnum > 9 && slotnum < 17 && state != 2){
                 //int itemNum = items.size() - 1 - Math.abs(((slotnum - 10) + (clicks)) % items.size());
-                int itemNum = Math.abs((clicks + (slotnum-9) - 3) % items.size());
-                //System.out.println(itemNum);
+
+                int itemNum = Math.abs(clicks + (slotnum - 9) - 4 ) % items.size();
                 e.set(((CrateRewardHolder)items.get(itemNum)[1]).getDisplayItem());
                 if(slotnum == 13) {
+                    //System.out.println(itemNum);
                     giveToPlayer = (CrateRewardHolder)items.get(itemNum)[1];
                 }
             }else if(slotnum != 13){
@@ -126,6 +130,11 @@ public class SpinnerCrateView implements CrateView {
                     e.set(border);
                 }
             }else if(slotnum == 13 && state == 2){
+                int itemNum = Math.abs(clicks + (slotnum - 9) - 4) % items.size();
+                /*HuskyCrates.instance.logger.warn("result: " + (itemNum + 1));
+                HuskyCrates.instance.logger.warn("fail: " + (planned != itemNum));
+                HuskyCrates.instance.logger.warn("difference: " + (planned - itemNum));*/
+                giveToPlayer = (CrateRewardHolder)items.get(itemNum)[1];
                 e.set(giveToPlayer.getDisplayItem());
             }
             slotnum++;
@@ -135,7 +144,7 @@ public class SpinnerCrateView implements CrateView {
         }
     }
     private ItemStack confettiBorder(){
-        DyeColor[] colors = {DyeColors.BLUE,DyeColors.CYAN,DyeColors.GREEN,DyeColors.LIGHT_BLUE,DyeColors.LIME,DyeColors.MAGENTA,DyeColors.ORANGE,DyeColors.PINK,DyeColors.PURPLE,DyeColors.RED,DyeColors.YELLOW};
+        DyeColor[] colors = {DyeColors.BLUE,DyeColors.CYAN,DyeColors.LIGHT_BLUE,DyeColors.LIME,DyeColors.MAGENTA,DyeColors.ORANGE,DyeColors.PINK,DyeColors.PURPLE,DyeColors.RED,DyeColors.YELLOW};
         ItemStack g =ItemStack.builder()
                 .itemType(ItemTypes.STAINED_GLASS_PANE)
                 .add(Keys.DYE_COLOR,colors[(int)Math.floor(Math.random() * colors.length)])
@@ -155,7 +164,7 @@ public class SpinnerCrateView implements CrateView {
         //int revolutions = (int) Math.floor(clicks / items.size());
         //once clicks is greater than offset we stop the spinner
         if (waitCurrent == Math.round(updateMax) &&
-                clicks < offset &&
+                trueclicks < maxClicks &&
                 tickerState == 0) {
             //System.out.println(clicks + " : " + offset);
 
@@ -167,10 +176,9 @@ public class SpinnerCrateView implements CrateView {
             trueclicks++;
             //HuskyCrates.instance.logger.info(maxClicks + " : " + trueclicks);
 
-        }else if(clicks
+        }else if(trueclicks
                 >=
-                offset &&
-                updateMax != 100 &&
+                maxClicks &&
                 tickerState == 0){
             ourplr.openInventory(disp,plugin.genericCause);
             tickerState = 1;
@@ -181,43 +189,14 @@ public class SpinnerCrateView implements CrateView {
             if (waitCurrent == Math.round(updateMax)) {
                 updater.cancel();
                 ourplr.closeInventory(plugin.genericCause);
-                if (giveToPlayer.getReward().getReward() instanceof String){
-                    Sponge.getCommandManager().process(new CrateCommandSource(), giveToPlayer.getReward().getReward().toString().replace("%p", ourplr.getName()));
-                }else {
-                    //System.out.println(giveToPlayer.getReward().treatAsSingle());
-
-                    ourplr.getInventory().offer((ItemStack) giveToPlayer.getReward().getReward());
-                }
-                boolean mult = false;
-                if (!giveToPlayer.getReward().treatAsSingle() &&  giveToPlayer.getReward().getReward() instanceof ItemStack) {
-                    if(((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() > 1) {
-                        /*ourplr.sendMessage(Text.of("You won ", TextColors.YELLOW,
-                                ((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() + " ",
-                                TextSerializers.FORMATTING_CODE.deserialize(giveToPlayer.getReward().getRewardName()), TextColors.RESET, " from a ",
-                                TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));*/
-                        ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                                vc.langData.formatter(vc.langData.prefix + vc.langData.rewardMessage,((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() + "",ourplr,vc,giveToPlayer)
-                        ));
-                        mult = true;
-                    }
-                }
-                if(!mult){
-                    String[] vowels = {"a", "e", "i", "o", "u"};
-                    if (Arrays.asList(vowels).contains(giveToPlayer.getReward().getRewardName().substring(0, 1).toLowerCase())) {
-                        ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                                vc.langData.formatter(vc.langData.prefix + vc.langData.rewardMessage,"an",ourplr,vc,giveToPlayer)
-                        ));
-                    } else {
-                        ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                                vc.langData.formatter(vc.langData.prefix + vc.langData.rewardMessage,"a",ourplr,vc,giveToPlayer)
-                        ));
-                    }
-                }
+                handleReward(giveToPlayer,ourplr,vc);
                 ourplr.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP,ourplr.getLocation().getPosition(),1);
 
             }else if(waitCurrent % 5 == 0){
                 updateInv(2);
             }
+        }else{
+            //System.out.println(clicks);
         }
 
     }
