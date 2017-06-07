@@ -127,7 +127,7 @@ public class CrateRewardHolderParser {
     private static ItemStack itemFromNode(ConfigurationNode itemRoot){
         try {
 
-            if(itemRoot.getNode("id").isVirtual() || itemRoot.getNode("huskydata").isVirtual()){
+            if(itemRoot.getNode("id").isVirtual() ){
                 HuskyCrates.instance.logger.error("CHECK ITEM: " + itemRoot.getNode("name").getString("(no name)") + " (item #" + itemRoot.getKey()+  ") || " + itemRoot.getParent().getParent().getKey());
                 return ItemStack.empty();
             }
