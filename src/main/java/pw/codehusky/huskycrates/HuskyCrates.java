@@ -63,7 +63,7 @@ import java.util.function.Consumer;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.2.3", description = "A CratesReloaded Replacement for Sponge? lol")
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.3.0", description = "A CratesReloaded Replacement for Sponge? lol")
 public class HuskyCrates {
     //@Inject
     public Logger logger;
@@ -84,9 +84,24 @@ public class HuskyCrates {
     public static HuskyCrates instance;
     public SharedLangData langData = new SharedLangData();
     public Set<BlockType> validCrateBlocks = new HashSet<>();
+    private boolean forceStop = false;
     @Listener
     public void gameInit(GamePreInitializationEvent event){
         logger = LoggerFactory.getLogger(pC.getName());
+        for(PluginContainer pc: Sponge.getPluginManager().getPlugins()){
+            if(pc.getId().equalsIgnoreCase("inventorytweaks")){
+                logger.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                logger.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                logger.error(pc.getName() + " is loaded! This plugin or mod is on a blacklist for HuskyCrates, and as a result, HuskyCrates is not starting. ");
+                logger.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                logger.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                forceStop = true;
+
+            }
+        }
+        if(forceStop)
+            return;
+
         CommentedConfigurationNode conf = null;
         try {
             conf = crateConfig.load();
@@ -103,11 +118,15 @@ public class HuskyCrates {
 
         logger.info("Let's not init VCrates here anymore. ://)");
         instance = this;
+
     }
     @Listener
     public void gameStarted(GameStartedServerEvent event){
 
-
+        if(forceStop) {
+            logger.error("Since a blacklisted mod is loaded, HuskyCrates will not start. Please check higher in your logs for the reasoning.");
+            return;
+        }
 
         CommandSpec key = CommandSpec.builder()
                 .description(Text.of("Get a key for a specified crate."))
@@ -196,7 +215,10 @@ public class HuskyCrates {
                 }
             }
         }).submit(this);
-
+        if(forceStop) {
+            //logger.error("Since a blacklisted mod is loaded, HuskyCrates will not start. Please check higher in your logs for the reasoning.");
+            return;
+        }
         Sponge.getScheduler().createTaskBuilder().execute(new Consumer<Task>() {
             @Override
             public void accept(Task task) {
@@ -252,6 +274,9 @@ public class HuskyCrates {
 
     @Listener(order = Order.POST)
     public void chunkLoad(LoadChunkEvent event){
+        if(forceStop) {
+            return;
+        }
         Chunk bit = event.getTargetChunk();
         for (Entity ent : bit.getEntities()) {
             if (ent instanceof ArmorStand) {
@@ -264,9 +289,11 @@ public class HuskyCrates {
             }
         }
     }
-
     @Listener(order = Order.POST)
     public void worldLoaded(LoadWorldEvent event){
+        if(forceStop) {
+            return;
+        }
         World bit = event.getTargetWorld();
         for (Entity ent : bit.getEntities()) {
             if (ent instanceof ArmorStand) {
@@ -281,6 +308,9 @@ public class HuskyCrates {
     }
     @Listener
     public void gameReloaded(GameReloadEvent event){
+        if(forceStop) {
+            return;
+        }
         for(World bit: Sponge.getServer().getWorlds()) {
             for (Entity ent : bit.getEntities()) {
                 if (ent instanceof ArmorStand) {
@@ -336,6 +366,9 @@ public class HuskyCrates {
 
     @Listener
     public void placeBlock(ChangeBlockEvent event){
+        if(forceStop) {
+            return;
+        }
         if(event.getCause().root() instanceof Player) {
             Player plr = (Player) event.getCause().root();
             if (event instanceof ChangeBlockEvent.Place || event instanceof ChangeBlockEvent.Break) {
@@ -415,6 +448,9 @@ public class HuskyCrates {
 
     @Listener
     public void crateInteract(InteractBlockEvent.Secondary.MainHand event){
+        if(forceStop) {
+            return;
+        }
         //System.out.println(crateUtilities.physicalCrates.keySet());
         //Player pp = (Player) event.getCause().root();
 
@@ -484,12 +520,18 @@ public class HuskyCrates {
     }
     @Listener
     public void entityMove(MoveEntityEvent event){
+        if(forceStop) {
+            return;
+        }
         if(crateUtilities.physicalCrates.containsKey(event.getFromTransform().getLocation())){
             event.setCancelled(true);
         }
     }
     @Listener
     public void entityInteract(InteractEntityEvent.Secondary.MainHand event){
+        if(forceStop) {
+            return;
+        }
         //event.getTargetEntity().(event.getTargetEntity().toContainer().set(DataQuery.of("UnsafeData","crateID"),"blap"));
         //event.getTargetEntity().()
         //System.out.println(event.getTargetEntity().toContainer().get(DataQuery.of("UnsafeData","crateID")));

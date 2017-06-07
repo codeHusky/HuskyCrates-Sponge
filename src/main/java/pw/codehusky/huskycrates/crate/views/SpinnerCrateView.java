@@ -6,7 +6,7 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
@@ -91,8 +91,12 @@ public class SpinnerCrateView extends CrateView {
         }
         disp = Inventory.builder()
                 .of(InventoryArchetypes.CHEST)
-                .listener(ClickInventoryEvent.class,evt ->
-                        evt.setCancelled(true))
+                .listener(InteractInventoryEvent.class, evt ->{
+                    if(!(evt instanceof InteractInventoryEvent.Open) && !(evt instanceof  InteractInventoryEvent.Close)){
+                        evt.setCancelled(true);
+                    }
+                    //System.out.println(evt.getClass());
+                })
                 .property(InventoryTitle.PROPERTY_NAME,InventoryTitle.of(TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName)))
                 .build(plugin);
         updateInv(0);

@@ -6,7 +6,7 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
@@ -47,12 +47,14 @@ public class RouletteCrateView extends CrateView {
         items = vc.getItemSet();
         disp = Inventory.builder()
                 .of(InventoryArchetypes.DISPENSER)
-                .listener(ClickInventoryEvent.class, evt ->{
+                .listener(InteractInventoryEvent.class, evt ->{
+                    if(!(evt instanceof InteractInventoryEvent.Open) && !(evt instanceof  InteractInventoryEvent.Close)){
                         evt.setCancelled(true);
-                        if(!stopped){
-                            target.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH,target.getLocation().getPosition(),1);
-                        }
-                        stopped = true;
+                    }
+                    if(!stopped){
+                        target.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH,target.getLocation().getPosition(),1);
+                    }
+                    stopped = true;
                 })
                 .property(InventoryTitle.PROPERTY_NAME,InventoryTitle.of(TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName)))
                 .build(plugin);
