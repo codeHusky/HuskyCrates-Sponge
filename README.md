@@ -9,4 +9,4 @@ A simple, straightforward crate system for Sponge!
 For all your needs of config building, permissions, and commands.
 
 # [HuskyCrates ConfigConverter](https://github.com/codeHusky/HuskyCrates-ConfigConverter/releases)
-All 0.x.x configs must be converted to be used in 1.x.x+ using this converter, there is no built in converter with HuskyCrates anymore.
+All 0.x.x configs must be converted to be used in 0.10.x+ using this converter, there is no built in converter with HuskyCrates anymore.
