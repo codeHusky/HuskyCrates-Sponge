@@ -153,41 +153,12 @@ public class VirtualCrate {
             CrateRewardHolder rewardHolder = null;
 //            System.out.println(e.getNode("formatversion").getValue());
             if(e.getNode("formatversion").isVirtual()){
-               // System.out.println("??");
-                System.out.println("------------------------------------------------");
-                System.out.println("Starting conversion on crate " + id + " item #" + (((int)e.getKey())+1));
-                //Old, deprecated format. Convert!!
-                String name = e.getNode("name").getString("");
-                String itemID = e.getNode("id").getString("").toUpperCase();
-                int amount = e.getNode("amount").getInt(1);
-                ItemStack ourChild = null;
-                try {
-                    ourChild = ItemStack.builder()
-                            .itemType(e.getNode("id").getValue(TypeToken.of(ItemType.class)))
-                            .quantity(amount)
-                            .build();
-                } catch (ObjectMappingException e1) {
-                    e1.printStackTrace();
-                }
-                if (name.length() > 0)
-                    ourChild.offer(Keys.DISPLAY_NAME, TextSerializers.LEGACY_FORMATTING_CODE.deserialize(name));
-                //ed.addElement()
-                String lore = e.getNode("lore").getString("");
-                ArrayList<Text> bb = new ArrayList<>();
-                if (lore.length() > 0) {
-                    bb.add(TextSerializers.LEGACY_FORMATTING_CODE.deserialize(lore));
-                }
-
-                ourChild.offer(Keys.ITEM_LORE, bb);
-                ourChild.offer(Keys.HIDE_ENCHANTMENTS, true);
-                String potentialCommand = e.getNode("command").getString("");
-                float chance = e.getNode("chance").getFloat(1);
-                e.setValue(CrateRewardHolderParser.toConfig(CrateRewardHolderParser.v0_to_v1(ourChild,potentialCommand,chance)));
-                e.getNode("formatversion").setValue(1);
-                System.out.println("Finished conversion on crate " + id + " item #" + (((int)e.getKey())+1));
+               HuskyCrates.instance.logger.error("Out of date item in " + id + "! Please update your config with HuskyCrates Config Updater!");
+               continue;
             }
             rewardHolder = CrateRewardHolderParser.fromConfig(e,this);
-
+            if(rewardHolder == null)
+                continue;
 
             Object[] t = {rewardHolder.getChance(), rewardHolder};
             currentProb += rewardHolder.getChance();

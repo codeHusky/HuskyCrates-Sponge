@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.config.DefaultConfig;
@@ -310,6 +311,10 @@ public class HuskyCrates {
     public void gameReloaded(GameReloadEvent event){
         if(forceStop) {
             return;
+        }
+        if(event.getCause().root() instanceof CommandSource){
+            CommandSource cs = (CommandSource) event.getCause().root();
+            cs.sendMessage(Text.of(TextColors.GOLD,"HuskyCrates",TextColors.WHITE,":",TextColors.YELLOW," Please check console to verify that any config modifications you've done are valid."));
         }
         for(World bit: Sponge.getServer().getWorlds()) {
             for (Entity ent : bit.getEntities()) {

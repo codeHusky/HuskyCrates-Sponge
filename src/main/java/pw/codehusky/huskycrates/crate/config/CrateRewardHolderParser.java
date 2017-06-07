@@ -26,6 +26,10 @@ import java.util.List;
 
 public class CrateRewardHolderParser {
     public static CrateRewardHolder fromConfig(ConfigurationNode holderNode, VirtualCrate vc){
+        if(holderNode.getNode("id").isVirtual() || holderNode.getNode("huskydata").isVirtual()){
+            HuskyCrates.instance.logger.error("CHECK ITEM: " + holderNode.getNode("name").getString("(no name)") + " (item #" + holderNode.getKey()+  ") || " + holderNode.getParent().getParent().getKey());
+            return null;
+        }
         ItemStack dispItem = itemFromNode(holderNode);
         CrateReward reward = new CrateReward(null,"CODE ERROR, CONTACT DEVELOPER",false);
         boolean dispAwardSimilar = false;
@@ -67,7 +71,7 @@ public class CrateRewardHolderParser {
         }else if(holderNode.getNode("huskydata","reward","type").getString().equalsIgnoreCase("command")){
             reward = new CrateReward(holderNode.getNode("huskydata","reward","command").getString("/say You didn't set a command or something..."),name,single);
         }else{
-            System.out.println("?! Invalid Reward Type !? " + holderNode.getNode("huskydata","reward","type").getString());
+            HuskyCrates.instance.logger.error("CHECK REWARD TYPE: " + holderNode.getNode("huskydata","reward","type").getString() +"@" + holderNode.getNode("name").getString("(no name)") + " (item #" + holderNode.getKey() + ") || "+ holderNode.getParent().getParent().getKey());
         }
 
         return new CrateRewardHolder(dispItem,reward,holderNode.getNode("huskydata","weight").getDouble(1),dispAwardSimilar,langData);
@@ -122,13 +126,27 @@ public class CrateRewardHolderParser {
     }
     private static ItemStack itemFromNode(ConfigurationNode itemRoot){
         try {
+
+            if(itemRoot.getNode("id").isVirtual() || itemRoot.getNode("huskydata").isVirtual()){
+                HuskyCrates.instance.logger.error("CHECK ITEM: " + itemRoot.getNode("name").getString("(no name)") + " (item #" + itemRoot.getKey()+  ") || " + itemRoot.getParent().getParent().getKey());
+                return ItemStack.empty();
+            }
+            ItemType type;
+            try {
+                type = itemRoot.getNode("id").getValue(TypeToken.of(ItemType.class));
+            }catch(ObjectMappingException e){
+                HuskyCrates.instance.logger.error("CHECK ITEM ID: " + itemRoot.getNode("name").getString("(no name)") + " (item #" + itemRoot.getKey()+  ") || " + itemRoot.getParent().getParent().getKey());
+                return ItemStack.empty();
+            }
             ItemStack item = ItemStack.builder()
-                    .itemType(itemRoot.getNode("id").getValue(TypeToken.of(ItemType.class)))
+                    .itemType(type)
                     .quantity(itemRoot.getNode("count").getInt(1))
-                    .add(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(itemRoot.getNode("name").getString()))
+                    //.add())
                     .build();
 
-
+            if(!itemRoot.getNode("name").isVirtual()){
+                item.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(itemRoot.getNode("name").getString()));
+            }
             if(!itemRoot.getNode("variant").isVirtual()) {
                 //if(Sponge.getRegistry().getType(TreeType.class,itemRoot.getNode("variant").getString()).isPresent()) {
                 //System.out.println(item.offer(Keys.TREE_TYPE,getTreeType(itemRoot.getNode("variant").getString("oak"))));
