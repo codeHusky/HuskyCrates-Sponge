@@ -31,11 +31,10 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
-import org.spongepowered.api.event.world.LoadWorldEvent;
-import org.spongepowered.api.event.world.chunk.LoadChunkEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
@@ -45,7 +44,6 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
@@ -273,36 +271,15 @@ public class HuskyCrates {
         }).delayTicks(1).submit(this);
     }
 
-    @Listener(order = Order.POST)
-    public void chunkLoad(LoadChunkEvent event){
-        if(forceStop) {
-            return;
-        }
-        Chunk bit = event.getTargetChunk();
-        for (Entity ent : bit.getEntities()) {
-            if (ent instanceof ArmorStand) {
-                ArmorStand arm = (ArmorStand) ent;
-                if (arm.getCreator().isPresent()) {
-                    if (arm.getCreator().get().equals(UUID.fromString(armorStandIdentifier))) {
-                        arm.remove();
-                    }
-                }
-            }
-        }
-    }
-    @Listener(order = Order.POST)
-    public void worldLoaded(LoadWorldEvent event){
-        if(forceStop) {
-            return;
-        }
-        World bit = event.getTargetWorld();
-        for (Entity ent : bit.getEntities()) {
-            if (ent instanceof ArmorStand) {
-                ArmorStand arm = (ArmorStand) ent;
-                if (arm.getCreator().isPresent()) {
-                    if (arm.getCreator().get().equals(UUID.fromString(armorStandIdentifier))) {
-                        arm.remove();
-                    }
+    @Listener
+    public void onArmorStand(SpawnEntityEvent.ChunkLoad event){
+        for(Entity e : event.getEntities()){
+            if(!(e instanceof ArmorStand))
+                continue;
+            ArmorStand as = (ArmorStand) e;
+            if (as.getCreator().isPresent()) {
+                if (as.getCreator().get().equals(UUID.fromString(armorStandIdentifier))) {
+                    as.remove();
                 }
             }
         }
@@ -310,6 +287,10 @@ public class HuskyCrates {
     @Listener
     public void gameReloaded(GameReloadEvent event){
         if(forceStop) {
+            if(event.getCause().root() instanceof CommandSource){
+                CommandSource cs = (CommandSource) event.getCause().root();
+                cs.sendMessage(Text.of(TextColors.GOLD,"HuskyCrates",TextColors.WHITE,":",TextColors.RED," HuskyCrates is currently force stopped. Check the console for more information."));
+            }
             return;
         }
         if(event.getCause().root() instanceof CommandSource){
