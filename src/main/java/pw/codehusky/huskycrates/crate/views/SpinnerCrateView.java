@@ -20,6 +20,7 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
+import pw.codehusky.huskycrates.exceptions.RandomItemSelectionFailureException;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -30,18 +31,13 @@ import java.util.Random;
 @SuppressWarnings("deprecation")
 public class SpinnerCrateView extends CrateView {
     private HuskyCrates plugin;
-
-    Integer offset = null;
-    int itemNum;
     private ArrayList<Object[]> items;
     private Inventory disp;
     private Task updater;
     private Player ourplr;
-    private VirtualCrate vc;
     private int clicks = 0;
     private double dampening = 1.05;
     private int maxClicks = 45; // maximum times the spinner "clicks" in one spin
-    private int planned = -1;
     public SpinnerCrateView(HuskyCrates plugin, Player runner, VirtualCrate virtualCrate){
         this.vc = virtualCrate;
         ourplr = runner;
@@ -63,29 +59,12 @@ public class SpinnerCrateView extends CrateView {
             Random rand = new Random();
             maxClicks += Math.round((max*rand.nextDouble())+(min*rand.nextDouble()));
         }
-        //offsetBase = (int)Math.floor(gg);
-        double random = new Random().nextFloat()*vc.getMaxProb();
-        //System.out.println("clicks: " +maxClicks);
-        //System.out.println("item count: " +items.size());
-
-        double cummProb = 0;
-        for(int i = 0; i < items.size(); i++){
-            cummProb += ((double)items.get(i)[0]);
-            if(random <= cummProb && offset == null){
-                offset =  i - (maxClicks % items.size());
-                clicks = offset;
-                planned = i;
-                //System.out.println(((CrateRewardHolder)items.get(i)[1]).getDisplayItem().getQuantity());
-                //System.out.println("goal: " + i);
-                //System.out.println("offset:" + offset);
-            }
-
-        }
-        //System.out.println("calc target: " + ((offset + maxClicks) % items.size()));
-        if(offset == null){
+        try {
+            clicks = itemIndexSelected() - (maxClicks % items.size());
+        }catch (RandomItemSelectionFailureException e){
             System.out.println("--------------------------------");
             System.out.println("--------------------------------");
-            System.out.println("ERROR WHEN INITING PROBABILITY FOR " + vc.displayName);
+            System.out.println("ERROR WHEN INITING RANDOM ITEM FOR " + vc.displayName);
             System.out.println("--------------------------------");
             System.out.println("--------------------------------");
         }
@@ -133,7 +112,7 @@ public class SpinnerCrateView extends CrateView {
                 }else if(state == 0){
                     e.set(border);
                 }
-            }else if(slotnum == 13 && state == 2){
+            }else if(state == 2){
                 int itemNum = Math.abs(clicks + (slotnum - 9) - 4) % items.size();
                 /*HuskyCrates.instance.logger.warn("result: " + (itemNum + 1));
                 HuskyCrates.instance.logger.warn("fail: " + (planned != itemNum));
@@ -157,11 +136,11 @@ public class SpinnerCrateView extends CrateView {
         return g;
     }
     private CrateRewardHolder giveToPlayer;
-    double updateMax = 1;
-    int waitCurrent = 0;
+    private double updateMax = 1;
+    private int waitCurrent = 0;
 
     private int tickerState = 0;
-    int trueclicks = 0;
+    private int trueclicks = 0;
     private void updateTick() {
         //revDampening = 1.15;
         waitCurrent++;
@@ -193,14 +172,12 @@ public class SpinnerCrateView extends CrateView {
             if (waitCurrent == Math.round(updateMax)) {
                 updater.cancel();
                 ourplr.closeInventory(plugin.genericCause);
-                handleReward(giveToPlayer,ourplr,vc);
+                handleReward(giveToPlayer);
                 ourplr.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP,ourplr.getLocation().getPosition(),1);
 
             }else if(waitCurrent % 5 == 0){
                 updateInv(2);
             }
-        }else{
-            //System.out.println(clicks);
         }
 
     }

@@ -202,6 +202,8 @@ public class VirtualCrate {
             return new SpinnerCrateView(plugin,plr,this);
         }else if(crateType.equalsIgnoreCase("roulette")){
             return  new RouletteCrateView(plugin,plr,this);
+        }else if(crateType.equalsIgnoreCase("instant")){
+
         }
         return new NullCrateView(plugin,plr,this);
     }

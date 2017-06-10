@@ -118,7 +118,7 @@ public class RouletteCrateView extends CrateView {
                     Sponge.getScheduler().createTaskBuilder().execute(task -> {
                         updater.cancel();
                         target.closeInventory(plugin.genericCause);
-                        handleReward(holder,target,vc);
+                        handleReward(holder);
                         target.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP,target.getLocation().getPosition(),1);
                     }).delay(3, TimeUnit.SECONDS).submit(HuskyCrates.instance);
                     firedEnd = true;
