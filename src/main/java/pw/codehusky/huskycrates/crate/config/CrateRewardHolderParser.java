@@ -23,7 +23,7 @@ import java.util.LinkedHashMap;
 public class CrateRewardHolderParser {
     public static CrateRewardHolder fromConfig(ConfigurationNode holderNode, VirtualCrate vc){
         if(holderNode.getNode("huskydata").isVirtual()){
-            HuskyCrates.instance.logger.error("CHECK HUSKYDATA: " + holderNode.getNode("name").getString("(no name)") + " (item #" + holderNode.getKey()+  ") || " + holderNode.getParent().getParent().getKey());
+            HuskyCrates.instance.logger.error("CANNOT FIND HUSKYDATA: " + holderNode.getNode("name").getString("(no name)") + " (item #" + holderNode.getKey()+  ") || " + holderNode.getParent().getParent().getKey());
             return null;
         }
         ItemStack dispItem = itemFromNode(holderNode);
@@ -76,14 +76,14 @@ public class CrateRewardHolderParser {
         try {
 
             if(itemRoot.getNode("id").isVirtual() ){
-                HuskyCrates.instance.logger.error("CHECK ITEM: " + itemRoot.getNode("name").getString("(no name)") + " (item #" + itemRoot.getKey()+  ") || " + itemRoot.getParent().getParent().getKey());
+                HuskyCrates.instance.logger.error("NO ITEM ID: " + itemRoot.getNode("name").getString("(no name)") + " (item #" + itemRoot.getKey()+  ") || " + itemRoot.getParent().getParent().getKey());
                 return ItemStack.empty();
             }
             ItemType type;
             try {
                 type = itemRoot.getNode("id").getValue(TypeToken.of(ItemType.class));
             }catch(Exception e){
-                HuskyCrates.instance.logger.error("CHECK ITEM ID: " + itemRoot.getNode("name").getString("(no name)") + " (item #" + itemRoot.getKey()+  ") || " + itemRoot.getParent().getParent().getKey());
+                HuskyCrates.instance.logger.error("INVALID ITEM ID: \"" + itemRoot.getNode("id").getString("NOT A STRING") + "\" || "+ itemRoot.getNode("name").getString("(no name)") + " (item #" + itemRoot.getKey()+  ") || " + itemRoot.getParent().getParent().getKey());
                 return ItemStack.empty();
             }
             ItemStack item = ItemStack.builder()
