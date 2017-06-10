@@ -22,29 +22,25 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
+import pw.codehusky.huskycrates.exceptions.RandomItemSelectionFailureException;
 
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Created by lokio on 12/29/2016.
  */
 public class RouletteCrateView extends CrateView {
-    private HuskyCrates plugin;
-    private VirtualCrate vc;
-    private ArrayList<Object[]> items;
     private Inventory disp;
     private Task updater;
     private boolean stopped = false;
-    private Player target;
     private CrateRewardHolder holder;
     private boolean firedEnd = false;
     private boolean outOfTime = false;
     public RouletteCrateView(HuskyCrates plugin, Player runner, VirtualCrate virtualCrate){
         this.plugin = plugin;
         vc = virtualCrate;
-        target = runner;
+        ourplr = runner;
         items = vc.getItemSet();
         disp = Inventory.builder()
                 .of(InventoryArchetypes.DISPENSER)
@@ -52,7 +48,7 @@ public class RouletteCrateView extends CrateView {
                     if(!(evt instanceof InteractInventoryEvent.Open) && !(evt instanceof  InteractInventoryEvent.Close)){
                         evt.setCancelled(true);
                         if(!stopped && evt instanceof ClickInventoryEvent){
-                            target.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH,target.getLocation().getPosition(),1);
+                            ourplr.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH,ourplr.getLocation().getPosition(),1);
                         }
                         stopped = true;
                     }
@@ -96,30 +92,27 @@ public class RouletteCrateView extends CrateView {
                     e.set(border);
                 }
             }else if(!stopped&&(tickCount == 0 || Math.round(tickCount/speed) > Math.round((tickCount-1)/speed))){
-                boolean selected = false;
-                double random = new Random().nextFloat()*vc.getMaxProb();
-                double cummProb = 0;
-                for(int i = 0; i < items.size(); i++){
-                    cummProb += ((double)items.get(i)[0]);
-                    if(random <= cummProb && !selected){
-                        selected = true;
-                        e.set(((CrateRewardHolder)items.get(i)[1]).getDisplayItem());
-                        holder = (CrateRewardHolder)items.get(i)[1];
-                        target.playSound(SoundTypes.UI_BUTTON_CLICK,target.getLocation().getPosition(),0.25);
-                    }
+                try {
+                    int i = itemIndexSelected();
+                    e.set(((CrateRewardHolder)items.get(i)[1]).getDisplayItem());
+                    holder = (CrateRewardHolder)items.get(i)[1];
+                    ourplr.playSound(SoundTypes.UI_BUTTON_CLICK,ourplr.getLocation().getPosition(),0.25);
+                } catch (RandomItemSelectionFailureException e1) {
+                    plugin.logger.error("Random Item Selection failed in Roulette Crate View: " + vc.displayName);
                 }
+
                 //e.set(((CrateRewardHolder)items.get(Math.round(tickCount/2) % items.size())[1]).getDisplayItem());
             }else{
                 if(stopped && !firedEnd){
                     if(secRemain < 0){
                         outOfTime = true;
-                        target.playSound(SoundTypes.BLOCK_GLASS_BREAK,target.getLocation().getPosition(),1);
+                        ourplr.playSound(SoundTypes.BLOCK_GLASS_BREAK,ourplr.getLocation().getPosition(),1);
                     }
                     Sponge.getScheduler().createTaskBuilder().execute(task -> {
                         updater.cancel();
-                        target.closeInventory(plugin.genericCause);
+                        ourplr.closeInventory(plugin.genericCause);
                         handleReward(holder);
-                        target.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP,target.getLocation().getPosition(),1);
+                        ourplr.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP,ourplr.getLocation().getPosition(),1);
                     }).delay(3, TimeUnit.SECONDS).submit(HuskyCrates.instance);
                     firedEnd = true;
                 }

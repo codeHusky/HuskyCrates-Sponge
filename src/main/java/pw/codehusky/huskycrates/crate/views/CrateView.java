@@ -5,6 +5,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.CrateCommandSource;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
@@ -18,9 +19,10 @@ import java.util.Random;
  * Created by lokio on 12/29/2016.
  */
 public class CrateView {
-    public VirtualCrate vc;
-    public Player ourplr;
-    public ArrayList<Object[]> items;
+    HuskyCrates plugin;
+    VirtualCrate vc;
+    Player ourplr;
+    ArrayList<Object[]> items;
     public Inventory getInventory(){
         return null;
     }

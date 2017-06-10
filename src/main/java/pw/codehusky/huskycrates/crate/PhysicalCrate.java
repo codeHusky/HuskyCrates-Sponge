@@ -9,12 +9,15 @@ import org.spongepowered.api.effect.particle.ParticleOptions;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.ArmorStand;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import pw.codehusky.huskycrates.HuskyCrates;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
 
@@ -30,6 +33,13 @@ public class PhysicalCrate {
     private HuskyCrates huskyCrates;
     double randomTimeOffset = new Random().nextDouble()*2000;
     public static Vector3d offset = new Vector3d(0.5,1,0.5);
+    public HashMap<UUID,LocalDateTime> lastUsed = new HashMap<>();
+    public void handleUse(Player player){
+        if(lastUsed.containsKey(player.getUniqueId())){
+            lastUsed.remove(player.getUniqueId());
+        }
+        lastUsed.put(player.getUniqueId(), LocalDateTime.now());
+    }
     public PhysicalCrate(Location<World> crateLocation, String crateId, HuskyCrates huskyCrates){
         this.location = crateLocation;
         this.crateId = crateId;
@@ -64,7 +74,7 @@ public class PhysicalCrate {
         as.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(name));
 
     }
-    public void runParticles() {
+    void runParticles() {
         try {
             createHologram();
             double time = randomTimeOffset + (Sponge.getServer().getRunningTimeTicks() * 0.25);

@@ -6,6 +6,7 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -18,6 +19,7 @@ import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.views.NullCrateView;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -27,7 +29,6 @@ import java.util.*;
 public class CrateUtilities {
     private HashMap<String,VirtualCrate> crateTypes = new HashMap<>();
     public HashMap<Location<World>,PhysicalCrate> physicalCrates = new HashMap<>();
-    private HashMap<String,ItemStack> keys = new HashMap<>();
     public boolean hasInitalizedVirtualCrates = false;
     private HuskyCrates plugin;
     public CrateUtilities(HuskyCrates plugin){
@@ -38,7 +39,11 @@ public class CrateUtilities {
             System.out.println(crateType);
             target.openInventory(new NullCrateView(plugin,target,null).getInventory(), plugin.genericCause);
         }else{
-            target.openInventory(crateTypes.get(crateType).generateViewForCrate(plugin, target).getInventory(), plugin.genericCause);
+            if(crateTypes.get(crateType).isGUI) {
+                target.openInventory(crateTypes.get(crateType).generateViewForCrate(plugin, target).getInventory(), plugin.genericCause);
+            }else{
+                crateTypes.get(crateType).generateViewForCrate(plugin, target);
+            }
         }
     }
     public VirtualCrate getVirtualCrate(String id){
@@ -98,7 +103,7 @@ public class CrateUtilities {
             return null;
         return prego.replace(plugin.huskyCrateIdentifier,"");
     }
-    public void recognizeChest(Location<World> location){
+    /*public void recognizeChest(Location<World> location){
         if(physicalCrates.containsKey(location)) return;
         String id = null;
         try {
@@ -109,7 +114,7 @@ public class CrateUtilities {
             HuskyCrates.instance.updatePhysicalCrates();
         }
 
-    }
+    }*/
     public boolean flag = false;
     private void particleRunner(){
         if(flag)
@@ -159,5 +164,32 @@ public class CrateUtilities {
      */
     public List<String> getCrateTypes() {
         return new ArrayList<>(crateTypes.keySet());
+    }
+
+    public int isAcceptedKey(PhysicalCrate crate, Optional<ItemStack> key, Player using) {
+        if (crate.vc.freeCrate) {
+            System.out.println("O");
+            if (!crate.lastUsed.containsKey(using.getUniqueId())) {
+                return 1;
+            } else {
+                LocalDateTime lastUsed = crate.lastUsed.get(using.getUniqueId());
+                LocalDateTime minimumWait = lastUsed.plusSeconds((int) crate.vc.getOptions().get("crateFreeDelay"));
+                HuskyCrates.instance.logger.info("" + LocalDateTime.now().compareTo(minimumWait));
+                if (LocalDateTime.now().compareTo(minimumWait) < 0) {
+
+                }
+                return 0;
+            }
+        } else if (key.isPresent()) {
+            if (key.get().getItem() == crate.vc.getKeyType()) {
+                if (key.get().toContainer().get(DataQuery.of("UnsafeData", "crateID")).isPresent()) {
+                    String id = key.get().toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString();
+                    if (id.equals(crate.vc.crateType)) {
+                        return 1;
+                    }
+                }
+            }
+        }
+        return 0;
     }
 }

@@ -22,7 +22,6 @@ import pw.codehusky.huskycrates.crate.VirtualCrate;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
 import pw.codehusky.huskycrates.exceptions.RandomItemSelectionFailureException;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -30,11 +29,8 @@ import java.util.Random;
  */
 @SuppressWarnings("deprecation")
 public class SpinnerCrateView extends CrateView {
-    private HuskyCrates plugin;
-    private ArrayList<Object[]> items;
     private Inventory disp;
     private Task updater;
-    private Player ourplr;
     private int clicks = 0;
     private double dampening = 1.05;
     private int maxClicks = 45; // maximum times the spinner "clicks" in one spin

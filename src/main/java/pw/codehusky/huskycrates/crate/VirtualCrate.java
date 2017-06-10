@@ -21,10 +21,7 @@ import org.spongepowered.api.util.Color;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolderParser;
-import pw.codehusky.huskycrates.crate.views.CrateView;
-import pw.codehusky.huskycrates.crate.views.NullCrateView;
-import pw.codehusky.huskycrates.crate.views.RouletteCrateView;
-import pw.codehusky.huskycrates.crate.views.SpinnerCrateView;
+import pw.codehusky.huskycrates.crate.views.*;
 import pw.codehusky.huskycrates.lang.SharedLangData;
 
 import java.util.ArrayList;
@@ -48,6 +45,9 @@ public class VirtualCrate {
     private ItemType keyType;
     private Integer keyDamage= null;
     public SharedLangData langData;
+    public boolean isGUI;
+    public boolean freeCrate = false;
+    public boolean virtualKeys = false;
     public VirtualCrate(String id, ConfigurationLoader<CommentedConfigurationNode> config, CommentedConfigurationNode node){
         this.id = id;
         displayName = node.getNode("name").getString();
@@ -58,6 +58,9 @@ public class VirtualCrate {
         crateBlockItemType = ItemTypes.CHEST;
         keyType = ItemTypes.NETHER_STAR;//default
         crateType = node.getNode("type").getString("null");
+
+        isGUI = !crateType.equalsIgnoreCase("instant");
+
         if(crateType.equalsIgnoreCase("spinner")){
             if(!node.getNode("spinnerOptions").isVirtual()){
                 ConfigurationNode ops = node.getNode("spinnerOptions");
@@ -80,6 +83,11 @@ public class VirtualCrate {
         }
         if(!node.getNode("options").isVirtual()){
             ConfigurationNode gops = node.getNode("options");
+            virtualKeys = gops.getNode("useVirtualKeys").getBoolean(false);
+            freeCrate = gops.getNode("freeCrate").getBoolean(false);
+            if(freeCrate){
+                options.put("freeCrateDelay",gops.getNode("freeCrateDelay").getInt(0)); // IN SECONDS
+            }
             if(!gops.getNode("crateBlockID").isVirtual()){
                 try {
                     crateBlockItemType = gops.getNode("crateBlockID").getValue(TypeToken.of(ItemType.class));
@@ -201,9 +209,9 @@ public class VirtualCrate {
         if(crateType.equalsIgnoreCase("spinner")){
             return new SpinnerCrateView(plugin,plr,this);
         }else if(crateType.equalsIgnoreCase("roulette")){
-            return  new RouletteCrateView(plugin,plr,this);
+            return new RouletteCrateView(plugin,plr,this);
         }else if(crateType.equalsIgnoreCase("instant")){
-
+            return new InstantView(plugin,plr,this);
         }
         return new NullCrateView(plugin,plr,this);
     }

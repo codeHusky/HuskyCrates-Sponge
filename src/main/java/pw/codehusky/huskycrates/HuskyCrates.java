@@ -462,32 +462,27 @@ public class HuskyCrates {
                     return;
                 }
                 //crateUtilities.recognizeChest(te.getLocation());
-                if(plr.getItemInHand(HandTypes.MAIN_HAND).isPresent()) {
-                    ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
-                    if(inhand.getItem() == vc.getKeyType()) {
-
-                        if(inhand.toContainer().get(DataQuery.of("UnsafeData","crateID")).isPresent()) {
-                            String id = inhand.toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString();
-                            if (id.equals(crateType)) {
-                                if (!plr.hasPermission("huskycrates.tester")) {
-                                    if (inhand.getQuantity() == 1)
-                                        plr.setItemInHand(HandTypes.MAIN_HAND, null);
-                                    else {
-                                        ItemStack tobe = inhand.copy();
-                                        tobe.setQuantity(tobe.getQuantity() - 1);
-                                        plr.setItemInHand(HandTypes.MAIN_HAND, tobe);
-                                    }
-                                }
-                                Task.Builder upcoming = scheduler.createTaskBuilder();
-
-                                upcoming.execute(() -> {
-                                    crateUtilities.launchCrateForPlayer(crateType, plr, this);
-                                }).delayTicks(1).submit(this);
-                                return;
+                int keyResult = crateUtilities.isAcceptedKey(crateUtilities.physicalCrates.get(blk),plr.getItemInHand(HandTypes.MAIN_HAND),plr);
+                System.out.println(keyResult);
+                if(keyResult == 1) {
+                    if(!vc.freeCrate) {
+                        ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
+                        if (!plr.hasPermission("huskycrates.tester")) {
+                            if (inhand.getQuantity() == 1)
+                                plr.setItemInHand(HandTypes.MAIN_HAND, null);
+                            else {
+                                ItemStack tobe = inhand.copy();
+                                tobe.setQuantity(tobe.getQuantity() - 1);
+                                plr.setItemInHand(HandTypes.MAIN_HAND, tobe);
                             }
                         }
-
                     }
+                    Task.Builder upcoming = scheduler.createTaskBuilder();
+                    crateUtilities.physicalCrates.get(blk).handleUse(plr);
+                    upcoming.execute(() -> {
+                        crateUtilities.launchCrateForPlayer(crateType, plr, this);
+                    }).delayTicks(1).submit(this);
+                    return;
 
                 }
                 plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,blk.getPosition(),0.3);
@@ -553,33 +548,27 @@ public class HuskyCrates {
                 crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()).createHologram();
                 //crateUtilities.recognizeChest(te.getLocation());
                 event.setCancelled(true);
-                if(plr.getItemInHand(HandTypes.MAIN_HAND).isPresent()) {
-                    ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
-                    if(inhand.getItem() == vc.getKeyType()) {
-
-                        if(inhand.toContainer().get(DataQuery.of("UnsafeData","crateID")).isPresent()) {
-                            String id = inhand.toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString();
-                            if (id.equals(crateType)) {
-                                if (!plr.hasPermission("huskycrates.tester")) {
-                                    if (inhand.getQuantity() == 1)
-                                        plr.setItemInHand(HandTypes.MAIN_HAND, null);
-                                    else {
-                                        ItemStack tobe = inhand.copy();
-                                        tobe.setQuantity(tobe.getQuantity() - 1);
-                                        plr.setItemInHand(HandTypes.MAIN_HAND, tobe);
-                                    }
-                                }
-                                Task.Builder upcoming = scheduler.createTaskBuilder();
-
-                                upcoming.execute(() -> {
-                                    crateUtilities.launchCrateForPlayer(crateType, plr, this);
-                                }).delayTicks(1).submit(this);
-                                return;
+                int keyResult = crateUtilities.isAcceptedKey(crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()),plr.getItemInHand(HandTypes.MAIN_HAND),plr);
+                System.out.println(keyResult);
+                if(keyResult == 1) {
+                    if (!vc.freeCrate) {
+                        ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
+                        if (!plr.hasPermission("huskycrates.tester")) {
+                            if (inhand.getQuantity() == 1)
+                                plr.setItemInHand(HandTypes.MAIN_HAND, null);
+                            else {
+                                ItemStack tobe = inhand.copy();
+                                tobe.setQuantity(tobe.getQuantity() - 1);
+                                plr.setItemInHand(HandTypes.MAIN_HAND, tobe);
                             }
                         }
-
                     }
-
+                    Task.Builder upcoming = scheduler.createTaskBuilder();
+                    crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()).handleUse(plr);
+                    upcoming.execute(() -> {
+                        crateUtilities.launchCrateForPlayer(crateType, plr, this);
+                    }).delayTicks(1).submit(this);
+                    return;
                 }
                 plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,event.getTargetEntity().getLocation().getPosition(),0.3);
                 try {

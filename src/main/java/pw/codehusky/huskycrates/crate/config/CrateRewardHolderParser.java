@@ -4,12 +4,13 @@ import com.google.common.collect.BiMap;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.item.Enchantment;
-import org.spongepowered.api.item.Enchantments;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -19,6 +20,7 @@ import pw.codehusky.huskycrates.lang.SharedLangData;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Optional;
 
 public class CrateRewardHolderParser {
     public static CrateRewardHolder fromConfig(ConfigurationNode holderNode, VirtualCrate vc){
@@ -77,14 +79,14 @@ public class CrateRewardHolderParser {
 
             if(itemRoot.getNode("id").isVirtual() ){
                 HuskyCrates.instance.logger.error("NO ITEM ID: " + itemRoot.getNode("name").getString("(no name)") + " (item #" + itemRoot.getKey()+  ") || " + itemRoot.getParent().getParent().getKey());
-                return ItemStack.empty();
+                return ItemStack.of(ItemTypes.NONE,1);
             }
             ItemType type;
             try {
                 type = itemRoot.getNode("id").getValue(TypeToken.of(ItemType.class));
             }catch(Exception e){
                 HuskyCrates.instance.logger.error("INVALID ITEM ID: \"" + itemRoot.getNode("id").getString("NOT A STRING") + "\" || "+ itemRoot.getNode("name").getString("(no name)") + " (item #" + itemRoot.getKey()+  ") || " + itemRoot.getParent().getParent().getKey());
-                return ItemStack.empty();
+                return ItemStack.of(ItemTypes.NONE,1);
             }
             ItemStack item = ItemStack.builder()
                     .itemType(type)
@@ -116,7 +118,12 @@ public class CrateRewardHolderParser {
                 for (Object key : itemRoot.getNode("enchants").getChildrenMap().keySet()) {
                     int level = itemRoot.getNode("enchants").getChildrenMap().get(key).getInt();
                     String enchantID = (String) key;
-                    Enchantment enc = getEnchantment(enchantID); // STRINGS ONLY!
+                    Optional<Enchantment> pEnchant = Sponge.getRegistry().<Enchantment>getType(Enchantment.class,enchantID);
+                    if(!pEnchant.isPresent()){
+                        HuskyCrates.instance.logger.error("INVALID ENCHANT ID: \"" + key + "\" || "+ itemRoot.getNode("name").getString("(no name)") + " (item #" + itemRoot.getKey()+  ") || " + itemRoot.getParent().getParent().getKey());
+                        return ItemStack.of(ItemTypes.NONE,1);
+                    }
+                    Enchantment enc = pEnchant.get(); // STRINGS ONLY!
                     ItemEnchantment itemEnchantment = new ItemEnchantment(enc, level);
                     enchantments.add(itemEnchantment);
                 }
@@ -149,7 +156,7 @@ public class CrateRewardHolderParser {
         }
         return null;
     }
-    private static Enchantment getEnchantment(String id){
+    /*private static Enchantment getEnchantment(String id){
         switch(id){
             case "protection":
                 return Enchantments.PROTECTION;
@@ -216,5 +223,5 @@ public class CrateRewardHolderParser {
     }
     private static Enchantment getEnchantment(int id){
         return null;
-    }
+    }*/
 }
