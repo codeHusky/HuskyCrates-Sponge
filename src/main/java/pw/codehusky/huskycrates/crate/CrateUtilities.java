@@ -3,11 +3,11 @@ package pw.codehusky.huskycrates.crate;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
@@ -88,15 +88,6 @@ public class CrateUtilities {
         Task.Builder taskBuilder = scheduler.createTaskBuilder();
         runner = taskBuilder.execute(this::particleRunner).intervalTicks(1).submit(plugin);
     }
-    public String getTypeFromLocation(Location<World> location) {
-        if(!location.getTileEntity().isPresent()) {
-            return null;
-        }
-        String prego = ((TileEntityCarrier) location.getTileEntity().get()).getInventory().getName().get();
-        if(!prego.contains(plugin.huskyCrateIdentifier))
-            return null;
-        return prego.replace(plugin.huskyCrateIdentifier,"");
-    }
     /*public void recognizeChest(Location<World> location){
         if(physicalCrates.containsKey(location)) return;
         String id = null;
@@ -159,23 +150,39 @@ public class CrateUtilities {
     public List<String> getCrateTypes() {
         return new ArrayList<>(crateTypes.keySet());
     }
-
-    public int isAcceptedKey(PhysicalCrate crate, Optional<ItemStack> key, Player using) {
-        if (crate.vc.freeCrate) {
-            //System.out.println("FREE?");
-            if (!crate.lastUsed.containsKey(using.getUniqueId())) {
-                return 1;
-            } else {
-                //System.out.println(crate.vc.getOptions());
-                LocalDateTime lastUsed = crate.lastUsed.get(using.getUniqueId());
-                LocalDateTime minimumWait = lastUsed.plusSeconds((int) crate.vc.getOptions().get("freeCrateDelay"));
-                //HuskyCrates.instance.logger.info("" + LocalDateTime.now().compareTo(minimumWait));
-                if(LocalDateTime.now().compareTo(minimumWait) > 0){
-                    return 1;
+    public VirtualCrate vcFromKey(ItemStack key){
+        if (key.toContainer().get(DataQuery.of("UnsafeData", "crateID")).isPresent()) {
+            String id = key.toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString();
+            if (crateTypes.keySet().contains(id)) {
+                if(isAcceptedKey(crateTypes.get(id),Optional.of(key),null) == 1){
+                    return crateTypes.get(id);
                 }
-                return -1;
             }
-        } else if (key.isPresent()) {
+        }
+        return null;
+    }
+    public int isAcceptedKey(VirtualCrate crate, Optional<ItemStack> key, Player using) {
+        return isAcceptedKey(new PhysicalCrate(null,crate.id,HuskyCrates.instance),key,using);
+    }
+    public int isAcceptedKey(PhysicalCrate crate, Optional<ItemStack> key, Player using) {
+        if (crate != null) {
+            if(crate.vc.freeCrate) {
+                //System.out.println("FREE?");
+                if (!crate.lastUsed.containsKey(using.getUniqueId())) {
+                    return 1;
+                } else {
+                    //System.out.println(crate.vc.getOptions());
+                    LocalDateTime lastUsed = crate.lastUsed.get(using.getUniqueId());
+                    LocalDateTime minimumWait = lastUsed.plusSeconds((int) crate.vc.getOptions().get("freeCrateDelay"));
+                    //HuskyCrates.instance.logger.info("" + LocalDateTime.now().compareTo(minimumWait));
+                    if (LocalDateTime.now().compareTo(minimumWait) > 0) {
+                        return 1;
+                    }
+                    return -1;
+                }
+            }
+        }
+        if (key.isPresent()) {
             if (key.get().getItem() == crate.vc.getKeyType()) {
                 if (key.get().toContainer().get(DataQuery.of("UnsafeData", "crateID")).isPresent()) {
                     String id = key.get().toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString();
@@ -185,6 +192,96 @@ public class CrateUtilities {
                 }
             }
         }
+        if(getVirtualKeys(using,crate.vc) > 0){
+            return 2;
+        }
         return 0;
+    }
+    public int getVirtualKeys(User player, VirtualCrate vc) {
+        try {
+            CommentedConfigurationNode root = HuskyCrates.instance.crateConfig.load();
+            if(!root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).isVirtual()){
+                return root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).getInt(0);
+            }
+        } catch (Exception e) {
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            if (e instanceof IOException) {
+                HuskyCrates.instance.logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
+            } else {
+                e.printStackTrace();
+            }
+            HuskyCrates.instance.logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");
+            HuskyCrates.instance.logger.error("If you're having trouble solving this issue, join the support discord: https://discord.gg/FSETtcx");
+
+        }
+        return 0;
+    }
+    public void takeVirtualKey(User player, VirtualCrate vc,int count){
+        try {
+            CommentedConfigurationNode root = HuskyCrates.instance.crateConfig.load();
+            //if(!root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).isVirtual()){
+            root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).setValue(root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).getInt(0) - count);
+            //}
+            HuskyCrates.instance.crateConfig.save(root);
+        } catch (Exception e) {
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            if (e instanceof IOException) {
+                HuskyCrates.instance.logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
+            } else {
+                e.printStackTrace();
+            }
+            HuskyCrates.instance.logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");
+            HuskyCrates.instance.logger.error("If you're having trouble solving this issue, join the support discord: https://discord.gg/FSETtcx");
+
+        }
+    }
+    public void takeVirtualKey(User player, VirtualCrate vc){
+        takeVirtualKey(player,vc,1);
+    }
+    public void giveVirtualKeys(User player, VirtualCrate vc, int count){
+        try {
+            CommentedConfigurationNode root = HuskyCrates.instance.crateConfig.load();
+            //if(!root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).isVirtual()){
+            root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).setValue(root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).getInt(0) + count);
+            //}
+            HuskyCrates.instance.crateConfig.save(root);
+        } catch (Exception e) {
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            if (e instanceof IOException) {
+                HuskyCrates.instance.logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
+            } else {
+                e.printStackTrace();
+            }
+            HuskyCrates.instance.logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");
+            HuskyCrates.instance.logger.error("If you're having trouble solving this issue, join the support discord: https://discord.gg/FSETtcx");
+
+        }
+    }
+    public void givePlayersVirtualKeys(Collection<Player> players, VirtualCrate vc, int count){
+        try {
+            CommentedConfigurationNode root = HuskyCrates.instance.crateConfig.load();
+            for(Player player : players) {
+                root.getNode("users", player.getUniqueId().toString(), "keys", vc.id).setValue(root.getNode("users", player.getUniqueId().toString(), "keys", vc.id).getInt(0) + count);
+            }
+            HuskyCrates.instance.crateConfig.save(root);
+        } catch (Exception e) {
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            if (e instanceof IOException) {
+                HuskyCrates.instance.logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
+            } else {
+                e.printStackTrace();
+            }
+            HuskyCrates.instance.logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");
+            HuskyCrates.instance.logger.error("If you're having trouble solving this issue, join the support discord: https://discord.gg/FSETtcx");
+
+        }
     }
 }

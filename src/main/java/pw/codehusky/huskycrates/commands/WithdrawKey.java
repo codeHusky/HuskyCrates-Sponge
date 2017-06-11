@@ -1,0 +1,56 @@
+package pw.codehusky.huskycrates.commands;
+
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.spec.CommandExecutor;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.serializer.TextSerializers;
+import pw.codehusky.huskycrates.HuskyCrates;
+import pw.codehusky.huskycrates.crate.VirtualCrate;
+
+/**
+ * Created By KasperFranz.
+ *
+ * This CommandExecutor is used to get the crate item.
+ */
+public class WithdrawKey implements CommandExecutor {
+
+    @Override public CommandResult execute(CommandSource commandSource, CommandContext commandContext) throws CommandException {
+        if(commandContext.getOne("type").isPresent()) {
+            if (!(commandSource instanceof Player)) {
+                commandSource.sendMessage(Text.of("You need to be in game or specify a player for this command to work."));
+                return CommandResult.empty();
+            }
+            Player player = (Player) commandSource;
+            String type = commandContext.<String>getOne("type").get();
+            VirtualCrate virtualCrate = HuskyCrates.instance.getCrateUtilities().getVirtualCrate(type);
+            int quantity = commandContext.getOne("quantity").isPresent() ? commandContext.<Integer>getOne("quantity").get() : 1;
+            if (virtualCrate == null) {
+                commandSource.sendMessage(Text.of("Invalid crate id: " + type + ". Please check your config."));
+                return CommandResult.empty();
+            }
+            int balance = HuskyCrates.instance.crateUtilities.getVirtualKeys(player,virtualCrate);
+            if(balance >= quantity && quantity > 0){
+                ItemStack key = virtualCrate.getCrateKey(quantity);
+                HuskyCrates.instance.crateUtilities.takeVirtualKey(player,virtualCrate,quantity);
+                player.getInventory().offer(key);
+                player.sendMessage(Text.of(TextColors.GREEN,"You have successfully withdrawn " + quantity + " ",
+                        TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName),TextColors.GREEN," Key(s)"));
+            }else{
+                if(quantity <= 0){
+                    player.sendMessage(Text.of(TextColors.RED, "Positive integer amounts only."));
+                }else {
+                    player.sendMessage(Text.of(TextColors.RED, "Insufficient balance! (Tried to withdraw " + quantity + ", have " + balance + ")"));
+                }
+            }
+        }else{
+            commandSource.sendMessage(Text.of("Usage: /crate withdraw <id> [count]"));
+        }
+        return CommandResult.success();
+    }
+}

@@ -11,7 +11,7 @@ import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-public class SharedLangData {
+public class LangData {
     public String prefix;
     public String rewardMessage;
     public String rewardAnnounceMessage;
@@ -35,7 +35,7 @@ public class SharedLangData {
             }
         }
     }
-    public SharedLangData(){
+    public LangData(){
         defaults();
         endings();
     }
@@ -46,7 +46,7 @@ public class SharedLangData {
         noKeyMessage += "&r";
         freeCrateWaitMessage+= "&r";
     }
-    public SharedLangData(SharedLangData base, ConfigurationNode node){
+    public LangData(LangData base, ConfigurationNode node){
         prefix = base.prefix;
         rewardMessage = base.rewardMessage;
         rewardAnnounceMessage = base.rewardAnnounceMessage;
@@ -69,7 +69,7 @@ public class SharedLangData {
         }
         endings();
     }
-    public SharedLangData(ConfigurationNode node){
+    public LangData(ConfigurationNode node){
         defaults(); //defaults, then do overrides.
         if(!node.getNode("prefix").isVirtual()){
             prefix = node.getNode("prefix").getString(prefix);
@@ -90,7 +90,7 @@ public class SharedLangData {
         }
         endings();
     }
-    public SharedLangData(String prefix, String rewardMessage, String rewardAnnounceMessage, String noKeyMessage, String freeCrateWaitMessage){
+    public LangData(String prefix, String rewardMessage, String rewardAnnounceMessage, String noKeyMessage, String freeCrateWaitMessage){
         this.prefix = prefix;
         this.rewardMessage = rewardMessage;
         this.rewardAnnounceMessage = rewardAnnounceMessage;

@@ -22,7 +22,7 @@ import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolderParser;
 import pw.codehusky.huskycrates.crate.views.*;
-import pw.codehusky.huskycrates.lang.SharedLangData;
+import pw.codehusky.huskycrates.lang.LangData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +44,7 @@ public class VirtualCrate {
     private HashMap<String,Object> options = new HashMap<>();
     private ItemType keyType;
     private Integer keyDamage= null;
-    private SharedLangData langData;
+    private LangData langData;
     public boolean isGUI;
     public boolean freeCrate = false;
     public boolean virtualKeys = false;
@@ -77,7 +77,7 @@ public class VirtualCrate {
             }
         }
         if(!node.getNode("lang").isVirtual()){
-            langData = new SharedLangData(node.getNode("lang"));
+            langData = new LangData(node.getNode("lang"));
         }else{
             langData = HuskyCrates.instance.langData;
         }
@@ -289,7 +289,7 @@ public class VirtualCrate {
         return options;
     }
 
-    public SharedLangData getLangData() {
+    public LangData getLangData() {
         return langData;
     }
 }

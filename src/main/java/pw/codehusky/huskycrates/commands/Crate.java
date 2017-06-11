@@ -88,9 +88,22 @@ public class Crate implements CommandExecutor {
             }
 */
         src.sendMessage(Text.of(TextColors.YELLOW,"HuskyCrates Commands"));
-        src.sendMessage(Text.of("/crate chest <id> [player]"));
-        src.sendMessage(Text.of("/crate key <id> [player] [count]"));
-        src.sendMessage(Text.of("/crate keyAll <id> [count]"));
+        if(src.hasPermission("huskycrates.chest"))
+            src.sendMessage(Text.of("  /crate chest <id> [player]"));
+        if(src.hasPermission("huskycrates.key"))
+            src.sendMessage(Text.of("  /crate key <id> [player] [count]"));
+        if(src.hasPermission("huskycrates.keyall"))
+            src.sendMessage(Text.of("  /crate keyAll <id> [count]"));
+        if(src.hasPermission("huskycrates.vkey"))
+            src.sendMessage(Text.of("  /crate vKey <id> [player] [count]"));
+        if(src.hasPermission("huskycrates.vkeyall"))
+            src.sendMessage(Text.of("  /crate vKeyAll <id> [count]"));
+        if(src.hasPermission("huskycrates.keybal"))
+            src.sendMessage(Text.of("  /crate keybal",((src.hasPermission("huskycrates.keybal.others"))?" [player]":"")));
+        if(src.hasPermission("huskycrates.depositkey"))
+            src.sendMessage(Text.of("  /crate deposit"));
+        if(src.hasPermission("huskycrates.withdrawkey"))
+            src.sendMessage(Text.of("  /crate withdraw <type> [quantity]"));
         //HuskyCrates.instance.updatePhysicalCrates();
         return CommandResult.success();
     }

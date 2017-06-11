@@ -45,7 +45,8 @@ public class PhysicalCrate {
         this.crateId = crateId;
         this.huskyCrates = huskyCrates;
         this.vc = huskyCrates.crateUtilities.getVirtualCrate(crateId);
-        createHologram();
+        if(crateLocation != null)
+            createHologram();
     }
     public void createHologram() {
         if(as == null || !as.isLoaded()) {

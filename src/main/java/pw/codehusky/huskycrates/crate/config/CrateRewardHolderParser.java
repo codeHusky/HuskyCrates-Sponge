@@ -16,7 +16,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
-import pw.codehusky.huskycrates.lang.SharedLangData;
+import pw.codehusky.huskycrates.lang.LangData;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -38,9 +38,9 @@ public class CrateRewardHolderParser {
         String name;
         boolean single = false;
         boolean announce = false;
-        SharedLangData langData = HuskyCrates.instance.langData;
+        LangData langData = HuskyCrates.instance.langData;
         if(!holderNode.getNode("huskydata","lang").isVirtual()){
-            langData = new SharedLangData(vc.getLangData(),holderNode.getNode("huskydata","lang"));
+            langData = new LangData(vc.getLangData(),holderNode.getNode("huskydata","lang"));
         }
         //System.out.println(dispItem.get(Keys.DISPLAY_NAME));
         if(holderNode.getNode("huskydata","reward").getNode("overrideRewardName").isVirtual()){

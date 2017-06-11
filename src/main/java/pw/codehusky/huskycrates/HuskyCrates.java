@@ -52,7 +52,7 @@ import pw.codehusky.huskycrates.commands.elements.CrateElement;
 import pw.codehusky.huskycrates.crate.CrateUtilities;
 import pw.codehusky.huskycrates.crate.PhysicalCrate;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
-import pw.codehusky.huskycrates.lang.SharedLangData;
+import pw.codehusky.huskycrates.lang.LangData;
 
 import java.io.IOException;
 import java.util.*;
@@ -81,7 +81,7 @@ public class HuskyCrates {
     public String huskyCrateIdentifier = "☼1☼2☼3HUSKYCRATE-";
     public String armorStandIdentifier = "ABABABAB-CDDE-0000-8374-CAAAECAAAECA";
     public static HuskyCrates instance;
-    public SharedLangData langData = null;
+    public LangData langData = null;
     public Set<BlockType> validCrateBlocks = new HashSet<>();
     private boolean forceStop = false;
     @Listener
@@ -106,7 +106,7 @@ public class HuskyCrates {
         try {
             conf = crateConfig.load();
             if(!conf.getNode("lang").isVirtual()) {
-                langData = new SharedLangData(conf.getNode("lang"));
+                langData = new LangData(conf.getNode("lang"));
             }else
                 logger.info("Using default lang settings.");
 
@@ -155,6 +155,25 @@ public class HuskyCrates {
                 .permission("huskycrates.keyAll")
                 .executor(new KeyAll())
                 .build();
+        CommandSpec vKey = CommandSpec.builder()
+                .description(Text.of("Credits a user an amount of virtual keys for a specified crate."))
+                .arguments(
+                        new CrateElement(Text.of("type")),
+                        GenericArguments.userOrSource(Text.of("player")),
+                        GenericArguments.optional(GenericArguments.integer(Text.of("quantity")))
+                )
+                .permission("huskycrates.vKey")
+                .executor(new VirtualKey())
+                .build();
+        CommandSpec vKeyAll = CommandSpec.builder()
+                .description(Text.of("Credits everyone a specified amount of virtual keys for a crate."))
+                .arguments(
+                        new CrateElement(Text.of("type")),
+                        GenericArguments.optional(GenericArguments.integer(Text.of("quantity")))
+                )
+                .permission("huskycrates.vKeyAll")
+                .executor(new VirtualKeyAll())
+                .build();
         CommandSpec wand = CommandSpec.builder()
                 .description(Text.of("Give yourself an entity wand for crates."))
                 .arguments(
@@ -173,13 +192,39 @@ public class HuskyCrates {
                         GenericArguments.optional(GenericArguments.integer(Text.of("quantity")))
                 ).executor(new Chest())
                 .build();
-
+        CommandSpec keyBal = CommandSpec.builder()
+                .description(Text.of("Check your (or another user's) virtual key balance."))
+                .arguments(
+                        GenericArguments.userOrSource(Text.of("player"))
+                )
+                .permission("huskycrates.keybal")
+                .executor(new KeyBal())
+                .build();
+        CommandSpec deposit = CommandSpec.builder()
+                .description(Text.of("Transfer the held physical key(s) into your virtual key balance."))
+                .permission("huskycrates.depositkey")
+                .executor(new DepositKey())
+                .build();
+        CommandSpec withdraw = CommandSpec.builder()
+                .description(Text.of("Convert an amount of virtual key(s) into a physical key(s)."))
+                .permission("huskycrates.withdrawkey")
+                .arguments(
+                        new CrateElement(Text.of("type")),
+                        GenericArguments.optional(GenericArguments.integer(Text.of("quantity")))
+                )
+                .executor(new WithdrawKey())
+                .build();
         CommandSpec crateSpec = CommandSpec.builder()
                 .description(Text.of("Main crates command"))
                 .child(key, "key")
                 .child(chest, "chest")
                 .child(keyAll, "keyAll")
+                .child(vKey, "vkey","virtualkey")
+                .child(vKeyAll, "vkeyall","virtualkeyall")
+                .child(keyBal,"bal","keybal")
                 .child(wand, "wand")
+                .child(deposit, "deposit","depositkey","ptov")
+                .child(withdraw, "withdraw","withdrawkey","vtop")
                 .arguments(GenericArguments.optional(GenericArguments.remainingRawJoinedStrings(Text.of(""))))
                 .executor(new Crate(this))
                 .build();
@@ -331,12 +376,12 @@ public class HuskyCrates {
                 }
             }
         }
-        langData = new SharedLangData();
+        langData = new LangData();
         CommentedConfigurationNode root = null;
         try {
             root = crateConfig.load();
             if(!root.getNode("lang").isVirtual())
-                langData = new SharedLangData(root.getNode("lang"));
+                langData = new LangData(root.getNode("lang"));
             else
                 logger.info("Using default lang settings.");
             crateUtilities.generateVirtualCrates(crateConfig);
@@ -492,8 +537,8 @@ public class HuskyCrates {
                 //crateUtilities.recognizeChest(te.getLocation());
                 int keyResult = crateUtilities.isAcceptedKey(crateUtilities.physicalCrates.get(blk),plr.getItemInHand(HandTypes.MAIN_HAND),plr);
                 //System.out.println(keyResult);
-                if(keyResult == 1) {
-                    if(!vc.freeCrate) {
+                if(keyResult == 1  || keyResult == 2) {
+                    if(!vc.freeCrate && keyResult == 1) {
                         ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
                         if (!plr.hasPermission("huskycrates.tester")) {
                             if (inhand.getQuantity() == 1)
@@ -504,6 +549,9 @@ public class HuskyCrates {
                                 plr.setItemInHand(HandTypes.MAIN_HAND, tobe);
                             }
                         }
+                    }else if(keyResult == 2){
+                        crateUtilities.takeVirtualKey(plr,vc);
+                        plr.sendMessage(Text.of(TextColors.GRAY,"You now have " + crateUtilities.getVirtualKeys(plr,vc) + " virtual key(s) for this crate."));
                     }
                     Task.Builder upcoming = scheduler.createTaskBuilder();
                     crateUtilities.physicalCrates.get(blk).handleUse(plr);
@@ -588,8 +636,8 @@ public class HuskyCrates {
                 //crateUtilities.recognizeChest(te.getLocation());
                 event.setCancelled(true);
                 int keyResult = crateUtilities.isAcceptedKey(crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()),plr.getItemInHand(HandTypes.MAIN_HAND),plr);
-                if(keyResult == 1) {
-                    if (!vc.freeCrate) {
+                if(keyResult == 1 || keyResult == 2) {
+                    if (!vc.freeCrate && keyResult == 1) {
                         ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
                         if (!plr.hasPermission("huskycrates.tester")) {
                             if (inhand.getQuantity() == 1)
@@ -600,6 +648,9 @@ public class HuskyCrates {
                                 plr.setItemInHand(HandTypes.MAIN_HAND, tobe);
                             }
                         }
+                    }else if(keyResult == 2){
+                        crateUtilities.takeVirtualKey(plr,vc);
+                        plr.sendMessage(Text.of(TextColors.GRAY,"You now have " + crateUtilities.getVirtualKeys(plr,vc) + " virtual key(s) for this crate."));
                     }
                     Task.Builder upcoming = scheduler.createTaskBuilder();
                     crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()).handleUse(plr);
@@ -607,7 +658,7 @@ public class HuskyCrates {
                         crateUtilities.launchCrateForPlayer(crateType, plr, this);
                     }).delayTicks(1).submit(this);
                     return;
-                }else if(keyResult == -1){
+                }else if(keyResult == -1 || keyResult == 2){
                     plr.playSound(SoundTypes.BLOCK_IRON_DOOR_CLOSE,event.getTargetEntity().getLocation().getPosition(),1);
                     try {
                         plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(

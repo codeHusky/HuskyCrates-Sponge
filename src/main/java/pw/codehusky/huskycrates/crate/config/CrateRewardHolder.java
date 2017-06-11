@@ -1,16 +1,16 @@
 package pw.codehusky.huskycrates.crate.config;
 
 import org.spongepowered.api.item.inventory.ItemStack;
-import pw.codehusky.huskycrates.lang.SharedLangData;
+import pw.codehusky.huskycrates.lang.LangData;
 
 public class CrateRewardHolder {
     private ItemStack displayItem;
     private CrateReward reward;
     private boolean dispRewardSimilar;
     private double chance;
-    private SharedLangData langData;
+    private LangData langData;
     private boolean shouldAnnounce;
-    public CrateRewardHolder(ItemStack disp, CrateReward reward, double chance, boolean dispRewardSimilar,SharedLangData langData,boolean shouldAnnounce) {
+    public CrateRewardHolder(ItemStack disp, CrateReward reward, double chance, boolean dispRewardSimilar, LangData langData, boolean shouldAnnounce) {
         this.reward = reward;
         this.displayItem = disp;
         this.chance = chance;
@@ -27,7 +27,7 @@ public class CrateRewardHolder {
         return chance;
     }
 
-    public SharedLangData getLangData() {
+    public LangData getLangData() {
         return langData;
     }
 
