@@ -3,6 +3,7 @@ package pw.codehusky.huskycrates.lang;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.PhysicalCrate;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
@@ -19,10 +20,10 @@ public class SharedLangData {
     private void defaults() {
         //"", ,,
         prefix = "";
-        rewardMessage = "You won %a %R&r from a %C&r!";
-        rewardAnnounceMessage = "&e%p just won %R&r&e from a %C&r!";
-        noKeyMessage = "You need a %K&r to open this crate.";
-        freeCrateWaitMessage = "&7Please wait %t more second(s)";
+        rewardMessage = "%prefix%You won %a %R&r from a %C&r!";
+        rewardAnnounceMessage = "%p just won %R&r from a %C&r!";
+        noKeyMessage = "%prefix%You need a %K&r to open this crate.";
+        freeCrateWaitMessage = "%prefix%&7Please wait %t more second(s)";
         endings();
     }
     public SharedLangData(){
@@ -41,6 +42,7 @@ public class SharedLangData {
         rewardMessage = base.rewardMessage;
         rewardAnnounceMessage = base.rewardAnnounceMessage;
         noKeyMessage = base.noKeyMessage;
+        freeCrateWaitMessage = base.freeCrateWaitMessage;
         if(!node.getNode("prefix").isVirtual()){
             prefix = node.getNode("prefix").getString(prefix);
         }
@@ -67,7 +69,9 @@ public class SharedLangData {
             rewardMessage = node.getNode("rewardMessage").getString(rewardMessage);
         }
         if(!node.getNode("rewardAnnounceMessage").isVirtual()){
+            HuskyCrates.instance.logger.info("overriding");
             rewardAnnounceMessage = node.getNode("rewardAnnounceMessage").getString(rewardAnnounceMessage);
+            HuskyCrates.instance.logger.info(rewardAnnounceMessage);
         }
         if(!node.getNode("noKeyMessage").isVirtual()){
             noKeyMessage = node.getNode("noKeyMessage").getString(noKeyMessage);
@@ -87,6 +91,7 @@ public class SharedLangData {
     }
     public String formatter(String toFormat, String aOrAn, Player context, VirtualCrate vc, CrateRewardHolder rewardHolder, PhysicalCrate ps){
         String formatted = toFormat;
+        formatted = formatted.replaceAll("%prefix%",prefix);
         if(aOrAn != null)
             formatted = formatted.replaceAll("%a",aOrAn);
         if(rewardHolder != null) {

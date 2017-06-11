@@ -1,9 +1,7 @@
 package pw.codehusky.huskycrates.crate;
 
-import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataQuery;
@@ -66,22 +64,18 @@ public class CrateUtilities {
                 crateTypes.put(key,new VirtualCrate(key,config,configRoot.getNode("crates",key)));
             }
             config.save(configRoot);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            CommentedConfigurationNode root = plugin.crateConfig.load();
-            List<? extends CommentedConfigurationNode> cacher = root.getNode("cachedCrates").getChildrenList();
-            for(CommentedConfigurationNode i : cacher){
-                try {
-                    toCheck.add(i.getValue(TypeToken.of(Location.class)));
-                } catch (ObjectMappingException e) {
-                    e.printStackTrace();
-                    i.setValue(null);
-                }
+        } catch (Exception e) {
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            if(e instanceof IOException){
+                HuskyCrates.instance.logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
+            }else{
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            HuskyCrates.instance.logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");
+            HuskyCrates.instance.logger.error("If you're having trouble solving this issue, join the support discord: https://discord.gg/FSETtcx");
+            return;
         }
         hasInitalizedVirtualCrates = true;
     }

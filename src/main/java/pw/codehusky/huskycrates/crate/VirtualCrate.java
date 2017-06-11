@@ -44,7 +44,7 @@ public class VirtualCrate {
     private HashMap<String,Object> options = new HashMap<>();
     private ItemType keyType;
     private Integer keyDamage= null;
-    public SharedLangData langData;
+    private SharedLangData langData;
     public boolean isGUI;
     public boolean freeCrate = false;
     public boolean virtualKeys = false;
@@ -285,5 +285,9 @@ public class VirtualCrate {
 
     public HashMap<String, Object> getOptions() {
         return options;
+    }
+
+    public SharedLangData getLangData() {
+        return langData;
     }
 }

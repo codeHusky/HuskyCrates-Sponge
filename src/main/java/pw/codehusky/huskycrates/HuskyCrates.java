@@ -87,6 +87,7 @@ public class HuskyCrates {
     @Listener
     public void gameInit(GamePreInitializationEvent event){
         logger = LoggerFactory.getLogger(pC.getName());
+        instance = this;
         for(PluginContainer pc: Sponge.getPluginManager().getPlugins()){
             if(pc.getId().equalsIgnoreCase("inventorytweaks")){
                 logger.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -109,14 +110,22 @@ public class HuskyCrates {
             }else
                 logger.info("Using default lang settings.");
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.warn("Lang load failed, using defaults.");
+        } catch (Exception e) {
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+            if(e instanceof IOException){
+                HuskyCrates.instance.logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
+            }else{
+                e.printStackTrace();
+            }
+            HuskyCrates.instance.logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");
+            HuskyCrates.instance.logger.error("If you're having trouble solving this issue, join the support discord: https://discord.gg/FSETtcx");
         }
 
 
-        logger.info("Let's not init VCrates here anymore. ://)");
-        instance = this;
+        //logger.info("Let's not init VCrates here anymore. ://)");
+
 
     }
     @Listener
@@ -259,10 +268,22 @@ public class HuskyCrates {
                             crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance));
                         logger.info("PROGRESS: "  + Math.round((count/max)*100) + "%");
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ObjectMappingException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    logger.error("!!!!! Config loading has failed! !!!!!");
+                    logger.error("!!!!! Config loading has failed! !!!!!");
+                    logger.error("!!!!! Config loading has failed! !!!!!");
+                    if(e instanceof IOException){
+                        logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
+                    }else{
+                        e.printStackTrace();
+                    }
+                    logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");
+                    logger.error("If you're having trouble solving this issue, join the support discord: https://discord.gg/FSETtcx");
+                    if(event.getCause().root() instanceof Player){
+                        CommandSource cs = (CommandSource) event.getCause().root();
+                        cs.sendMessage(Text.of(TextColors.GOLD,"HuskyCrates",TextColors.WHITE,":",TextColors.RED," An error has occured. Please check the console for more information."));
+                    }
+                    return;
                 }
                 crateUtilities.startParticleEffects();
                 logger.info("Done populating physical crates.");
@@ -287,13 +308,13 @@ public class HuskyCrates {
     @Listener
     public void gameReloaded(GameReloadEvent event){
         if(forceStop) {
-            if(event.getCause().root() instanceof CommandSource){
+            if(event.getCause().root() instanceof Player){
                 CommandSource cs = (CommandSource) event.getCause().root();
                 cs.sendMessage(Text.of(TextColors.GOLD,"HuskyCrates",TextColors.WHITE,":",TextColors.RED," HuskyCrates is currently force stopped. Check the console for more information."));
             }
             return;
         }
-        if(event.getCause().root() instanceof CommandSource){
+        if(event.getCause().root() instanceof Player){
             CommandSource cs = (CommandSource) event.getCause().root();
             cs.sendMessage(Text.of(TextColors.GOLD,"HuskyCrates",TextColors.WHITE,":",TextColors.YELLOW," Please check console to verify that any config modifications you've done are valid."));
         }
@@ -310,21 +331,14 @@ public class HuskyCrates {
             }
         }
         langData = new SharedLangData();
-        CommentedConfigurationNode conf = null;
-        try {
-            conf = crateConfig.load();
-            if(!conf.getNode("lang").isVirtual())
-                langData = new SharedLangData(conf.getNode("lang"));
-            else
-                logger.info("Using default lang settings.");
-        } catch (IOException e) {
-            e.printStackTrace();
-            logger.warn("Lang load failed, using defaults.");
-        }
-        crateUtilities.generateVirtualCrates(crateConfig);
         CommentedConfigurationNode root = null;
         try {
             root = crateConfig.load();
+            if(!root.getNode("lang").isVirtual())
+                langData = new SharedLangData(root.getNode("lang"));
+            else
+                logger.info("Using default lang settings.");
+            crateUtilities.generateVirtualCrates(crateConfig);
             for(CommentedConfigurationNode node : root.getNode("positions").getChildrenList()){
                 Location<World> ee;
                 try {
@@ -336,12 +350,25 @@ public class HuskyCrates {
                 if(!crateUtilities.physicalCrates.containsKey(ee))
                     crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance));
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ObjectMappingException e) {
-            e.printStackTrace();
+            crateUtilities.startParticleEffects();
+        } catch (Exception e) {
+            logger.error("!!!!! Config loading has failed! !!!!!");
+            logger.error("!!!!! Config loading has failed! !!!!!");
+            logger.error("!!!!! Config loading has failed! !!!!!");
+            if(e instanceof IOException){
+                logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
+            }else{
+                e.printStackTrace();
+            }
+            logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");
+            logger.error("If you're having trouble solving this issue, join the support discord: https://discord.gg/FSETtcx");
+            if(event.getCause().root() instanceof Player){
+                CommandSource cs = (CommandSource) event.getCause().root();
+                cs.sendMessage(Text.of(TextColors.GOLD,"HuskyCrates",TextColors.WHITE,":",TextColors.RED," An error has occured. Please check the console for more information."));
+            }
+            return;
         }
-        crateUtilities.startParticleEffects();
+
 
     }
     private boolean blockCanBeCrate(BlockType type){
@@ -488,7 +515,7 @@ public class HuskyCrates {
                     plr.playSound(SoundTypes.BLOCK_IRON_DOOR_CLOSE,blk.getPosition(),1);
                     try {
                         plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                                vc.langData.formatter(vc.langData.prefix + vc.langData.freeCrateWaitMessage,null,plr,vc,null,crateUtilities.physicalCrates.get(blk))
+                                vc.getLangData().formatter(vc.getLangData().freeCrateWaitMessage,null,plr,vc,null,crateUtilities.physicalCrates.get(blk))
                         ));
                     }catch(Exception e){
                         plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
@@ -499,7 +526,7 @@ public class HuskyCrates {
                 plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,blk.getPosition(),0.3);
                 try {
                     plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.langData.formatter(vc.langData.prefix + vc.langData.noKeyMessage,null,plr,vc,null,null)
+                            vc.getLangData().formatter(vc.getLangData().noKeyMessage,null,plr,vc,null,null)
                     ));
                 }catch(Exception e){
                     plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
@@ -584,7 +611,7 @@ public class HuskyCrates {
                     plr.playSound(SoundTypes.BLOCK_IRON_DOOR_CLOSE,event.getTargetEntity().getLocation().getPosition(),1);
                     try {
                         plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                                vc.langData.formatter(vc.langData.prefix + vc.langData.freeCrateWaitMessage,null,plr,vc,null,crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()))
+                                vc.getLangData().formatter(vc.getLangData().freeCrateWaitMessage,null,plr,vc,null,crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()))
                         ));
                     }catch(Exception e){
                         plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
@@ -595,7 +622,7 @@ public class HuskyCrates {
                 plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,event.getTargetEntity().getLocation().getPosition(),0.3);
                 try {
                     plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.langData.formatter(vc.langData.prefix + vc.langData.noKeyMessage,null,plr,vc,null,null)
+                            vc.getLangData().formatter(vc.getLangData().noKeyMessage,null,plr,vc,null,null)
                     ));
                 }catch(Exception e){
                     plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));

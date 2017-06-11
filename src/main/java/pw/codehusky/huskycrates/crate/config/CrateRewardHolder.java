@@ -9,12 +9,14 @@ public class CrateRewardHolder {
     private boolean dispRewardSimilar;
     private double chance;
     private SharedLangData langData;
-    public CrateRewardHolder(ItemStack disp, CrateReward reward, double chance, boolean dispRewardSimilar,SharedLangData langData) {
+    private boolean shouldAnnounce;
+    public CrateRewardHolder(ItemStack disp, CrateReward reward, double chance, boolean dispRewardSimilar,SharedLangData langData,boolean shouldAnnounce) {
         this.reward = reward;
         this.displayItem = disp;
         this.chance = chance;
         this.dispRewardSimilar = dispRewardSimilar;
         this.langData = langData;
+        this.shouldAnnounce = shouldAnnounce;
     }
 
     public CrateReward getReward() {
@@ -35,5 +37,9 @@ public class CrateRewardHolder {
 
     public boolean isDispRewardSimilar() {
         return dispRewardSimilar;
+    }
+
+    public boolean shouldAnnounce() {
+        return shouldAnnounce;
     }
 }
