@@ -25,6 +25,15 @@ public class SharedLangData {
         noKeyMessage = "%prefix%You need a %K&r to open this crate.";
         freeCrateWaitMessage = "%prefix%&7Please wait %t more second(s)";
         endings();
+        if(HuskyCrates.instance != null){
+            if(HuskyCrates.instance.langData != null){
+                prefix = HuskyCrates.instance.langData.prefix;
+                rewardMessage = HuskyCrates.instance.langData.rewardMessage;
+                rewardAnnounceMessage = HuskyCrates.instance.langData.rewardAnnounceMessage;
+                noKeyMessage = HuskyCrates.instance.langData.noKeyMessage;
+                freeCrateWaitMessage = HuskyCrates.instance.langData.freeCrateWaitMessage;
+            }
+        }
     }
     public SharedLangData(){
         defaults();

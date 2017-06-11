@@ -81,7 +81,7 @@ public class HuskyCrates {
     public String huskyCrateIdentifier = "☼1☼2☼3HUSKYCRATE-";
     public String armorStandIdentifier = "ABABABAB-CDDE-0000-8374-CAAAECAAAECA";
     public static HuskyCrates instance;
-    public SharedLangData langData = new SharedLangData();
+    public SharedLangData langData = null;
     public Set<BlockType> validCrateBlocks = new HashSet<>();
     private boolean forceStop = false;
     @Listener
@@ -307,6 +307,7 @@ public class HuskyCrates {
     }
     @Listener
     public void gameReloaded(GameReloadEvent event){
+        langData = null;
         if(forceStop) {
             if(event.getCause().root() instanceof Player){
                 CommandSource cs = (CommandSource) event.getCause().root();
@@ -490,7 +491,7 @@ public class HuskyCrates {
                 }
                 //crateUtilities.recognizeChest(te.getLocation());
                 int keyResult = crateUtilities.isAcceptedKey(crateUtilities.physicalCrates.get(blk),plr.getItemInHand(HandTypes.MAIN_HAND),plr);
-                System.out.println(keyResult);
+                //System.out.println(keyResult);
                 if(keyResult == 1) {
                     if(!vc.freeCrate) {
                         ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();

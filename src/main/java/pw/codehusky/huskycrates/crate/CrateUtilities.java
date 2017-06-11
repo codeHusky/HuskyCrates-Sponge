@@ -162,7 +162,7 @@ public class CrateUtilities {
 
     public int isAcceptedKey(PhysicalCrate crate, Optional<ItemStack> key, Player using) {
         if (crate.vc.freeCrate) {
-            System.out.println("O");
+            //System.out.println("O");
             if (!crate.lastUsed.containsKey(using.getUniqueId())) {
                 return 1;
             } else {
