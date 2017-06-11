@@ -78,9 +78,9 @@ public class SharedLangData {
             rewardMessage = node.getNode("rewardMessage").getString(rewardMessage);
         }
         if(!node.getNode("rewardAnnounceMessage").isVirtual()){
-            HuskyCrates.instance.logger.info("overriding");
+            //HuskyCrates.instance.logger.info("overriding");
             rewardAnnounceMessage = node.getNode("rewardAnnounceMessage").getString(rewardAnnounceMessage);
-            HuskyCrates.instance.logger.info(rewardAnnounceMessage);
+            //HuskyCrates.instance.logger.info(rewardAnnounceMessage);
         }
         if(!node.getNode("noKeyMessage").isVirtual()){
             noKeyMessage = node.getNode("noKeyMessage").getString(noKeyMessage);

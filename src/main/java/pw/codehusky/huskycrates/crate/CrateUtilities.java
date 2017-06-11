@@ -162,14 +162,14 @@ public class CrateUtilities {
 
     public int isAcceptedKey(PhysicalCrate crate, Optional<ItemStack> key, Player using) {
         if (crate.vc.freeCrate) {
-            //System.out.println("O");
+            //System.out.println("FREE?");
             if (!crate.lastUsed.containsKey(using.getUniqueId())) {
                 return 1;
             } else {
                 //System.out.println(crate.vc.getOptions());
                 LocalDateTime lastUsed = crate.lastUsed.get(using.getUniqueId());
                 LocalDateTime minimumWait = lastUsed.plusSeconds((int) crate.vc.getOptions().get("freeCrateDelay"));
-                HuskyCrates.instance.logger.info("" + LocalDateTime.now().compareTo(minimumWait));
+                //HuskyCrates.instance.logger.info("" + LocalDateTime.now().compareTo(minimumWait));
                 if(LocalDateTime.now().compareTo(minimumWait) > 0){
                     return 1;
                 }
@@ -179,7 +179,7 @@ public class CrateUtilities {
             if (key.get().getItem() == crate.vc.getKeyType()) {
                 if (key.get().toContainer().get(DataQuery.of("UnsafeData", "crateID")).isPresent()) {
                     String id = key.get().toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString();
-                    if (id.equals(crate.vc.crateType)) {
+                    if (id.equals(crate.vc.id)) {
                         return 1;
                     }
                 }

@@ -588,7 +588,6 @@ public class HuskyCrates {
                 //crateUtilities.recognizeChest(te.getLocation());
                 event.setCancelled(true);
                 int keyResult = crateUtilities.isAcceptedKey(crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()),plr.getItemInHand(HandTypes.MAIN_HAND),plr);
-                System.out.println(keyResult);
                 if(keyResult == 1) {
                     if (!vc.freeCrate) {
                         ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
