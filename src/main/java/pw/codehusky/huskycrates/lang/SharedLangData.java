@@ -3,30 +3,38 @@ package pw.codehusky.huskycrates.lang;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import pw.codehusky.huskycrates.crate.PhysicalCrate;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
 import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class SharedLangData {
     public String prefix;
     public String rewardMessage;
     public String rewardAnnounceMessage;
     public String noKeyMessage;
+    public String freeCrateWaitMessage;
     private void defaults() {
         //"", ,,
         prefix = "";
         rewardMessage = "You won %a %R&r from a %C&r!";
         rewardAnnounceMessage = "&e%p just won %R&r&e from a %C&r!";
         noKeyMessage = "You need a %K&r to open this crate.";
+        freeCrateWaitMessage = "&7Please wait %t more second(s)";
         endings();
     }
     public SharedLangData(){
         defaults();
+        endings();
     }
     public void endings() {
         prefix += "&r";
         rewardMessage += "&r";
         rewardAnnounceMessage += "&r";
         noKeyMessage += "&r";
+        freeCrateWaitMessage+= "&r";
     }
     public SharedLangData(SharedLangData base, ConfigurationNode node){
         prefix = base.prefix;
@@ -45,6 +53,9 @@ public class SharedLangData {
         if(!node.getNode("noKeyMessage").isVirtual()){
             noKeyMessage = node.getNode("noKeyMessage").getString(noKeyMessage);
         }
+        if(!node.getNode("freeCrateWaitMessage").isVirtual()){
+            noKeyMessage = node.getNode("freeCrateWaitMessage").getString(freeCrateWaitMessage);
+        }
         endings();
     }
     public SharedLangData(ConfigurationNode node){
@@ -61,16 +72,20 @@ public class SharedLangData {
         if(!node.getNode("noKeyMessage").isVirtual()){
             noKeyMessage = node.getNode("noKeyMessage").getString(noKeyMessage);
         }
+        if(!node.getNode("freeCrateWaitMessage").isVirtual()){
+            noKeyMessage = node.getNode("freeCrateWaitMessage").getString(freeCrateWaitMessage);
+        }
         endings();
     }
-    public SharedLangData(String prefix, String rewardMessage, String rewardAnnounceMessage, String noKeyMessage){
+    public SharedLangData(String prefix, String rewardMessage, String rewardAnnounceMessage, String noKeyMessage, String freeCrateWaitMessage){
         this.prefix = prefix;
         this.rewardMessage = rewardMessage;
         this.rewardAnnounceMessage = rewardAnnounceMessage;
         this.noKeyMessage = noKeyMessage;
+        this.freeCrateWaitMessage = freeCrateWaitMessage;
         endings();
     }
-    public String formatter(String toFormat, String aOrAn, Player context, VirtualCrate vc, CrateRewardHolder rewardHolder){
+    public String formatter(String toFormat, String aOrAn, Player context, VirtualCrate vc, CrateRewardHolder rewardHolder, PhysicalCrate ps){
         String formatted = toFormat;
         if(aOrAn != null)
             formatted = formatted.replaceAll("%a",aOrAn);
@@ -87,6 +102,11 @@ public class SharedLangData {
         if(context != null) {
             formatted = formatted.replaceAll("%P", context.getName());
             formatted = formatted.replaceAll("%p", TextSerializers.FORMATTING_CODE.stripCodes(context.getName()));
+        }
+        if(ps != null){
+            LocalDateTime lastUsed = ps.lastUsed.get(context.getUniqueId());
+            LocalDateTime minimumWait = lastUsed.plusSeconds((int) ps.vc.getOptions().get("freeCrateDelay"));
+            formatted = formatted.replaceAll("%t", "" +(LocalDateTime.now().until(minimumWait, ChronoUnit.SECONDS)+1));
         }
         return formatted;
     }

@@ -54,7 +54,7 @@ public class CrateView {
                                 TextSerializers.FORMATTING_CODE.deserialize(giveToPlayer.getReward().getRewardName()), TextColors.RESET, " from a ",
                                 TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));*/
                 ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                        vc.langData.formatter(vc.langData.prefix + vc.langData.rewardMessage,((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() + "",ourplr,vc,giveToPlayer)
+                        vc.langData.formatter(vc.langData.prefix + vc.langData.rewardMessage,((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() + "",ourplr,vc,giveToPlayer,null)
                 ));
                 mult = true;
             }
@@ -63,11 +63,11 @@ public class CrateView {
             String[] vowels = {"a", "e", "i", "o", "u"};
             if (Arrays.asList(vowels).contains(giveToPlayer.getReward().getRewardName().substring(0, 1).toLowerCase())) {
                 ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                        vc.langData.formatter(vc.langData.prefix + vc.langData.rewardMessage,"an",ourplr,vc,giveToPlayer)
+                        vc.langData.formatter(vc.langData.prefix + vc.langData.rewardMessage,"an",ourplr,vc,giveToPlayer,null)
                 ));
             } else {
                 ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                        vc.langData.formatter(vc.langData.prefix + vc.langData.rewardMessage,"a",ourplr,vc,giveToPlayer)
+                        vc.langData.formatter(vc.langData.prefix + vc.langData.rewardMessage,"a",ourplr,vc,giveToPlayer,null)
                 ));
             }
         }

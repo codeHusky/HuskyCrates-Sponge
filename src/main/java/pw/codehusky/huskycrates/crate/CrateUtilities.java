@@ -172,13 +172,14 @@ public class CrateUtilities {
             if (!crate.lastUsed.containsKey(using.getUniqueId())) {
                 return 1;
             } else {
+                //System.out.println(crate.vc.getOptions());
                 LocalDateTime lastUsed = crate.lastUsed.get(using.getUniqueId());
-                LocalDateTime minimumWait = lastUsed.plusSeconds((int) crate.vc.getOptions().get("crateFreeDelay"));
+                LocalDateTime minimumWait = lastUsed.plusSeconds((int) crate.vc.getOptions().get("freeCrateDelay"));
                 HuskyCrates.instance.logger.info("" + LocalDateTime.now().compareTo(minimumWait));
-                if (LocalDateTime.now().compareTo(minimumWait) < 0) {
-
+                if(LocalDateTime.now().compareTo(minimumWait) > 0){
+                    return 1;
                 }
-                return 0;
+                return -1;
             }
         } else if (key.isPresent()) {
             if (key.get().getItem() == crate.vc.getKeyType()) {

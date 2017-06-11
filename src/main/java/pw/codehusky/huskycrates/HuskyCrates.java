@@ -309,7 +309,7 @@ public class HuskyCrates {
                 }
             }
         }
-        langData = new SharedLangData("", "You won %a %R&rfrom a %C&r!","&e%p just won %a %R&r&e from a %C&r!","You need a %K&r to open this crate.");
+        langData = new SharedLangData();
         CommentedConfigurationNode conf = null;
         try {
             conf = crateConfig.load();
@@ -484,11 +484,22 @@ public class HuskyCrates {
                     }).delayTicks(1).submit(this);
                     return;
 
+                }else if(keyResult == -1){
+                    plr.playSound(SoundTypes.BLOCK_IRON_DOOR_CLOSE,blk.getPosition(),1);
+                    try {
+                        plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                                vc.langData.formatter(vc.langData.prefix + vc.langData.freeCrateWaitMessage,null,plr,vc,null,crateUtilities.physicalCrates.get(blk))
+                        ));
+                    }catch(Exception e){
+                        plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
+                        e.printStackTrace();
+                    }
+                    return;
                 }
                 plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,blk.getPosition(),0.3);
                 try {
                     plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.langData.formatter(vc.langData.prefix + vc.langData.noKeyMessage,null,plr,vc,null)
+                            vc.langData.formatter(vc.langData.prefix + vc.langData.noKeyMessage,null,plr,vc,null,null)
                     ));
                 }catch(Exception e){
                     plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
@@ -569,11 +580,22 @@ public class HuskyCrates {
                         crateUtilities.launchCrateForPlayer(crateType, plr, this);
                     }).delayTicks(1).submit(this);
                     return;
+                }else if(keyResult == -1){
+                    plr.playSound(SoundTypes.BLOCK_IRON_DOOR_CLOSE,event.getTargetEntity().getLocation().getPosition(),1);
+                    try {
+                        plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                                vc.langData.formatter(vc.langData.prefix + vc.langData.freeCrateWaitMessage,null,plr,vc,null,crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()))
+                        ));
+                    }catch(Exception e){
+                        plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
+                        e.printStackTrace();
+                    }
+                    return;
                 }
                 plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,event.getTargetEntity().getLocation().getPosition(),0.3);
                 try {
                     plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.langData.formatter(vc.langData.prefix + vc.langData.noKeyMessage,null,plr,vc,null)
+                            vc.langData.formatter(vc.langData.prefix + vc.langData.noKeyMessage,null,plr,vc,null,null)
                     ));
                 }catch(Exception e){
                     plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
