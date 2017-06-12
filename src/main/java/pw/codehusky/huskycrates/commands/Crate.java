@@ -98,7 +98,7 @@ public class Crate implements CommandExecutor {
             src.sendMessage(Text.of("  /crate vKey <id> [player] [count]"));
         if(src.hasPermission("huskycrates.vkeyall"))
             src.sendMessage(Text.of("  /crate vKeyAll <id> [count]"));
-        if(src.hasPermission("huskycrates.keybal"))
+        if(src.hasPermission("huskycrates.keybal.self"))
             src.sendMessage(Text.of("  /crate keybal",((src.hasPermission("huskycrates.keybal.others"))?" [player]":"")));
         if(src.hasPermission("huskycrates.depositkey"))
             src.sendMessage(Text.of("  /crate deposit"));

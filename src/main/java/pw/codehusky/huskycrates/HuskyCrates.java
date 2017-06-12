@@ -197,7 +197,7 @@ public class HuskyCrates {
                 .arguments(
                         GenericArguments.userOrSource(Text.of("player"))
                 )
-                .permission("huskycrates.keybal")
+                .permission("huskycrates.keybal.self")
                 .executor(new KeyBal())
                 .build();
         CommandSpec deposit = CommandSpec.builder()
