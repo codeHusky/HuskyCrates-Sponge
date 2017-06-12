@@ -37,7 +37,7 @@ public class KeyBal implements CommandExecutor {
         boolean atleastOne = false;
         for(String vcid : HuskyCrates.instance.crateUtilities.getCrateTypes()) {
             VirtualCrate vc = HuskyCrates.instance.crateUtilities.getVirtualCrate(vcid);
-            int keys = HuskyCrates.instance.crateUtilities.getVirtualKeys(user.get(),vc);
+            int keys = HuskyCrates.instance.crateUtilities.getVirtualKeyBalance(user.get(),vc);
             if(keys > 0){
                 atleastOne = true;
                 commandSource.sendMessage(Text.of("  ", TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), ": " + keys + " (id: " + vc.id + ") "));

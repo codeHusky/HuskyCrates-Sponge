@@ -40,7 +40,10 @@ public class DepositKey implements CommandExecutor {
         int keyCount = key.getQuantity();
         plr.setItemInHand(HandTypes.MAIN_HAND,null);
         HuskyCrates.instance.crateUtilities.giveVirtualKeys(plr,virtualCrate,keyCount);
-        commandSource.sendMessage(Text.of(TextColors.GREEN,"Successfully deposited " + keyCount + " ", TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName),TextColors.GREEN," Key(s)."));
+        //commandSource.sendMessage(Text.of(TextColors.GREEN,"Successfully deposited " + keyCount + " ", TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName),TextColors.GREEN," Key(s)."));
+        commandSource.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                virtualCrate.getLangData().formatter(virtualCrate.getLangData().depositSuccess,null,plr,virtualCrate,null,null,keyCount)
+        ));
         return CommandResult.success();
     }
 }

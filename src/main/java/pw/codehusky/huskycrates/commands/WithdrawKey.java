@@ -31,21 +31,24 @@ public class WithdrawKey implements CommandExecutor {
             VirtualCrate virtualCrate = HuskyCrates.instance.getCrateUtilities().getVirtualCrate(type);
             int quantity = commandContext.getOne("quantity").isPresent() ? commandContext.<Integer>getOne("quantity").get() : 1;
             if (virtualCrate == null) {
-                commandSource.sendMessage(Text.of("Invalid crate id: " + type + ". Please check your config."));
+                commandSource.sendMessage(Text.of("Invalid crate id: " + type + ". Try using tab auto completion."));
                 return CommandResult.empty();
             }
-            int balance = HuskyCrates.instance.crateUtilities.getVirtualKeys(player,virtualCrate);
+            int balance = HuskyCrates.instance.crateUtilities.getVirtualKeyBalance(player,virtualCrate);
             if(balance >= quantity && quantity > 0){
                 ItemStack key = virtualCrate.getCrateKey(quantity);
                 HuskyCrates.instance.crateUtilities.takeVirtualKey(player,virtualCrate,quantity);
                 player.getInventory().offer(key);
-                player.sendMessage(Text.of(TextColors.GREEN,"You have successfully withdrawn " + quantity + " ",
-                        TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName),TextColors.GREEN," Key(s)"));
+                commandSource.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                        virtualCrate.getLangData().formatter(virtualCrate.getLangData().withdrawSuccess,null,player,virtualCrate,null,null,quantity)
+                ));
             }else{
                 if(quantity <= 0){
                     player.sendMessage(Text.of(TextColors.RED, "Positive integer amounts only."));
                 }else {
-                    player.sendMessage(Text.of(TextColors.RED, "Insufficient balance! (Tried to withdraw " + quantity + ", have " + balance + ")"));
+                    commandSource.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                            virtualCrate.getLangData().formatter(virtualCrate.getLangData().withdrawInsufficient,null,player,virtualCrate,null,null,quantity)
+                    ));
                 }
             }
         }else{

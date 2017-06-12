@@ -192,12 +192,12 @@ public class CrateUtilities {
                 }
             }
         }
-        if(getVirtualKeys(using,crate.vc) > 0){
+        if(getVirtualKeyBalance(using,crate.vc) > 0){
             return 2;
         }
         return 0;
     }
-    public int getVirtualKeys(User player, VirtualCrate vc) {
+    public int getVirtualKeyBalance(User player, VirtualCrate vc) {
         try {
             CommentedConfigurationNode root = HuskyCrates.instance.crateConfig.load();
             if(!root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).isVirtual()){

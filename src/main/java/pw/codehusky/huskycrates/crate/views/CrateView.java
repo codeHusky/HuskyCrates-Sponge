@@ -54,11 +54,11 @@ public class CrateView {
                                 TextSerializers.FORMATTING_CODE.deserialize(giveToPlayer.getReward().getRewardName()), TextColors.RESET, " from a ",
                                 TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));*/
                 ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                        vc.getLangData().formatter(vc.getLangData().rewardMessage,((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() + "",ourplr,vc,giveToPlayer,null)
+                        vc.getLangData().formatter(vc.getLangData().rewardMessage,((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() + "",ourplr,vc,giveToPlayer,null,null)
                 ));
                 if(giveToPlayer.shouldAnnounce()){
                     Sponge.getServer().getBroadcastChannel().send(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.getLangData().formatter(vc.getLangData().rewardAnnounceMessage,((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() + "",ourplr,vc,giveToPlayer,null)
+                            vc.getLangData().formatter(vc.getLangData().rewardAnnounceMessage,((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() + "",ourplr,vc,giveToPlayer,null,null)
                     ));
                 }
                 mult = true;
@@ -68,20 +68,20 @@ public class CrateView {
             String[] vowels = {"a", "e", "i", "o", "u"};
             if (Arrays.asList(vowels).contains(giveToPlayer.getReward().getRewardName().substring(0, 1).toLowerCase())) {
                 ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                        vc.getLangData().formatter(vc.getLangData().rewardMessage,"an",ourplr,vc,giveToPlayer,null)
+                        vc.getLangData().formatter(vc.getLangData().rewardMessage,"an",ourplr,vc,giveToPlayer,null,null)
                 ));
                 if(giveToPlayer.shouldAnnounce()){
                     Sponge.getServer().getBroadcastChannel().send(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.getLangData().formatter(vc.getLangData().rewardAnnounceMessage,"an",ourplr,vc,giveToPlayer,null)
+                            vc.getLangData().formatter(vc.getLangData().rewardAnnounceMessage,"an",ourplr,vc,giveToPlayer,null,null)
                     ));
                 }
             } else {
                 ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                        vc.getLangData().formatter(vc.getLangData().rewardMessage,"a",ourplr,vc,giveToPlayer,null)
+                        vc.getLangData().formatter(vc.getLangData().rewardMessage,"a",ourplr,vc,giveToPlayer,null,null)
                 ));
                 if(giveToPlayer.shouldAnnounce()){
                     Sponge.getServer().getBroadcastChannel().send(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.getLangData().formatter(vc.getLangData().rewardAnnounceMessage,"a",ourplr,vc,giveToPlayer,null)
+                            vc.getLangData().formatter(vc.getLangData().rewardAnnounceMessage,"a",ourplr,vc,giveToPlayer,null,null)
                     ));
                 }
             }

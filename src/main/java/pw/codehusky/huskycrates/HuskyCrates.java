@@ -551,7 +551,9 @@ public class HuskyCrates {
                         }
                     }else if(keyResult == 2){
                         crateUtilities.takeVirtualKey(plr,vc);
-                        plr.sendMessage(Text.of(TextColors.GRAY,"You now have " + crateUtilities.getVirtualKeys(plr,vc) + " virtual key(s) for this crate."));
+                        plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                                vc.getLangData().formatter(vc.getLangData().vkeyUseNotifier,null,plr,vc,null,crateUtilities.physicalCrates.get(blk),null)
+                        ));
                     }
                     Task.Builder upcoming = scheduler.createTaskBuilder();
                     crateUtilities.physicalCrates.get(blk).handleUse(plr);
@@ -564,7 +566,7 @@ public class HuskyCrates {
                     plr.playSound(SoundTypes.BLOCK_IRON_DOOR_CLOSE,blk.getPosition(),1);
                     try {
                         plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                                vc.getLangData().formatter(vc.getLangData().freeCrateWaitMessage,null,plr,vc,null,crateUtilities.physicalCrates.get(blk))
+                                vc.getLangData().formatter(vc.getLangData().freeCrateWaitMessage,null,plr,vc,null,crateUtilities.physicalCrates.get(blk),null)
                         ));
                     }catch(Exception e){
                         plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
@@ -575,7 +577,7 @@ public class HuskyCrates {
                 plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,blk.getPosition(),0.3);
                 try {
                     plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.getLangData().formatter(vc.getLangData().noKeyMessage,null,plr,vc,null,null)
+                            vc.getLangData().formatter(vc.getLangData().noKeyMessage,null,plr,vc,null,null,null)
                     ));
                 }catch(Exception e){
                     plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
@@ -650,7 +652,9 @@ public class HuskyCrates {
                         }
                     }else if(keyResult == 2){
                         crateUtilities.takeVirtualKey(plr,vc);
-                        plr.sendMessage(Text.of(TextColors.GRAY,"You now have " + crateUtilities.getVirtualKeys(plr,vc) + " virtual key(s) for this crate."));
+                        plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                                vc.getLangData().formatter(vc.getLangData().vkeyUseNotifier,null,plr,vc,null,crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()),null)
+                        ));
                     }
                     Task.Builder upcoming = scheduler.createTaskBuilder();
                     crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()).handleUse(plr);
@@ -662,7 +666,7 @@ public class HuskyCrates {
                     plr.playSound(SoundTypes.BLOCK_IRON_DOOR_CLOSE,event.getTargetEntity().getLocation().getPosition(),1);
                     try {
                         plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                                vc.getLangData().formatter(vc.getLangData().freeCrateWaitMessage,null,plr,vc,null,crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()))
+                                vc.getLangData().formatter(vc.getLangData().freeCrateWaitMessage,null,plr,vc,null,crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()),null)
                         ));
                     }catch(Exception e){
                         plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
@@ -673,7 +677,7 @@ public class HuskyCrates {
                 plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,event.getTargetEntity().getLocation().getPosition(),0.3);
                 try {
                     plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.getLangData().formatter(vc.getLangData().noKeyMessage,null,plr,vc,null,null)
+                            vc.getLangData().formatter(vc.getLangData().noKeyMessage,null,plr,vc,null,null,null)
                     ));
                 }catch(Exception e){
                     plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
