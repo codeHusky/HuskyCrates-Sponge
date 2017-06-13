@@ -71,6 +71,7 @@ public class CrateUtilities {
             if(e instanceof IOException){
                 HuskyCrates.instance.logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
             }else{
+                HuskyCrates.instance.logger.error("genVirtualCrates Failure");
                 e.printStackTrace();
             }
             HuskyCrates.instance.logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");

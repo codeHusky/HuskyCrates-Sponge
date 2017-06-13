@@ -62,14 +62,14 @@ import java.util.function.Consumer;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.4.0", description = "A CratesReloaded Replacement for Sponge? lol")
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.4.1", description = "A CratesReloaded Replacement for Sponge? lol")
 public class HuskyCrates {
     //@Inject
     public Logger logger;
 
 
     @Inject
-    private PluginContainer pC;
+    public PluginContainer pC;
     @Inject
     @DefaultConfig(sharedRoot = false)
     public ConfigurationLoader<CommentedConfigurationNode> crateConfig;
@@ -81,7 +81,7 @@ public class HuskyCrates {
     public String huskyCrateIdentifier = "☼1☼2☼3HUSKYCRATE-";
     public String armorStandIdentifier = "ABABABAB-CDDE-0000-8374-CAAAECAAAECA";
     public static HuskyCrates instance;
-    public LangData langData = null;
+    public LangData langData = new LangData();
     public Set<BlockType> validCrateBlocks = new HashSet<>();
     private boolean forceStop = false;
     @Listener
@@ -228,10 +228,14 @@ public class HuskyCrates {
                 .arguments(GenericArguments.optional(GenericArguments.remainingRawJoinedStrings(Text.of(""))))
                 .executor(new Crate(this))
                 .build();
+        CommandSpec huskySpec = CommandSpec.builder()
+                .executor(new Husky(this))
+                .build();
 
         scheduler = Sponge.getScheduler();
         genericCause = Cause.of(NamedCause.of("PluginContainer",pC));
         Sponge.getCommandManager().register(this, crateSpec, "crate");
+        Sponge.getCommandManager().register(this, huskySpec, "husky","huskycrates","hc");
         logger.info("Crates has been started.");
     }
 
