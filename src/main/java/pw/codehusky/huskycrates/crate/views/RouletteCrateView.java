@@ -21,7 +21,7 @@ import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
-import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
+import pw.codehusky.huskycrates.crate.config.CrateReward;
 import pw.codehusky.huskycrates.exceptions.RandomItemSelectionFailureException;
 
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ public class RouletteCrateView extends CrateView {
     private Inventory disp;
     private Task updater;
     private boolean stopped = false;
-    private CrateRewardHolder holder;
+    private CrateReward holder;
     private boolean firedEnd = false;
     private boolean outOfTime = false;
     public RouletteCrateView(HuskyCrates plugin, Player runner, VirtualCrate virtualCrate){
@@ -94,8 +94,8 @@ public class RouletteCrateView extends CrateView {
             }else if(!stopped&&(tickCount == 0 || Math.round(tickCount/speed) > Math.round((tickCount-1)/speed))){
                 try {
                     int i = itemIndexSelected();
-                    e.set(((CrateRewardHolder)items.get(i)[1]).getDisplayItem());
-                    holder = (CrateRewardHolder)items.get(i)[1];
+                    e.set(((CrateReward)items.get(i)[1]).getDisplayItem());
+                    holder = (CrateReward)items.get(i)[1];
                     ourplr.playSound(SoundTypes.UI_BUTTON_CLICK,ourplr.getLocation().getPosition(),0.25);
                 } catch (RandomItemSelectionFailureException e1) {
                     plugin.logger.error("Random Item Selection failed in Roulette Crate View: " + vc.displayName);

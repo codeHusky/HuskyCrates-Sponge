@@ -22,19 +22,14 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Optional;
 
-public class CrateRewardHolderParser {
-    public static CrateRewardHolder fromConfig(ConfigurationNode holderNode, VirtualCrate vc){
+public class CrateConfigParser {
+    public static CrateReward fromConfig(ConfigurationNode holderNode, VirtualCrate vc){
         if(holderNode.getNode("huskydata").isVirtual()){
             HuskyCrates.instance.logger.error("CANNOT FIND HUSKYDATA: " + holderNode.getNode("name").getString("(no name)") + " (item #" + holderNode.getKey()+  ") || " + holderNode.getParent().getParent().getKey());
             return null;
         }
-        if(holderNode.getNode("huskydata","reward","type").isVirtual()){
-            HuskyCrates.instance.logger.error("CANNOT FIND REWARD TYPE: " + holderNode.getNode("name").getString("(no name)") + " (item #" + holderNode.getKey()+  ") || " + holderNode.getParent().getParent().getKey());
-            return null;
-        }
+
         ItemStack dispItem = itemFromNode(holderNode);
-        CrateReward reward = new CrateReward(null,"CODE ERROR, CONTACT DEVELOPER",false);
-        boolean dispAwardSimilar = false;
         String name;
         boolean single = false;
         boolean announce = false;
@@ -43,44 +38,76 @@ public class CrateRewardHolderParser {
             langData = new LangData(vc.getLangData(),holderNode.getNode("huskydata","lang"));
         }
         //System.out.println(dispItem.get(Keys.DISPLAY_NAME));
-        if(holderNode.getNode("huskydata","reward").getNode("overrideRewardName").isVirtual()){
+        if (!holderNode.getNode("huskydata", "reward", "announce").isVirtual()) {
+            //announce = holderNode.getNode("huskydata", "reward", "announce").getBoolean(false);
+            holderNode.getNode("huskydata", "announce").setValue(holderNode.getNode("huskydata", "reward", "announce").getValue());
+            holderNode.getNode("huskydata", "reward", "announce").setValue(null);
+        }
+        if (!holderNode.getNode("huskydata", "reward", "treatAsSingle").isVirtual()) {
+            //single = holderNode.getNode("huskydata", "reward", "treatAsSingle").getBoolean(false);
+            holderNode.getNode("huskydata", "treatAsSingle").setValue(holderNode.getNode("huskydata", "reward", "treatAsSingle").getValue());
+            holderNode.getNode("huskydata", "reward", "treatAsSingle").setValue(null);
+        }
+        if(!holderNode.getNode("huskydata","reward","overrideRewardName").isVirtual()) {
+            String premove = holderNode.getNode("huskydata","reward","overrideRewardName").getString("failure?");
+            holderNode.getNode("huskydata","reward","overrideRewardName").setValue(null);
+            holderNode.getNode("huskydata","overrideRewardName").setValue(premove);
+        }
+        if(holderNode.getNode("huskydata","overrideRewardName").isVirtual()){
             //System.out.println("Virtual");
-            if(dispItem.get(Keys.DISPLAY_NAME).isPresent()){
+            if (dispItem.get(Keys.DISPLAY_NAME).isPresent()) {
                 name = TextSerializers.FORMATTING_CODE.serialize(dispItem.get(Keys.DISPLAY_NAME).get());
-            }else{
+            } else {
                 name = dispItem.getItem().getName();
             }
         }else{
             //System.out.println("Real");
-            name = holderNode.getNode("huskydata","reward").getNode("overrideRewardName").getString("strings, please.");
+            name = holderNode.getNode("huskydata","overrideRewardName").getString("strings, please.");
         }
-        if(!holderNode.getNode("huskydata","reward").getNode("treatAsSingle").isVirtual()){
-            single = holderNode.getNode("huskydata","reward").getNode("treatAsSingle").getBoolean();
+        if (!holderNode.getNode("huskydata", "announce").isVirtual()) {
+            announce = holderNode.getNode("huskydata", "announce").getBoolean(false);
         }
-        if(holderNode.getNode("huskydata","reward","type").getString().equalsIgnoreCase("item")) {
-            ItemStack rewardItem;
-            if (holderNode.getNode("huskydata","reward").getNode("overrideItem").isVirtual()) {
-                ItemStack rr = dispItem.copy();
-                if(!holderNode.getNode("huskydata","reward").getNode("overrideCount").isVirtual()){
+        if (!holderNode.getNode("huskydata", "treatAsSingle").isVirtual()) {
+            single = holderNode.getNode("huskydata", "treatAsSingle").getBoolean(false);
+        }
+        if(!holderNode.getNode("huskydata","reward").isVirtual()){
+            holderNode.getNode("huskydata","rewards").getAppendedNode().setValue(holderNode.getNode("huskydata","reward"));
+            holderNode.getNode("huskydata","reward").setValue(null);
+        }
 
-                    rr.setQuantity(holderNode.getNode("huskydata","reward").getNode("overrideCount").getInt());
-
-                }
-                reward=new CrateReward(rr,name,single);
-                dispAwardSimilar = true;
-            }else{
-                reward=new CrateReward(itemFromNode(holderNode.getNode("huskydata","reward","overrideItem")),name,single);
+        ArrayList<Object> rewards = new ArrayList<>();
+        for(ConfigurationNode rewardNode : holderNode.getNode("huskydata","rewards").getChildrenList()) {
+            if(rewardNode.getNode("type").isVirtual()){
+                HuskyCrates.instance.logger.error("CANNOT FIND REWARD TYPE: " + holderNode.getNode("name").getString("(no name)") + " (item #" + holderNode.getKey()+  ") (reward #" + rewardNode.getKey()+  ") || " + holderNode.getParent().getParent().getKey());
+                continue;
             }
-        }else if(holderNode.getNode("huskydata","reward","type").getString().equalsIgnoreCase("command")){
-            reward = new CrateReward(holderNode.getNode("huskydata","reward","command").getString("/say You didn't set a command or something..."),name,single);
-        }else{
-            HuskyCrates.instance.logger.error("INVALID REWARD TYPE: " + holderNode.getNode("huskydata","reward","type").getString() +"@" + holderNode.getNode("name").getString("(no name)") + " (item #" + holderNode.getKey() + ") || "+ holderNode.getParent().getParent().getKey());
-        }
-        if(!holderNode.getNode("huskydata","reward","announce").isVirtual()){
-            announce = holderNode.getNode("huskydata","reward","announce").getBoolean(false);
-        }
+            if (rewardNode.getNode("type").getString().equalsIgnoreCase("item")) {
+                //ItemStack rewardItem;
+                if (rewardNode.getNode("overrideItem").isVirtual()) {
+                    ItemStack rr = dispItem.copy();
+                    if (!rewardNode.getNode("overrideCount").isVirtual()) {
 
-        return new CrateRewardHolder(dispItem,reward,holderNode.getNode("huskydata","weight").getDouble(1),dispAwardSimilar,langData,announce);
+                        rr.setQuantity(rewardNode.getNode("overrideCount").getInt());
+
+                    }
+                    rewards.add(rr);
+                } else {
+                    rewards.add(itemFromNode(rewardNode.getNode("overrideItem")));
+                }
+            } else if (rewardNode.getNode("type").getString().equalsIgnoreCase("command")) {
+                rewards.add(rewardNode.getNode("command").getString("/say You didn't set a command or something..."));
+            } else {
+                HuskyCrates.instance.logger.error("INVALID REWARD TYPE: " + rewardNode.getNode("type").getString() + "@" + holderNode.getNode("name").getString("(no name)") + " (item #" + holderNode.getKey() + ") || " + holderNode.getParent().getParent().getKey());
+            }
+
+        }
+        if (!holderNode.getNode("huskydata","announce").isVirtual()) {
+            announce = holderNode.getNode("huskydata","announce").getBoolean(false);
+        }
+        if(rewards.size() == 0){
+            rewards.add("/say No rewards were loaded in the " + vc.id + " crate!");
+        }
+        return new CrateReward(dispItem,rewards,name,holderNode.getNode("huskydata","weight").getDouble(1),langData,announce,single);
     }
     private static ItemStack itemFromNode(ConfigurationNode itemRoot){
         try {

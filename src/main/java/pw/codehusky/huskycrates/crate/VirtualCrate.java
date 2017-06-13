@@ -19,8 +19,8 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.Color;
 import pw.codehusky.huskycrates.HuskyCrates;
-import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
-import pw.codehusky.huskycrates.crate.config.CrateRewardHolderParser;
+import pw.codehusky.huskycrates.crate.config.CrateReward;
+import pw.codehusky.huskycrates.crate.config.CrateConfigParser;
 import pw.codehusky.huskycrates.crate.views.*;
 import pw.codehusky.huskycrates.lang.LangData;
 
@@ -158,13 +158,13 @@ public class VirtualCrate {
         commandSet = new HashMap<>();
         ///System.out.println("???");
         for(CommentedConfigurationNode e : items){
-            CrateRewardHolder rewardHolder = null;
+            CrateReward rewardHolder = null;
 //            System.out.println(e.getNode("formatversion").getValue());
             if(e.getNode("formatversion").isVirtual()){
                HuskyCrates.instance.logger.error("Out of date item in " + id + "! Please update your config with HuskyCrates Config Updater!");
                continue;
             }
-            rewardHolder = CrateRewardHolderParser.fromConfig(e,this);
+            rewardHolder = CrateConfigParser.fromConfig(e,this);
             if(rewardHolder == null)
                 continue;
 

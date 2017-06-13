@@ -6,7 +6,7 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.PhysicalCrate;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
-import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
+import pw.codehusky.huskycrates.crate.config.CrateReward;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -111,14 +111,14 @@ public class LangData {
         configNodeOverrides(node);
         endings();
     }
-    public String formatter(String toFormat, String aOrAn, Player plr, VirtualCrate vc, CrateRewardHolder rewardHolder, PhysicalCrate ps, Integer amount){
+    public String formatter(String toFormat, String aOrAn, Player plr, VirtualCrate vc, CrateReward rewardHolder, PhysicalCrate ps, Integer amount){
         String formatted = toFormat;
         formatted = formatted.replaceAll("%prefix%",prefix);
         if(aOrAn != null)
             formatted = formatted.replaceAll("%a",aOrAn);
         if(rewardHolder != null) {
-            formatted = formatted.replaceAll("%R", rewardHolder.getReward().getRewardName());
-            formatted = formatted.replaceAll("%r", TextSerializers.FORMATTING_CODE.stripCodes(rewardHolder.getReward().getRewardName()));
+            formatted = formatted.replaceAll("%R", rewardHolder.getRewardName());
+            formatted = formatted.replaceAll("%r", TextSerializers.FORMATTING_CODE.stripCodes(rewardHolder.getRewardName()));
         }
         if(vc != null) {
             formatted = formatted.replaceAll("%C", vc.displayName);

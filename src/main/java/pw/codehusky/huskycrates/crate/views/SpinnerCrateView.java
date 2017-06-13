@@ -19,7 +19,7 @@ import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
-import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
+import pw.codehusky.huskycrates.crate.config.CrateReward;
 import pw.codehusky.huskycrates.exceptions.RandomItemSelectionFailureException;
 
 import java.util.Random;
@@ -97,10 +97,10 @@ public class SpinnerCrateView extends CrateView {
                 //int itemNum = items.size() - 1 - Math.abs(((slotnum - 10) + (clicks)) % items.size());
 
                 int itemNum = Math.abs(clicks + (slotnum - 9) - 4 ) % items.size();
-                e.set(((CrateRewardHolder)items.get(itemNum)[1]).getDisplayItem());
+                e.set(((CrateReward)items.get(itemNum)[1]).getDisplayItem());
                 if(slotnum == 13) {
                     //System.out.println(itemNum);
-                    giveToPlayer = (CrateRewardHolder)items.get(itemNum)[1];
+                    giveToPlayer = (CrateReward)items.get(itemNum)[1];
                 }
             }else if(slotnum != 13){
                 if(state == 2 ){
@@ -113,7 +113,7 @@ public class SpinnerCrateView extends CrateView {
                 /*HuskyCrates.instance.logger.warn("result: " + (itemNum + 1));
                 HuskyCrates.instance.logger.warn("fail: " + (planned != itemNum));
                 HuskyCrates.instance.logger.warn("difference: " + (planned - itemNum));*/
-                giveToPlayer = (CrateRewardHolder)items.get(itemNum)[1];
+                giveToPlayer = (CrateReward)items.get(itemNum)[1];
                 e.set(giveToPlayer.getDisplayItem());
             }
             slotnum++;
@@ -131,7 +131,7 @@ public class SpinnerCrateView extends CrateView {
         g.offer(Keys.DISPLAY_NAME,Text.of(TextStyles.RESET,"You won an item!"));
         return g;
     }
-    private CrateRewardHolder giveToPlayer;
+    private CrateReward giveToPlayer;
     private double updateMax = 1;
     private int waitCurrent = 0;
 

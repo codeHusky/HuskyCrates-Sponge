@@ -18,7 +18,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
-import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
+import pw.codehusky.huskycrates.crate.config.CrateReward;
 import pw.codehusky.huskycrates.exceptions.RandomItemSelectionFailureException;
 
 import java.util.concurrent.TimeUnit;
@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 public class InstantGUIView extends CrateView {
     private Inventory disp;
     private Task updater;
-    private CrateRewardHolder holder = null;
+    private CrateReward holder = null;
     public InstantGUIView(HuskyCrates plugin, Player runner, VirtualCrate virtualCrate){
         //System.out.println("AA");
         this.plugin = plugin;
@@ -69,8 +69,8 @@ public class InstantGUIView extends CrateView {
             }else if(holder == null){
                 try {
                     int i = itemIndexSelected();
-                    e.set(((CrateRewardHolder)items.get(i)[1]).getDisplayItem());
-                    holder = (CrateRewardHolder)items.get(i)[1];
+                    e.set(((CrateReward)items.get(i)[1]).getDisplayItem());
+                    holder = (CrateReward)items.get(i)[1];
                     ourplr.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH,ourplr.getLocation().getPosition(),1);
                 } catch (RandomItemSelectionFailureException e1) {
                     plugin.logger.error("Random Item Selection failed in Roulette Crate View: " + vc.displayName);

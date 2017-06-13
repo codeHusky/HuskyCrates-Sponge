@@ -8,7 +8,7 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.CrateCommandSource;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
-import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
+import pw.codehusky.huskycrates.crate.config.CrateReward;
 import pw.codehusky.huskycrates.exceptions.RandomItemSelectionFailureException;
 
 import java.util.ArrayList;
@@ -38,53 +38,56 @@ public class CrateView {
         }
         throw new RandomItemSelectionFailureException();
     }
-    public void handleReward(CrateRewardHolder giveToPlayer){
-        if (giveToPlayer.getReward().getReward() instanceof String){
-            Sponge.getCommandManager().process(new CrateCommandSource(), giveToPlayer.getReward().getReward().toString().replace("%p", ourplr.getName()));
-        }else {
-            //System.out.println(giveToPlayer.getReward().treatAsSingle());
+    public void handleReward(CrateReward giveToPlayer){
+        for(Object reward : giveToPlayer.getRewards()) {
+            if (reward instanceof String) {
+                Sponge.getCommandManager().process(new CrateCommandSource(), reward.toString().replace("%p", ourplr.getName()));
+            } else {
+                //System.out.println(giveToPlayer.getReward().treatAsSingle());
 
-            ourplr.getInventory().offer((ItemStack) giveToPlayer.getReward().getReward());
+                ourplr.getInventory().offer((ItemStack) reward);
+            }
         }
         boolean mult = false;
-        if (!giveToPlayer.getReward().treatAsSingle() &&  giveToPlayer.getReward().getReward() instanceof ItemStack) {
-            if(((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() > 1) {
-                        /*ourplr.sendMessage(Text.of("You won ", TextColors.YELLOW,
-                                ((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() + " ",
-                                TextSerializers.FORMATTING_CODE.deserialize(giveToPlayer.getReward().getRewardName()), TextColors.RESET, " from a ",
-                                TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));*/
+        if (!giveToPlayer.treatAsSingle() && giveToPlayer.getRewards().size() == 1 && giveToPlayer.getRewards().get(0) instanceof ItemStack) {
+            if (((ItemStack) giveToPlayer.getRewards().get(0)).getQuantity() > 1) {
+                    /*ourplr.sendMessage(Text.of("You won ", TextColors.YELLOW,
+                            ((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() + " ",
+                            TextSerializers.FORMATTING_CODE.deserialize(giveToPlayer.getReward().getRewardName()), TextColors.RESET, " from a ",
+                            TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));*/
                 ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                        vc.getLangData().formatter(vc.getLangData().rewardMessage,((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() + "",ourplr,vc,giveToPlayer,null,null)
+                        vc.getLangData().formatter(vc.getLangData().rewardMessage, ((ItemStack) giveToPlayer.getRewards().get(0)).getQuantity() + "", ourplr, vc, giveToPlayer, null, null)
                 ));
-                if(giveToPlayer.shouldAnnounce()){
+                if (giveToPlayer.shouldAnnounce()) {
                     Sponge.getServer().getBroadcastChannel().send(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.getLangData().formatter(vc.getLangData().rewardAnnounceMessage,((ItemStack) giveToPlayer.getReward().getReward()).getQuantity() + "",ourplr,vc,giveToPlayer,null,null)
+                            vc.getLangData().formatter(vc.getLangData().rewardAnnounceMessage, ((ItemStack) giveToPlayer.getRewards().get(0)).getQuantity() + "", ourplr, vc, giveToPlayer, null, null)
                     ));
                 }
                 mult = true;
             }
         }
-        if(!mult){
+        if (!mult) {
             String[] vowels = {"a", "e", "i", "o", "u"};
-            if (Arrays.asList(vowels).contains(giveToPlayer.getReward().getRewardName().substring(0, 1).toLowerCase())) {
+            if (Arrays.asList(vowels).contains(giveToPlayer.getRewardName().substring(0, 1).toLowerCase())) {
                 ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                        vc.getLangData().formatter(vc.getLangData().rewardMessage,"an",ourplr,vc,giveToPlayer,null,null)
+                        vc.getLangData().formatter(vc.getLangData().rewardMessage, "an", ourplr, vc, giveToPlayer, null, null)
                 ));
-                if(giveToPlayer.shouldAnnounce()){
+                if (giveToPlayer.shouldAnnounce()) {
                     Sponge.getServer().getBroadcastChannel().send(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.getLangData().formatter(vc.getLangData().rewardAnnounceMessage,"an",ourplr,vc,giveToPlayer,null,null)
+                            vc.getLangData().formatter(vc.getLangData().rewardAnnounceMessage, "an", ourplr, vc, giveToPlayer, null, null)
                     ));
                 }
             } else {
                 ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                        vc.getLangData().formatter(vc.getLangData().rewardMessage,"a",ourplr,vc,giveToPlayer,null,null)
+                        vc.getLangData().formatter(vc.getLangData().rewardMessage, "a", ourplr, vc, giveToPlayer, null, null)
                 ));
-                if(giveToPlayer.shouldAnnounce()){
+                if (giveToPlayer.shouldAnnounce()) {
                     Sponge.getServer().getBroadcastChannel().send(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.getLangData().formatter(vc.getLangData().rewardAnnounceMessage,"a",ourplr,vc,giveToPlayer,null,null)
+                            vc.getLangData().formatter(vc.getLangData().rewardAnnounceMessage, "a", ourplr, vc, giveToPlayer, null, null)
                     ));
                 }
             }
         }
+
     }
 }

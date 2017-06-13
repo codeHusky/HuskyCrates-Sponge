@@ -4,7 +4,7 @@ import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
-import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
+import pw.codehusky.huskycrates.crate.config.CrateReward;
 import pw.codehusky.huskycrates.exceptions.RandomItemSelectionFailureException;
 
 public class InstantView extends CrateView {
@@ -14,7 +14,7 @@ public class InstantView extends CrateView {
         vc = virtualCrate;
         items = vc.getItemSet();
         try {
-            CrateRewardHolder rewardHolder = (CrateRewardHolder)vc.getItemSet().get(itemIndexSelected())[1];
+            CrateReward rewardHolder = (CrateReward)vc.getItemSet().get(itemIndexSelected())[1];
             handleReward(rewardHolder);
             ourplr.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP,ourplr.getLocation().getPosition(),1);
         } catch (RandomItemSelectionFailureException e) {

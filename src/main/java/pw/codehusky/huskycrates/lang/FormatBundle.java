@@ -3,17 +3,17 @@ package pw.codehusky.huskycrates.lang;
 import org.spongepowered.api.entity.living.player.Player;
 import pw.codehusky.huskycrates.crate.PhysicalCrate;
 import pw.codehusky.huskycrates.crate.VirtualCrate;
-import pw.codehusky.huskycrates.crate.config.CrateRewardHolder;
+import pw.codehusky.huskycrates.crate.config.CrateReward;
 
 public class FormatBundle {
     private String toFormat;
     private String aOrAn;
     private Player plr;
     private VirtualCrate vc;
-    private CrateRewardHolder rewardHolder;
+    private CrateReward rewardHolder;
     private PhysicalCrate ps;
     private Integer amount;
-    FormatBundle(String tf, String a, Player p, VirtualCrate v, CrateRewardHolder crh, PhysicalCrate pc, Integer am) {
+    FormatBundle(String tf, String a, Player p, VirtualCrate v, CrateReward crh, PhysicalCrate pc, Integer am) {
         toFormat = tf;
         aOrAn = a;
         plr=p;
@@ -27,7 +27,7 @@ public class FormatBundle {
         private String aOrAn = null;
         private Player plr = null;
         private VirtualCrate vc = null;
-        private CrateRewardHolder rewardHolder = null;
+        private CrateReward rewardHolder = null;
         private PhysicalCrate ps = null;
         private Integer amount = null;
         public Builder(){}
@@ -43,7 +43,7 @@ public class FormatBundle {
         public void vc(VirtualCrate vc){
             this.vc = vc;
         }
-        public void rewardHolder(CrateRewardHolder rewardHolder){
+        public void rewardHolder(CrateReward rewardHolder){
             this.rewardHolder = rewardHolder;
         }
         public void ps(PhysicalCrate ps){

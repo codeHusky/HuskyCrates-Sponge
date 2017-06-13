@@ -1,32 +1,52 @@
 package pw.codehusky.huskycrates.crate.config;
 
 import org.spongepowered.api.item.inventory.ItemStack;
+import pw.codehusky.huskycrates.lang.LangData;
 
-public class CrateReward<T> {
-    private T reward;
+import java.util.ArrayList;
+
+public class CrateReward {
+    private ItemStack displayItem;
+    private ArrayList<Object> rewards;
+    private double chance;
+    private LangData langData;
     private String rewardName;
-    private boolean treatAsSingle;
-    public CrateReward(T reward, String name, boolean treatAsSingle){
-        this.reward = reward;
-        if(reward instanceof String){
-            String ret = reward.toString();
-            if(ret.split("")[0].equals("/")){
-                this.reward = (T) ret.substring(1);
-            }
-        }
-        this.rewardName = name;
-        this.treatAsSingle = treatAsSingle;
-        //System.out.println(treatAsSingle);
+    private boolean shouldAnnounce;
+    private boolean single;
+    public CrateReward(ItemStack disp, ArrayList<Object> rewards, String rewardName, double chance, LangData langData, boolean shouldAnnounce, boolean single) {
+        this.rewards = rewards;
+        this.displayItem = disp;
+        this.chance = chance;
+        this.langData = langData;
+        this.shouldAnnounce = shouldAnnounce;
+        this.rewardName = rewardName;
+        this.single = single;
     }
-    public T getReward() {
-        if(reward instanceof ItemStack)
-            return (T)((ItemStack)reward).copy(); //lmao intellij chill out
-        return reward;
+
+    public ArrayList<Object> getRewards() {
+        return rewards;
     }
+
+    public double getChance() {
+        return chance;
+    }
+
+    public LangData getLangData() {
+        return langData;
+    }
+
+    public ItemStack getDisplayItem() {
+        return displayItem;
+    }
+
     public String getRewardName() {
         return rewardName;
     }
+
+    public boolean shouldAnnounce() {
+        return shouldAnnounce;
+    }
     public boolean treatAsSingle() {
-        return treatAsSingle;
+        return single;
     }
 }

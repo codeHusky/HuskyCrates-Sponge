@@ -62,7 +62,7 @@ import java.util.function.Consumer;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.4.1", description = "A CratesReloaded Replacement for Sponge? lol")
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.5.0", description = "A CratesReloaded Replacement for Sponge? lol")
 public class HuskyCrates {
     //@Inject
     public Logger logger;
@@ -552,12 +552,19 @@ public class HuskyCrates {
                                 tobe.setQuantity(tobe.getQuantity() - 1);
                                 plr.setItemInHand(HandTypes.MAIN_HAND, tobe);
                             }
+                        }else{
+                            plr.sendMessage(Text.of(TextColors.GRAY,"Since you are a tester, a key was not taken."));
                         }
                     }else if(keyResult == 2){
-                        crateUtilities.takeVirtualKey(plr,vc);
-                        plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                                vc.getLangData().formatter(vc.getLangData().vkeyUseNotifier,null,plr,vc,null,crateUtilities.physicalCrates.get(blk),null)
-                        ));
+                        if(!plr.hasPermission("huskycrates.tester")) {
+                            crateUtilities.takeVirtualKey(plr, vc);
+                            plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                                    vc.getLangData().formatter(vc.getLangData().vkeyUseNotifier, null, plr, vc, null, crateUtilities.physicalCrates.get(blk), null)
+                            ));
+                        }else{
+                            plr.sendMessage(Text.of(TextColors.GRAY,"Since you are a tester, a virtual key was not taken."));
+                            plr.sendMessage(Text.of(TextColors.GRAY,"You can remove them manually by withdrawing your keys."));
+                        }
                     }
                     Task.Builder upcoming = scheduler.createTaskBuilder();
                     crateUtilities.physicalCrates.get(blk).handleUse(plr);
@@ -643,7 +650,7 @@ public class HuskyCrates {
                 event.setCancelled(true);
                 int keyResult = crateUtilities.isAcceptedKey(crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()),plr.getItemInHand(HandTypes.MAIN_HAND),plr);
                 if(keyResult == 1 || keyResult == 2) {
-                    if (!vc.freeCrate && keyResult == 1) {
+                    if(!vc.freeCrate && keyResult == 1) {
                         ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
                         if (!plr.hasPermission("huskycrates.tester")) {
                             if (inhand.getQuantity() == 1)
@@ -653,12 +660,19 @@ public class HuskyCrates {
                                 tobe.setQuantity(tobe.getQuantity() - 1);
                                 plr.setItemInHand(HandTypes.MAIN_HAND, tobe);
                             }
+                        }else{
+                            plr.sendMessage(Text.of(TextColors.GRAY,"Since you are a tester, a key was not taken."));
                         }
                     }else if(keyResult == 2){
-                        crateUtilities.takeVirtualKey(plr,vc);
-                        plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                                vc.getLangData().formatter(vc.getLangData().vkeyUseNotifier,null,plr,vc,null,crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()),null)
-                        ));
+                        if(!plr.hasPermission("huskycrates.tester")) {
+                            crateUtilities.takeVirtualKey(plr, vc);
+                            plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                                    vc.getLangData().formatter(vc.getLangData().vkeyUseNotifier, null, plr, vc, null, crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()), null)
+                            ));
+                        }else{
+                            plr.sendMessage(Text.of(TextColors.GRAY,"Since you are a tester, a virtual key was not taken."));
+                            plr.sendMessage(Text.of(TextColors.GRAY,"You can remove them manually by withdrawing your keys."));
+                        }
                     }
                     Task.Builder upcoming = scheduler.createTaskBuilder();
                     crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()).handleUse(plr);
@@ -666,7 +680,7 @@ public class HuskyCrates {
                         crateUtilities.launchCrateForPlayer(crateType, plr, this);
                     }).delayTicks(1).submit(this);
                     return;
-                }else if(keyResult == -1 || keyResult == 2){
+                }else if(keyResult == -1){
                     plr.playSound(SoundTypes.BLOCK_IRON_DOOR_CLOSE,event.getTargetEntity().getLocation().getPosition(),1);
                     try {
                         plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
