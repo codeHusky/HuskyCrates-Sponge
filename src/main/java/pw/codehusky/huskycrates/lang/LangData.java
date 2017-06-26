@@ -113,34 +113,34 @@ public class LangData {
     }
     public String formatter(String toFormat, String aOrAn, Player plr, VirtualCrate vc, CrateReward rewardHolder, PhysicalCrate ps, Integer amount){
         String formatted = toFormat;
-        formatted = formatted.replaceAll("%prefix%",prefix);
+        formatted = formatted.replace("%prefix%",prefix);
         if(aOrAn != null)
-            formatted = formatted.replaceAll("%a",aOrAn);
+            formatted = formatted.replace("%a",aOrAn);
         if(rewardHolder != null) {
-            formatted = formatted.replaceAll("%R", rewardHolder.getRewardName());
-            formatted = formatted.replaceAll("%r", TextSerializers.FORMATTING_CODE.stripCodes(rewardHolder.getRewardName()));
+            formatted = formatted.replace("%R", rewardHolder.getRewardName());
+            formatted = formatted.replace("%r", TextSerializers.FORMATTING_CODE.stripCodes(rewardHolder.getRewardName()));
         }
         if(vc != null) {
-            formatted = formatted.replaceAll("%C", vc.displayName);
-            formatted = formatted.replaceAll("%c", TextSerializers.FORMATTING_CODE.stripCodes(vc.displayName));
-            formatted = formatted.replaceAll("%K",vc.displayName + " Key");
-            formatted = formatted.replaceAll("%k",TextSerializers.FORMATTING_CODE.stripCodes(vc.displayName + " Key"));
+            formatted = formatted.replace("%C", vc.displayName);
+            formatted = formatted.replace("%c", TextSerializers.FORMATTING_CODE.stripCodes(vc.displayName));
+            formatted = formatted.replace("%K",vc.displayName + " Key");
+            formatted = formatted.replace("%k",TextSerializers.FORMATTING_CODE.stripCodes(vc.displayName + " Key"));
         }
         if(plr != null) {
-            formatted = formatted.replaceAll("%P", plr.getName());
-            formatted = formatted.replaceAll("%p", TextSerializers.FORMATTING_CODE.stripCodes(plr.getName()));
+            formatted = formatted.replace("%P", plr.getName());
+            formatted = formatted.replace("%p", TextSerializers.FORMATTING_CODE.stripCodes(plr.getName()));
             if(vc != null) {
-                formatted = formatted.replaceAll("%bal%", HuskyCrates.instance.crateUtilities.getVirtualKeyBalance(plr,vc) + "");
+                formatted = formatted.replace("%bal%", HuskyCrates.instance.crateUtilities.getVirtualKeyBalance(plr,vc) + "");
             }
         }
         if(amount != null){
-            formatted = formatted.replaceAll("%amount%","" + amount);
+            formatted = formatted.replace("%amount%","" + amount);
         }
         if(ps != null){
             if(ps.vc.getOptions().containsKey("freeCrateDelay")) {
                 LocalDateTime lastUsed = ps.lastUsed.get(plr.getUniqueId());
                 LocalDateTime minimumWait = lastUsed.plusSeconds((int) ps.vc.getOptions().get("freeCrateDelay"));
-                formatted = formatted.replaceAll("%t", "" + (LocalDateTime.now().until(minimumWait, ChronoUnit.SECONDS) + 1));
+                formatted = formatted.replace("%t", "" + (LocalDateTime.now().until(minimumWait, ChronoUnit.SECONDS) + 1));
             }
         }
         return formatted;
