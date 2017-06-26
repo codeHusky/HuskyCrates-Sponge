@@ -84,7 +84,9 @@ public class Husky implements CommandExecutor {
 
             Page cratePage = new Page("crates");
             cratePage.setParent("testState");
-            cratePage.setInventoryDimension(InventoryDimension.of(9,6));
+            int height = (int)Math.ceil(((double)HuskyCrates.instance.crateUtilities.getCrateTypes().size())/9d);
+            System.out.println(height);
+            cratePage.setInventoryDimension(InventoryDimension.of(9,height + 1));
             int crate = 0;
             for(String vcID : HuskyCrates.instance.crateUtilities.getCrateTypes()){
                 VirtualCrate vC = HuskyCrates.instance.crateUtilities.getVirtualCrate(vcID);
@@ -112,12 +114,16 @@ public class Husky implements CommandExecutor {
                 ActionElement back = new ActionElement();
                 back.setDisplayItem(ItemStack.builder().itemType(ItemTypes.BARRIER).add(Keys.DISPLAY_NAME,Text.of("Back")).build());
                 back.setAction(new Action(test,plr,false,true,""));
-                crateView.putElement(53,back);
+                crateView.putElement(22,back);
 
 
                 test.addState(crateView);
                 crate++;
             }
+            ActionElement back = new ActionElement();
+            back.setDisplayItem(ItemStack.builder().itemType(ItemTypes.BARRIER).add(Keys.DISPLAY_NAME,Text.of("Back")).build());
+            back.setAction(new Action(test,plr,false,true,""));
+            cratePage.putElement(height*9 + 4,back);
 
 
             /*--------------
