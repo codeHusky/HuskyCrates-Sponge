@@ -1,5 +1,6 @@
 package pw.codehusky.huskygui.components.page;
 
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 /**
@@ -7,7 +8,10 @@ import org.spongepowered.api.item.inventory.ItemStack;
  * Elements do nothing by themselves, acting like a static, unmovable object.
  */
 public class Element {
-    private ItemStack displayItem;
+    private ItemStack displayItem = ItemStack.of(ItemTypes.AIR,1);
+    public void setDisplayItem(ItemStack item) {
+        displayItem = item;
+    }
     public ItemStack getDisplayItem() {
         return displayItem;
     }

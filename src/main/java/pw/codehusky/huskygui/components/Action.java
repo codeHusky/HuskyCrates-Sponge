@@ -1,6 +1,9 @@
 package pw.codehusky.huskygui.components;
 
+import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import pw.codehusky.huskycrates.HuskyCrates;
 import pw.codehusky.huskygui.HuskyGUI;
 
@@ -11,28 +14,34 @@ import pw.codehusky.huskygui.HuskyGUI;
 public class Action {
     public HuskyGUI gui;
     public Player observer;
-    public String currentState;
     public boolean isCloseAction;
     public boolean isBackAction;
     public String goalState;
-    public Action(HuskyGUI gui, Player observer, String currentState, boolean isCloseAction, boolean isBackAction, String goalState){
+    public Action(HuskyGUI gui, Player observer, boolean isCloseAction, boolean isBackAction, String goalState){
         this.gui = gui;
         this.observer = observer;
-        this.currentState = currentState;
         this.isCloseAction = isCloseAction;
         this.isBackAction=isBackAction;
         this.goalState = goalState;
     }
 
-    public void runAction(){
+    public void runAction(String currentState){
         //fired when action is activated
         if(isCloseAction)
             observer.closeInventory(HuskyCrates.instance.genericCause);
-        if(isBackAction) {
-
+        else if(isBackAction) {
+            if(gui.getState(currentState).hasParent) {
+                gui.openState(observer, gui.getState(currentState).parentState);
+            }else{
+                observer.playSound(SoundTypes.BLOCK_ANVIL_LAND,observer.getLocation().getPosition(),0.5);
+                observer.closeInventory(HuskyCrates.instance.genericCause);
+                observer.sendMessage(Text.of(TextColors.RED,"Impossible back action, closing broken state."));
+            }
         }else{
             //normal state change
-            gui.
+            //observer.closeInventory(HuskyCrates.instance.genericCause);
+
+            gui.openState(observer,goalState);
         }
     }
 }
