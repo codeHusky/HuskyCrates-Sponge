@@ -63,7 +63,7 @@ import java.util.function.Consumer;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.5.0", description = "A CratesReloaded Replacement for Sponge? lol",dependencies = {@Dependency(id="huskyui",version = "1.0.0")})
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.6.0", description = "A CratesReloaded Replacement for Sponge? lol",dependencies = {@Dependency(id="huskyui",version = "0.1.0")})
 public class HuskyCrates {
     //@Inject
     public Logger logger;
