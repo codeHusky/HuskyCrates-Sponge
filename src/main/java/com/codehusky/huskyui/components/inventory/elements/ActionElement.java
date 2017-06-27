@@ -1,7 +1,7 @@
-package com.codehusky.huskygui.components.page.elements;
+package com.codehusky.huskyui.components.inventory.elements;
 
-import com.codehusky.huskygui.components.Action;
-import com.codehusky.huskygui.components.page.Element;
+import com.codehusky.huskyui.components.Action;
+import com.codehusky.huskyui.components.inventory.Element;
 
 /**
  * Created by lokio on 6/25/2017.

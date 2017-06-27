@@ -22,7 +22,6 @@ import org.spongepowered.api.util.Color;
 import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.crate.config.CrateReward;
 import com.codehusky.huskycrates.crate.config.CrateConfigParser;
-import pw.codehusky.huskycrates.crate.views.*;
 import com.codehusky.huskycrates.lang.LangData;
 
 import java.util.ArrayList;

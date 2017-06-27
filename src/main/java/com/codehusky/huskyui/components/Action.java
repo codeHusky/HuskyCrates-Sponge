@@ -1,7 +1,7 @@
-package com.codehusky.huskygui.components;
+package com.codehusky.huskyui.components;
 
 import com.codehusky.huskycrates.HuskyCrates;
-import com.codehusky.huskygui.HuskyGUI;
+import com.codehusky.huskyui.HuskyUI;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
@@ -12,12 +12,12 @@ import org.spongepowered.api.text.format.TextColors;
  * where to move the current GUI Instance to.
  */
 public class Action {
-    public HuskyGUI gui;
+    public HuskyUI gui;
     public Player observer;
     public boolean isCloseAction;
     public boolean isBackAction;
     public String goalState;
-    public Action(HuskyGUI gui, Player observer, boolean isCloseAction, boolean isBackAction, String goalState){
+    public Action(HuskyUI gui, Player observer, boolean isCloseAction, boolean isBackAction, String goalState){
         this.gui = gui;
         this.observer = observer;
         this.isCloseAction = isCloseAction;

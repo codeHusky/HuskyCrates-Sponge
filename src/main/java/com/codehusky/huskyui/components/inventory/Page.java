@@ -1,4 +1,4 @@
-package com.codehusky.huskygui.components.page;
+package com.codehusky.huskyui.components.inventory;
 
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
@@ -12,26 +12,30 @@ import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import com.codehusky.huskycrates.HuskyCrates;
-import com.codehusky.huskygui.components.State;
-import com.codehusky.huskygui.components.page.elements.ActionElement;
+import com.codehusky.huskyui.components.State;
+import com.codehusky.huskyui.components.inventory.elements.ActionElement;
 
 import java.util.HashMap;
 
 /**
  * An inventory view state. Traditional crate gui view and such.
- * Generally, when making guis custom, overriding the page class is a good idea.
+ * Generally, when making guis custom, overriding the inventory class is a good idea.
  */
 public class Page extends State {
-    private HashMap<Integer,Element> elements = new HashMap<>();
-    private InventoryDimension inventoryDimension = InventoryDimension.of(9,1);
+    HashMap<Integer,Element> elements = new HashMap<>();
+    InventoryDimension inventoryDimension = InventoryDimension.of(9,1);
     public boolean fillEmptyWithItem = false;
-    public ItemStack empty = ItemStack.builder().itemType(ItemTypes.STAINED_GLASS_PANE).add(Keys.DYE_COLOR, DyeColors.BLACK).add(Keys.DISPLAY_NAME,Text.EMPTY).build();
+    Text title = Text.of("Unnamed Page");
+    public ItemStack empty = ItemStack.builder().itemType(ItemTypes.STAINED_GLASS_PANE).add(Keys.DYE_COLOR, DyeColors.BLACK).add(Keys.DISPLAY_NAME,Text.of(TextColors.DARK_GRAY,"HuskyUI")).build();
     public Page(String id){
         super(id);
     }
     public Page(String id, InventoryDimension invD){
         super(id);
         this.setInventoryDimension(invD);
+    }
+    public void setTitle(Text title){
+        this.title = title;
     }
     public void setInventoryDimension(InventoryDimension invD){
         inventoryDimension = invD;
@@ -56,7 +60,7 @@ public class Page extends State {
                         }
                     }
                 })
-                .property(InventoryTitle.PROPERTY_NAME,InventoryTitle.of(Text.of(TextColors.RED,"HUSKYGUI ",TextColors.YELLOW,id)))
+                .property(InventoryTitle.PROPERTY_NAME,InventoryTitle.of(title))
                 .build(HuskyCrates.instance);
 
         int slotNum = 0;

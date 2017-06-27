@@ -1,4 +1,4 @@
-package com.codehusky.huskygui.components.page;
+package com.codehusky.huskyui.components.inventory;
 
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
