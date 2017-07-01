@@ -2,11 +2,14 @@ package com.codehusky.huskycrates.commands;
 
 import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.crate.VirtualCrate;
-import com.codehusky.huskyui.components.RunnableAction;
-import com.codehusky.huskyui.components.inventory.AutoPage;
-import com.codehusky.huskyui.components.inventory.Element;
-import com.codehusky.huskyui.components.inventory.Page;
-import com.codehusky.huskyui.components.inventory.elements.ActionElement;
+
+import com.codehusky.huskyui.StateContainer;
+import com.codehusky.huskyui.states.Page;
+import com.codehusky.huskyui.states.State;
+import com.codehusky.huskyui.states.action.Action;
+import com.codehusky.huskyui.states.action.ActionType;
+import com.codehusky.huskyui.states.element.ActionableElement;
+import com.codehusky.huskyui.states.element.Element;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -22,8 +25,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import com.codehusky.huskyui.HuskyUI;
-import com.codehusky.huskyui.components.Action;
+
 
 import java.util.ArrayList;
 
@@ -46,118 +48,44 @@ public class Husky implements CommandExecutor {
             src.sendMessage(Text.of(TextColors.GOLD,"bark bark!"));
             src.sendMessage(Text.of(TextColors.GRAY, TextStyles.ITALIC,"Running HuskyCrates v" + HuskyCrates.instance.pC.getVersion().get() + " (BETA)"));
 
+            /* Home */
+            StateContainer test = new StateContainer();
+            Page.PageBuilder home = Page.builder();
+            home.setTitle(Text.of(TextColors.DARK_BLUE,"Color"));
+            home.setFillWhenEmpty(false);
+
+            ActionableElement moveButton = new ActionableElement(new Action(test, ActionType.NORMAL,"loki"),
+                    ItemStack.builder()
+                        .itemType(ItemTypes.GLOWSTONE)
+                        .add(Keys.DISPLAY_NAME,Text.of("Go to Loki's Page"))
+                        .build()
+            );
+            home.addElement(moveButton);
+
+            /* loki */
+            Page.PageBuilder loki = Page.builder();
+            loki.setTitle(Text.of(TextColors.RED,"Loki"));
+           // loki.setFillWhenEmpty(false);
+            loki.setAutoPaging(true);
 
 
+            Element single = new Element(ItemStack.of(ItemTypes.DIAMOND,1));
+            loki.addElement(single);
+            loki.addElement(single);
+            loki.addElement(single);
+            loki.addElement(single);
+            loki.addElement(single);
+            loki.addElement(single);
+            loki.addElement(single);
+            loki.addElement(single);
+            loki.addElement(single);
+            loki.addElement(single);
 
-            /*--------------
-              GUI Testing
-            --------------*/
-            HuskyUI test = new HuskyUI();
-
-
-            /*--------------
-              Test state.
-            --------------*/
-            Page testPage = new Page("testState");
-            testPage.setTitle(Text.of(TextColors.RED,"HuskyUI Test Page"));
-            testPage.setInventoryDimension(InventoryDimension.of(9,2));
-
-            ActionElement viewCrates = new ActionElement();
-            viewCrates.setDisplayItem(ItemStack.builder().itemType(ItemTypes.DIAMOND).add(Keys.DISPLAY_NAME,Text.of("View Crates")).build());
-            viewCrates.setAction(new Action(test,plr,false,false,"crates"));
-
-            ActionElement testClickable = new ActionElement();
-            testClickable.setDisplayItem(ItemStack.builder().itemType(ItemTypes.COMMAND_BLOCK).add(Keys.DISPLAY_NAME,Text.of("Onward!")).build());
-            testClickable.setAction(new Action(test,plr,false,false,"onward"));
-
-            ActionElement close = new ActionElement();
-            close.setDisplayItem(ItemStack.builder().itemType(ItemTypes.BARRIER).add(Keys.DISPLAY_NAME,Text.of("Close Test")).build());
-            close.setAction(new Action(test,plr,true,false,""));
-
-            Element staticBG = new Element();
-            staticBG.setDisplayItem(testPage.empty);
-
-            testPage.putElement(0,viewCrates);
-            for(int i = 9; i < 18; i++) {
-                if(i != 13){
-                    testPage.putElement(i,staticBG);
-                }
-            }
-            testPage.putElement(13, close);
-            testPage.putElement(8,testClickable);
-
-            /*--------------
-              Crate listing
-            --------------*/
-
-            AutoPage cratePage = new AutoPage("crates");
-            cratePage.setTitle(Text.of("All Crates"));
-            cratePage.setParent("testState");
-            cratePage.centered = true;
-            for(String vcID : HuskyCrates.instance.crateUtilities.getCrateTypes()){
-                VirtualCrate vC = HuskyCrates.instance.crateUtilities.getVirtualCrate(vcID);
-                ItemStack vCDisp = ItemStack.builder().itemType(vC.getCrateItem(1).getItem()).add(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(vC.displayName)).build();
-
-
-                ActionElement crateElement = new ActionElement();
-                crateElement.setDisplayItem(vCDisp);
-                crateElement.setAction(new Action(test,plr,false,false,"GUI." + vcID));
-                cratePage.addElement(crateElement);
-
-
-                /**--------------
-                  Autogenerated crate inventory
-                --------------*/
-                AutoPage crateView = new AutoPage("GUI." + vcID);
-                crateView.setParent("crates");
-                crateView.setTitle(TextSerializers.FORMATTING_CODE.deserialize(vC.displayName));
-
-                Element rewardCount = new Element();
-                ArrayList<Text> lore = new ArrayList<>();
-                lore.add(Text.of(TextStyles.RESET,TextColors.WHITE,"Count: " ,vC.getItemSet().size()));
-                lore.add(Text.of(TextStyles.RESET,TextColors.GREEN,"Click to view"));
-                rewardCount.setDisplayItem(ItemStack.builder().itemType(ItemTypes.CHEST).add(Keys.DISPLAY_NAME,Text.of(TextStyles.RESET,TextColors.GOLD,"Items")).add(Keys.ITEM_LORE,lore).build());
-                crateView.addElement(rewardCount);
-
-
-                test.addState(crateView);
-            }
-
-
-            /*--------------
-              onward
-            --------------*/
-            Page onward = new Page("onward");
-            onward.setParent("testState");
-            onward.setTitle(Text.of(TextStyles.BOLD,TextColors.GREEN,"Onward!!"));
-
-            onward.setInventoryDimension(InventoryDimension.of(9,3));
-            onward.fillEmptyWithItem = true;
-
-            ActionElement genericStop = new ActionElement();
-            genericStop.setDisplayItem(ItemStack.builder().itemType(ItemTypes.BARRIER).add(Keys.DISPLAY_NAME,Text.of("Back")).build());
-            genericStop.setAction(new Action(test,plr,false,true,"onward"));
-            onward.putElement(13,genericStop);
-
-
-            ActionElement soundTest = new ActionElement();
-            soundTest.setDisplayItem(ItemStack.builder().itemType(ItemTypes.NOTEBLOCK).add(Keys.DISPLAY_NAME,Text.of("Test runnable")).build());
-            RunnableAction ra = new RunnableAction(test,plr,false,true,"");
-            ra.setRunnable(context -> {
-                context.observer.playSound(SoundTypes.ENTITY_CREEPER_DEATH,context.observer.getLocation().getPosition(),1.0);
-            });
-            soundTest.setAction(ra);
-
-            onward.putElement(13,genericStop);
-            onward.putElement(4,soundTest);
-
-            /*--------------
-              Finalization
-            --------------*/
-            test.addDefaultState(testPage);
-            test.addState(onward);
-            test.addState(cratePage);
-            test.launchForPlayer(plr);
+            test.setInitialState(home.build("home"));
+            State lok = loki.build("loki");
+            lok.setParent("home");
+            test.addState(lok);
+            test.launchFor(plr);
         }
 
         return CommandResult.success();

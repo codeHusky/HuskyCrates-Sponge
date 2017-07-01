@@ -40,12 +40,13 @@ public class CrateView {
     }
     public void handleReward(CrateReward giveToPlayer){
         for(Object reward : giveToPlayer.getRewards()) {
+            //System.out.println(reward);
             if (reward instanceof String) {
                 Sponge.getCommandManager().process(new CrateCommandSource(), reward.toString().replace("%p", ourplr.getName()));
             } else {
                 //System.out.println(giveToPlayer.getReward().treatAsSingle());
 
-                ourplr.getInventory().offer((ItemStack) reward);
+                ourplr.getInventory().offer(((ItemStack) reward).copy());
             }
         }
         boolean mult = false;
