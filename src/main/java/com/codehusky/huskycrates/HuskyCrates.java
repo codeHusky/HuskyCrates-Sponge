@@ -4,6 +4,14 @@ import com.codehusky.huskycrates.commands.*;
 import com.codehusky.huskycrates.crate.CrateUtilities;
 import com.codehusky.huskycrates.crate.PhysicalCrate;
 import com.codehusky.huskycrates.crate.VirtualCrate;
+import com.codehusky.huskycrates.crate.config.CrateReward;
+import com.codehusky.huskyui.StateContainer;
+import com.codehusky.huskyui.states.Page;
+import com.codehusky.huskyui.states.State;
+import com.codehusky.huskyui.states.action.Action;
+import com.codehusky.huskyui.states.action.ActionType;
+import com.codehusky.huskyui.states.element.ActionableElement;
+import com.codehusky.huskyui.states.element.Element;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -22,6 +30,7 @@ import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.Entity;
@@ -428,20 +437,24 @@ public class HuskyCrates {
                 type==BlockTypes.ENDER_CHEST;
     }
 
-    @Listener
+    @Listener(order=Order.PRE)
     public void placeBlock(ChangeBlockEvent event){
         if(forceStop) {
             return;
         }
         if(event.getCause().root() instanceof Player) {
             Player plr = (Player) event.getCause().root();
+
             if (event instanceof ChangeBlockEvent.Place || event instanceof ChangeBlockEvent.Break) {
                 BlockType t = event.getTransactions().get(0).getOriginal().getLocation().get().getBlock().getType();
                 Location<World> location = event.getTransactions().get(0).getOriginal().getLocation().get();
                 location.getBlock().toContainer().set(DataQuery.of("rock"), 1);
                 //location.getBlock().with()
+                System.out.println(event instanceof ChangeBlockEvent.Break);
                 if (validCrateBlocks.contains(t)) {
+                    System.out.println("valid block");
                     //crateUtilities.recognizeChest(event.getTransactions().get(0).getOriginal().getLocation().get());
+
                     if(event instanceof ChangeBlockEvent.Place) {
                         if (plr.getItemInHand(HandTypes.MAIN_HAND).isPresent()) {
                             Optional<Object> tt = plr.getItemInHand(HandTypes.MAIN_HAND).get().toContainer().get(DataQuery.of("UnsafeData", "crateID"));
@@ -456,12 +469,11 @@ public class HuskyCrates {
 
                                 crateUtilities.physicalCrates.get(location).createHologram();
                                 updatePhysicalCrates();
+                                return;
                             }
                         }
                     }
-                }else{
-                    //break
-
+                }else if(event instanceof ChangeBlockEvent.Break){
                     if(crateUtilities.physicalCrates.containsKey(location)){
                         if(!plr.hasPermission("huskycrates.tester")) {
                             event.setCancelled(true);
@@ -599,6 +611,44 @@ public class HuskyCrates {
 
 
         }
+    }
+
+    @Listener
+    public void onCrateRightClick(InteractBlockEvent.Primary.MainHand event){
+        //System.out.println("primary interaction");
+        if(!(event.getCause().root() instanceof Player)) return;
+        Player plr = (Player) event.getCause().root();
+        if(!event.getTargetBlock().getLocation().isPresent()) return;
+        Location location = event.getTargetBlock().getLocation().get();
+        if(crateUtilities.physicalCrates.containsKey(location)){
+            if(!plr.hasPermission("huskycrates.tester")) {
+                event.setCancelled(true);
+                listRewards(plr,crateUtilities.physicalCrates.get(location).vc);
+                return;
+            }
+            crateUtilities.flag = true;
+            crateUtilities.physicalCrates.get(location).as.remove();
+            crateUtilities.physicalCrates.remove(location);
+            updatePhysicalCrates();
+        }
+    }
+    public void listRewards(Player player, VirtualCrate vc){
+        if(!vc.showRewardsOnRight) return;
+        /* Home */
+        StateContainer test = new StateContainer();
+        Page.PageBuilder rewards = Page.builder();
+        rewards.setAutoPaging(true);
+        rewards.setTitle(TextSerializers.FORMATTING_CODE.deserialize(vc.displayName + " Rewards"));
+        rewards.setEmptyStack(ItemStack.builder()
+                .itemType(ItemTypes.STAINED_GLASS_PANE)
+                .add(Keys.DYE_COLOR, DyeColors.BLACK)
+                .add(Keys.DISPLAY_NAME, Text.of(TextColors.DARK_GRAY, "HuskyCrates")).build());
+        for(Object[] e : vc.getItemSet()){
+            CrateReward rew = (CrateReward)e[1];
+            rewards.addElement(new Element(rew.getDisplayItem()));
+        }
+        test.setInitialState(rewards.build("rewards"));
+        test.launchFor(player);
     }
     @Listener
     public void entityMove(MoveEntityEvent event){

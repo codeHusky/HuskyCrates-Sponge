@@ -47,45 +47,6 @@ public class Husky implements CommandExecutor {
             }
             src.sendMessage(Text.of(TextColors.GOLD,"bark bark!"));
             src.sendMessage(Text.of(TextColors.GRAY, TextStyles.ITALIC,"Running HuskyCrates v" + HuskyCrates.instance.pC.getVersion().get() + " (BETA)"));
-
-            /* Home */
-            StateContainer test = new StateContainer();
-            Page.PageBuilder home = Page.builder();
-            home.setTitle(Text.of(TextColors.DARK_BLUE,"Color"));
-            home.setFillWhenEmpty(false);
-
-            ActionableElement moveButton = new ActionableElement(new Action(test, ActionType.NORMAL,"loki"),
-                    ItemStack.builder()
-                        .itemType(ItemTypes.GLOWSTONE)
-                        .add(Keys.DISPLAY_NAME,Text.of("Go to Loki's Page"))
-                        .build()
-            );
-            home.addElement(moveButton);
-
-            /* loki */
-            Page.PageBuilder loki = Page.builder();
-            loki.setTitle(Text.of(TextColors.RED,"Loki"));
-           // loki.setFillWhenEmpty(false);
-            loki.setAutoPaging(true);
-
-
-            Element single = new Element(ItemStack.of(ItemTypes.DIAMOND,1));
-            loki.addElement(single);
-            loki.addElement(single);
-            loki.addElement(single);
-            loki.addElement(single);
-            loki.addElement(single);
-            loki.addElement(single);
-            loki.addElement(single);
-            loki.addElement(single);
-            loki.addElement(single);
-            loki.addElement(single);
-
-            test.setInitialState(home.build("home"));
-            State lok = loki.build("loki");
-            lok.setParent("home");
-            test.addState(lok);
-            test.launchFor(plr);
         }
 
         return CommandResult.success();
