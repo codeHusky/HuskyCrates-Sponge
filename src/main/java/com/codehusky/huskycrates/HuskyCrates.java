@@ -72,7 +72,7 @@ import java.util.function.Consumer;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.6.0", description = "A CratesReloaded Replacement for Sponge? lol",dependencies = {@Dependency(id="huskyui",version = "0.1.0")})
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.6.0-PRE", description = "A CratesReloaded Replacement for Sponge? lol",dependencies = {@Dependency(id="huskyui",version = "0.1.0")})
 public class HuskyCrates {
     //@Inject
     public Logger logger;
@@ -256,27 +256,27 @@ public class HuskyCrates {
             public void accept(Task task) {
                 try {
                     JSONObject obj = JsonReader.readJsonFromUrl("https://api.github.com/repos/codehusky/HuskyCrates-Sponge/releases");
-                    String[] thisVersion = pC.getVersion().get().split("\\.");
-                    String[] remoteVersion = obj.getJSONArray("releases").getJSONObject(0).getString("tag_name").replace("v","").split("\\.");
-                    for(int i = 0; i < Math.min(remoteVersion.length,thisVersion.length); i++){
-                        if(!thisVersion[i].equals(remoteVersion[i])){
-                            if(Integer.parseInt(thisVersion[i]) > Integer.parseInt(remoteVersion[i])){
-                                //we're ahead
-                                logger.warn("----------------------------------------------------");
-                                logger.warn("Running unreleased version. (Developer build?)");
-                                logger.warn("----------------------------------------------------");
-                            }else{
-                                //we're behind
-                                logger.warn("----------------------------------------------------");
-                                logger.warn("Your version of HuskyCrates is out of date!");
-                                logger.warn("Your version: v" + pC.getVersion().get());
-                                logger.warn("Latest version: " + obj.getJSONArray("releases").getJSONObject(0).getString("tag_name"));
-                                logger.warn("Update here: https://goo.gl/hgtPMR");
-                                logger.warn("----------------------------------------------------");
-                            }
-                            return;
+                    //String[] thisVersion = "1.5.0".split("\\.");
+                    //String[] remoteVersion = obj.getJSONArray("releases").getJSONObject(0).getString("tag_name").replace("v","").split("\\.");
+                    //for(int i = 0; i < Math.min(remoteVersion.length,thisVersion.length); i++){
+
+                        if(obj.getJSONArray("releases").getJSONObject(0).getString("tag_name").equals("v" + pC.getVersion())){
+                            //we're ahead
+                            logger.warn("----------------------------------------------------");
+                            logger.warn("Running pre-released version.");
+                            logger.warn("----------------------------------------------------");
+                        }else{
+                            //we're behind
+                            logger.warn("----------------------------------------------------");
+                            logger.warn("Your version of HuskyCrates is out of date!");
+                            logger.warn("Your version: v" + pC.getVersion().get());
+                            logger.warn("Latest version: " + obj.getJSONArray("releases").getJSONObject(0).getString("tag_name"));
+                            logger.warn("Update here: https://goo.gl/hgtPMR");
+                            logger.warn("----------------------------------------------------");
                         }
-                    }
+                        //return;
+
+                    //}
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
