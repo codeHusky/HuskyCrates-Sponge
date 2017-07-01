@@ -33,6 +33,9 @@ public class InstantGUIView extends CrateView {
         vc = virtualCrate;
         ourplr = runner;
         items = vc.getItemSet();
+        if(virtualCrate.scrambleRewards){
+            scrambleRewards();
+        }
         disp = Inventory.builder()
                 .of(InventoryArchetypes.DISPENSER)
                 .listener(InteractInventoryEvent.class, evt ->{

@@ -27,6 +27,19 @@ public class CrateView {
         return null;
     }
     //empty class for organization and such
+    public void scrambleRewards(){
+        ArrayList<Object[]> scrambled = new ArrayList<>();
+        ArrayList<Object[]> toSift = (ArrayList<Object[]>) items.clone();
+        while(toSift.size() > 0){
+            System.out.println(toSift.size());
+            int pick = -1;
+            if(toSift.size() == 1) pick = 0;
+            else pick = new Random().nextInt(toSift.size()-1);
+            scrambled.add(toSift.get(pick));
+            toSift.remove(pick);
+        }
+        items = scrambled;
+    }
     public int itemIndexSelected() throws RandomItemSelectionFailureException {
         double random = new Random().nextFloat()*vc.getMaxProb();
         double cummProb = 0;

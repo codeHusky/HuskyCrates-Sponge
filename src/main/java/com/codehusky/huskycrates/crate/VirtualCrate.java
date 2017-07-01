@@ -49,6 +49,7 @@ public class VirtualCrate {
     public boolean freeCrate = false;
     public boolean virtualKeys = false;
     public boolean showRewardsOnRight = false;
+    public boolean scrambleRewards = false;
     public VirtualCrate(String id, ConfigurationLoader<CommentedConfigurationNode> config, CommentedConfigurationNode node){
         this.id = id;
         displayName = node.getNode("name").getString();
@@ -152,6 +153,9 @@ public class VirtualCrate {
             }
             if(!gops.getNode("showRewardsOnRight").isVirtual()){
                 showRewardsOnRight = gops.getNode("showRewardsOnRight").getBoolean(false);
+            }
+            if(!gops.getNode("scrambleRewards").isVirtual()){
+                scrambleRewards = gops.getNode("scrambleRewards").getBoolean(false);
             }
         }
         HuskyCrates.instance.validCrateBlocks.add(crateBlockType);

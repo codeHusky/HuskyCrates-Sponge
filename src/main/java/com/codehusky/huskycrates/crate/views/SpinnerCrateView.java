@@ -40,6 +40,9 @@ public class SpinnerCrateView extends CrateView {
         this.plugin = plugin;
 
         items = virtualCrate.getItemSet();
+        if(virtualCrate.scrambleRewards){
+            scrambleRewards();
+        }
 
         if(virtualCrate.getOptions().containsKey("dampening")) {
             dampening = (double) virtualCrate.getOptions().get("dampening");

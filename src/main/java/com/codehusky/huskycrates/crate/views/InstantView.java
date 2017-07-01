@@ -13,6 +13,9 @@ public class InstantView extends CrateView {
         ourplr = runner;
         vc = virtualCrate;
         items = vc.getItemSet();
+        if(virtualCrate.scrambleRewards){
+            scrambleRewards();
+        }
         try {
             CrateReward rewardHolder = (CrateReward)vc.getItemSet().get(itemIndexSelected())[1];
             handleReward(rewardHolder);
