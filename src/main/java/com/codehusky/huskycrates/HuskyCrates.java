@@ -37,6 +37,7 @@ import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -621,15 +622,10 @@ public class HuskyCrates {
         if(!event.getTargetBlock().getLocation().isPresent()) return;
         Location location = event.getTargetBlock().getLocation().get();
         if(crateUtilities.physicalCrates.containsKey(location)){
-            if(!plr.hasPermission("huskycrates.tester")) {
+            if(!plr.hasPermission("huskycrates.tester") || plr.hasPermission("huskycrates.tester") && plr.getGameModeData().get(Keys.GAME_MODE).get() != GameModes.CREATIVE) {
                 event.setCancelled(true);
                 listRewards(plr,crateUtilities.physicalCrates.get(location).vc);
-                return;
             }
-            crateUtilities.flag = true;
-            crateUtilities.physicalCrates.get(location).as.remove();
-            crateUtilities.physicalCrates.remove(location);
-            updatePhysicalCrates();
         }
     }
     public void listRewards(Player player, VirtualCrate vc){
