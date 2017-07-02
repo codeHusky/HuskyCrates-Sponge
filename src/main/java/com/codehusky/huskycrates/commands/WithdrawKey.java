@@ -36,9 +36,11 @@ public class WithdrawKey implements CommandExecutor {
             }
             int balance = HuskyCrates.instance.crateUtilities.getVirtualKeyBalance(player,virtualCrate);
             if(balance >= quantity && quantity > 0){
-                ItemStack key = virtualCrate.getCrateKey(quantity);
-                HuskyCrates.instance.crateUtilities.takeVirtualKey(player,virtualCrate,quantity);
-                player.getInventory().offer(key);
+                for(int i = 0; i < quantity; i++) {
+                    ItemStack key = virtualCrate.getCrateKey();
+                    HuskyCrates.instance.crateUtilities.takeVirtualKey(player, virtualCrate, quantity);
+                    player.getInventory().offer(key);
+                }
                 commandSource.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
                         virtualCrate.getLangData().formatter(virtualCrate.getLangData().withdrawSuccess,null,player,virtualCrate,null,null,quantity)
                 ));

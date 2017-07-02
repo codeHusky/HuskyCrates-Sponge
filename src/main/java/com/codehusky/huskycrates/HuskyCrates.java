@@ -32,6 +32,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.ArmorStand;
@@ -121,16 +122,7 @@ public class HuskyCrates {
                 logger.info("Using default lang settings.");
 
         } catch (Exception e) {
-            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
-            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
-            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
-            if(e instanceof IOException){
-                HuskyCrates.instance.logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
-            }else{
-                e.printStackTrace();
-            }
-            HuskyCrates.instance.logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");
-            HuskyCrates.instance.logger.error("If you're having trouble solving this issue, join the support discord: https://discord.gg/FSETtcx");
+            crateUtilities.exceptionHandler(e);
         }
 
 
@@ -260,7 +252,7 @@ public class HuskyCrates {
                     //String[] remoteVersion = obj.getJSONArray("releases").getJSONObject(0).getString("tag_name").replace("v","").split("\\.");
                     //for(int i = 0; i < Math.min(remoteVersion.length,thisVersion.length); i++){
 
-                        if(obj.getJSONArray("releases").getJSONObject(0).getString("tag_name").equals("v" + pC.getVersion())){
+                        if(obj.getJSONArray("releases").getJSONObject(0).getString("tag_name").equals("v" + pC.getVersion().get())){
                             //we're ahead
                             logger.warn("----------------------------------------------------");
                             logger.warn("Running pre-released version.");
@@ -268,10 +260,8 @@ public class HuskyCrates {
                         }else{
                             //we're behind
                             logger.warn("----------------------------------------------------");
-                            logger.warn("Your version of HuskyCrates is out of date!");
-                            logger.warn("Your version: v" + pC.getVersion().get());
-                            logger.warn("Latest version: " + obj.getJSONArray("releases").getJSONObject(0).getString("tag_name"));
-                            logger.warn("Update here: https://goo.gl/hgtPMR");
+                            logger.warn("Your version of HuskyCrates does not match the current public copy");
+                            logger.warn("Check GitHub for info.");
                             logger.warn("----------------------------------------------------");
                         }
                         //return;
@@ -328,16 +318,7 @@ public class HuskyCrates {
                         logger.info("PROGRESS: "  + Math.round((count/max)*100) + "%");
                     }
                 } catch (Exception e) {
-                    logger.error("!!!!! Config loading has failed! !!!!!");
-                    logger.error("!!!!! Config loading has failed! !!!!!");
-                    logger.error("!!!!! Config loading has failed! !!!!!");
-                    if(e instanceof IOException){
-                        logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
-                    }else{
-                        e.printStackTrace();
-                    }
-                    logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");
-                    logger.error("If you're having trouble solving this issue, join the support discord: https://discord.gg/FSETtcx");
+                    crateUtilities.exceptionHandler(e);
                     if(event.getCause().root() instanceof Player){
                         CommandSource cs = (CommandSource) event.getCause().root();
                         cs.sendMessage(Text.of(TextColors.GOLD,"HuskyCrates",TextColors.WHITE,":",TextColors.RED," An error has occured. Please check the console for more information."));
@@ -412,16 +393,7 @@ public class HuskyCrates {
             }
             crateUtilities.startParticleEffects();
         } catch (Exception e) {
-            logger.error("!!!!! Config loading has failed! !!!!!");
-            logger.error("!!!!! Config loading has failed! !!!!!");
-            logger.error("!!!!! Config loading has failed! !!!!!");
-            if(e instanceof IOException){
-                logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
-            }else{
-                e.printStackTrace();
-            }
-            logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");
-            logger.error("If you're having trouble solving this issue, join the support discord: https://discord.gg/FSETtcx");
+            crateUtilities.exceptionHandler(e);
             if(event.getCause().root() instanceof Player){
                 CommandSource cs = (CommandSource) event.getCause().root();
                 cs.sendMessage(Text.of(TextColors.GOLD,"HuskyCrates",TextColors.WHITE,":",TextColors.RED," An error has occured. Please check the console for more information."));
@@ -521,7 +493,87 @@ public class HuskyCrates {
         crateUtilities.flag = false;
         updating = false;
     }
+    public void keyHandler(Player plr, int keyResult, VirtualCrate vc, Location<World> blk,String crateType){
+        if(keyResult == 1  || keyResult == 2) {
+            if(!vc.freeCrate && keyResult == 1) {
+                ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
+                if (!plr.hasPermission("huskycrates.tester")) {
+                    if (inhand.getQuantity() == 1)
+                        plr.setItemInHand(HandTypes.MAIN_HAND, null);
+                    else {
+                        ItemStack tobe = inhand.copy();
+                        tobe.setQuantity(tobe.getQuantity() - 1);
+                        plr.setItemInHand(HandTypes.MAIN_HAND, tobe);
+                    }
+                }else{
+                    plr.sendMessage(Text.of(TextColors.GRAY,"Since you are a tester, a key was not taken."));
+                }
+            }else if(keyResult == 2){
+                if(!plr.hasPermission("huskycrates.tester")) {
+                    crateUtilities.takeVirtualKey(plr, vc);
+                    plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                            vc.getLangData().formatter(vc.getLangData().vkeyUseNotifier, null, plr, vc, null, crateUtilities.physicalCrates.get(blk), null)
+                    ));
+                }else{
+                    plr.sendMessage(Text.of(TextColors.GRAY,"Since you are a tester, a virtual key was not taken."));
+                    plr.sendMessage(Text.of(TextColors.GRAY,"You can remove them manually by withdrawing your keys."));
+                }
+            }
+            Task.Builder upcoming = scheduler.createTaskBuilder();
+            crateUtilities.physicalCrates.get(blk).handleUse(plr);
+            upcoming.execute(() -> {
+                crateUtilities.launchCrateForPlayer(crateType, plr, this);
+            }).delayTicks(1).submit(this);
+            return;
 
+        }else if(keyResult == -1){
+            plr.playSound(SoundTypes.BLOCK_IRON_DOOR_CLOSE,blk.getPosition(),1);
+            try {
+                plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                        vc.getLangData().formatter(vc.getLangData().freeCrateWaitMessage,null,plr,vc,null,crateUtilities.physicalCrates.get(blk),null)
+                ));
+            }catch(Exception e){
+                plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
+                e.printStackTrace();
+            }
+            return;
+        }else if(keyResult == -2){
+            plr.sendMessage(Text.of(TextColors.RED,"Unfortunately, the key you attempted to use is a legacy key. Please contact a server administrator for details."));
+            plr.sendMessage(Text.of(TextColors.RED,"This incident has been logged to the console."));
+            String id = plr.getItemInHand(HandTypes.MAIN_HAND).get().toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString();
+            for(Player player: Sponge.getServer().getOnlinePlayers()){
+                if(player.hasPermission("huskycrates.adminlog")){
+                    player.sendMessage(Text.of(TextColors.DARK_RED,"[HuskyCrates][Legacy/Dupe] ", TextColors.RED, plr.getName() + " used a legacy " + id + " key"));
+                    player.playSound(SoundTypes.ENTITY_CAT_HISS,player.getLocation().getPosition(),1.0);
+                }
+            }
+            logger.error("[DUPE LOG] " + plr.getName() + " attempted to use a legacy " + id + " key.");
+            plr.setItemInHand(HandTypes.MAIN_HAND,null);
+            return;
+        }else if(keyResult == -3){
+            plr.sendMessage(Text.of(TextColors.RED,"You appear to have used a duplicated key. Fortunately, we caught you."));
+            plr.sendMessage(Text.of(TextColors.RED,"This incident has been reported to admins and the console."));
+            String id = plr.getItemInHand(HandTypes.MAIN_HAND).get().toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString();
+            for(Player player: Sponge.getServer().getOnlinePlayers()){
+                if(player.hasPermission("huskycrates.adminlog")){
+                    player.sendMessage(Text.of(TextColors.DARK_RED,"[HuskyCrates][Dupe] ", TextColors.RED, plr.getName() + " used a duplicated " + id + " key"));
+                    player.playSound(SoundTypes.ENTITY_CAT_HISS,player.getLocation().getPosition(),1.0);
+                }
+            }
+            logger.error("[DUPE LOG] " + plr.getName() + " used a duplicated " + id + " key.");
+            plr.setItemInHand(HandTypes.MAIN_HAND,null);
+            return;
+        }
+        plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,blk.getPosition(),0.3);
+        try {
+            plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
+                    vc.getLangData().formatter(vc.getLangData().noKeyMessage,null,plr,vc,null,null,null)
+            ));
+        }catch(Exception e){
+            plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
+            e.printStackTrace();
+        }
+    }
     @Listener
     public void crateInteract(InteractBlockEvent.Secondary.MainHand event){
         if(forceStop) {
@@ -554,59 +606,7 @@ public class HuskyCrates {
                 //crateUtilities.recognizeChest(te.getLocation());
                 int keyResult = crateUtilities.isAcceptedKey(crateUtilities.physicalCrates.get(blk),plr.getItemInHand(HandTypes.MAIN_HAND),plr);
                 //System.out.println(keyResult);
-                if(keyResult == 1  || keyResult == 2) {
-                    if(!vc.freeCrate && keyResult == 1) {
-                        ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
-                        if (!plr.hasPermission("huskycrates.tester")) {
-                            if (inhand.getQuantity() == 1)
-                                plr.setItemInHand(HandTypes.MAIN_HAND, null);
-                            else {
-                                ItemStack tobe = inhand.copy();
-                                tobe.setQuantity(tobe.getQuantity() - 1);
-                                plr.setItemInHand(HandTypes.MAIN_HAND, tobe);
-                            }
-                        }else{
-                            plr.sendMessage(Text.of(TextColors.GRAY,"Since you are a tester, a key was not taken."));
-                        }
-                    }else if(keyResult == 2){
-                        if(!plr.hasPermission("huskycrates.tester")) {
-                            crateUtilities.takeVirtualKey(plr, vc);
-                            plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                                    vc.getLangData().formatter(vc.getLangData().vkeyUseNotifier, null, plr, vc, null, crateUtilities.physicalCrates.get(blk), null)
-                            ));
-                        }else{
-                            plr.sendMessage(Text.of(TextColors.GRAY,"Since you are a tester, a virtual key was not taken."));
-                            plr.sendMessage(Text.of(TextColors.GRAY,"You can remove them manually by withdrawing your keys."));
-                        }
-                    }
-                    Task.Builder upcoming = scheduler.createTaskBuilder();
-                    crateUtilities.physicalCrates.get(blk).handleUse(plr);
-                    upcoming.execute(() -> {
-                        crateUtilities.launchCrateForPlayer(crateType, plr, this);
-                    }).delayTicks(1).submit(this);
-                    return;
-
-                }else if(keyResult == -1){
-                    plr.playSound(SoundTypes.BLOCK_IRON_DOOR_CLOSE,blk.getPosition(),1);
-                    try {
-                        plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                                vc.getLangData().formatter(vc.getLangData().freeCrateWaitMessage,null,plr,vc,null,crateUtilities.physicalCrates.get(blk),null)
-                        ));
-                    }catch(Exception e){
-                        plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
-                        e.printStackTrace();
-                    }
-                    return;
-                }
-                plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,blk.getPosition(),0.3);
-                try {
-                    plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.getLangData().formatter(vc.getLangData().noKeyMessage,null,plr,vc,null,null,null)
-                    ));
-                }catch(Exception e){
-                    plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
-                    e.printStackTrace();
-                }
+                keyHandler(plr,keyResult,vc,blk,crateType);
             }
 
 
@@ -700,58 +700,8 @@ public class HuskyCrates {
                 //crateUtilities.recognizeChest(te.getLocation());
                 event.setCancelled(true);
                 int keyResult = crateUtilities.isAcceptedKey(crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()),plr.getItemInHand(HandTypes.MAIN_HAND),plr);
-                if(keyResult == 1 || keyResult == 2) {
-                    if(!vc.freeCrate && keyResult == 1) {
-                        ItemStack inhand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
-                        if (!plr.hasPermission("huskycrates.tester")) {
-                            if (inhand.getQuantity() == 1)
-                                plr.setItemInHand(HandTypes.MAIN_HAND, null);
-                            else {
-                                ItemStack tobe = inhand.copy();
-                                tobe.setQuantity(tobe.getQuantity() - 1);
-                                plr.setItemInHand(HandTypes.MAIN_HAND, tobe);
-                            }
-                        }else{
-                            plr.sendMessage(Text.of(TextColors.GRAY,"Since you are a tester, a key was not taken."));
-                        }
-                    }else if(keyResult == 2){
-                        if(!plr.hasPermission("huskycrates.tester")) {
-                            crateUtilities.takeVirtualKey(plr, vc);
-                            plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                                    vc.getLangData().formatter(vc.getLangData().vkeyUseNotifier, null, plr, vc, null, crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()), null)
-                            ));
-                        }else{
-                            plr.sendMessage(Text.of(TextColors.GRAY,"Since you are a tester, a virtual key was not taken."));
-                            plr.sendMessage(Text.of(TextColors.GRAY,"You can remove them manually by withdrawing your keys."));
-                        }
-                    }
-                    Task.Builder upcoming = scheduler.createTaskBuilder();
-                    crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()).handleUse(plr);
-                    upcoming.execute(() -> {
-                        crateUtilities.launchCrateForPlayer(crateType, plr, this);
-                    }).delayTicks(1).submit(this);
-                    return;
-                }else if(keyResult == -1){
-                    plr.playSound(SoundTypes.BLOCK_IRON_DOOR_CLOSE,event.getTargetEntity().getLocation().getPosition(),1);
-                    try {
-                        plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                                vc.getLangData().formatter(vc.getLangData().freeCrateWaitMessage,null,plr,vc,null,crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()),null)
-                        ));
-                    }catch(Exception e){
-                        plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
-                        e.printStackTrace();
-                    }
-                    return;
-                }
-                plr.playSound(SoundTypes.BLOCK_ANVIL_LAND,event.getTargetEntity().getLocation().getPosition(),0.3);
-                try {
-                    plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.getLangData().formatter(vc.getLangData().noKeyMessage,null,plr,vc,null,null,null)
-                    ));
-                }catch(Exception e){
-                    plr.sendMessage(Text.of(TextColors.RED,"Critical crate failure, contact the administrator. (Admins, check console!)"));
-                    e.printStackTrace();
-                }
+                keyHandler(plr,keyResult,vc,event.getTargetEntity().getLocation(),crateType);
+
             }
         }
 

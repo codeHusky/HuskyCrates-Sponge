@@ -186,9 +186,19 @@ public class CrateUtilities {
         if (key.isPresent()) {
             if (key.get().getItem() == crate.vc.getKeyType()) {
                 if (key.get().toContainer().get(DataQuery.of("UnsafeData", "crateID")).isPresent()) {
-                    String id = key.get().toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString();
-                    if (id.equals(crate.vc.id)) {
-                        return 1;
+                    if(key.get().toContainer().get(DataQuery.of("UnsafeData", "keyUUID")).isPresent()) {
+                        String id = key.get().toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString();
+                        String keyUUID = key.get().toContainer().get(DataQuery.of("UnsafeData", "keyUUID")).get().toString();
+                        if (id.equals(crate.vc.id)) {
+                            if(useKey(id,keyUUID)) {
+                                return 1;
+                            }else{
+                                return -3; //DUPE! or error.
+                            }
+                        }
+                    }else{
+                        //legacy key.
+                        return -2;
                     }
                 }
             }
@@ -198,6 +208,27 @@ public class CrateUtilities {
         }
         return 0;
     }
+    public void exceptionHandler(Exception e){
+        HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+        HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+        HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
+        if (e instanceof IOException) {
+            HuskyCrates.instance.logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
+        } else {
+            e.printStackTrace();
+        }
+        HuskyCrates.instance.logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");
+        HuskyCrates.instance.logger.error("If you're having trouble solving this issue, join the support discord: https://discord.gg/FSETtcx");
+    }
+
+    public boolean useKey(String crateID,String uuid){
+        if(crateTypes.containsKey(crateID)){
+            return getVirtualCrate(crateID).expireKey(uuid);
+        }
+        return false;
+    }
+
+    /* The mess of Virtual Key methods */
     public int getVirtualKeyBalance(User player, VirtualCrate vc) {
         try {
             CommentedConfigurationNode root = HuskyCrates.instance.crateConfig.load();
@@ -205,16 +236,7 @@ public class CrateUtilities {
                 return root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).getInt(0);
             }
         } catch (Exception e) {
-            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
-            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
-            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
-            if (e instanceof IOException) {
-                HuskyCrates.instance.logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
-            } else {
-                e.printStackTrace();
-            }
-            HuskyCrates.instance.logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");
-            HuskyCrates.instance.logger.error("If you're having trouble solving this issue, join the support discord: https://discord.gg/FSETtcx");
+            exceptionHandler(e);
 
         }
         return 0;
@@ -227,17 +249,7 @@ public class CrateUtilities {
             //}
             HuskyCrates.instance.crateConfig.save(root);
         } catch (Exception e) {
-            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
-            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
-            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
-            if (e instanceof IOException) {
-                HuskyCrates.instance.logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
-            } else {
-                e.printStackTrace();
-            }
-            HuskyCrates.instance.logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");
-            HuskyCrates.instance.logger.error("If you're having trouble solving this issue, join the support discord: https://discord.gg/FSETtcx");
-
+            exceptionHandler(e);
         }
     }
     public void takeVirtualKey(User player, VirtualCrate vc){
@@ -251,16 +263,7 @@ public class CrateUtilities {
             //}
             HuskyCrates.instance.crateConfig.save(root);
         } catch (Exception e) {
-            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
-            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
-            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
-            if (e instanceof IOException) {
-                HuskyCrates.instance.logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
-            } else {
-                e.printStackTrace();
-            }
-            HuskyCrates.instance.logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");
-            HuskyCrates.instance.logger.error("If you're having trouble solving this issue, join the support discord: https://discord.gg/FSETtcx");
+            exceptionHandler(e);
 
         }
     }
@@ -272,16 +275,7 @@ public class CrateUtilities {
             }
             HuskyCrates.instance.crateConfig.save(root);
         } catch (Exception e) {
-            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
-            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
-            HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
-            if (e instanceof IOException) {
-                HuskyCrates.instance.logger.error("CONFIG AT LINE " + e.getMessage().substring(e.getMessage().indexOf("Reader: ") + 8));
-            } else {
-                e.printStackTrace();
-            }
-            HuskyCrates.instance.logger.error("Due to the exception, further loading procedures have been stopped. Please address the exception.");
-            HuskyCrates.instance.logger.error("If you're having trouble solving this issue, join the support discord: https://discord.gg/FSETtcx");
+            exceptionHandler(e);
 
         }
     }

@@ -24,9 +24,11 @@ import com.codehusky.huskycrates.crate.config.CrateReward;
 import com.codehusky.huskycrates.crate.config.CrateConfigParser;
 import com.codehusky.huskycrates.lang.LangData;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by lokio on 12/29/2016.
@@ -42,6 +44,7 @@ public class VirtualCrate {
     public String crateType;
     private float maxProb = 100;
     private HashMap<String,Object> options = new HashMap<>();
+    private ArrayList<String> pendingKeys = new ArrayList<>();
     private ItemType keyType;
     private Integer keyDamage= null;
     private LangData langData;
@@ -197,9 +200,16 @@ public class VirtualCrate {
             maxProb = currentProb;
         }
         if(currentProb != maxProb){
-            System.out.println("You have too big of a chance! " + id + " (" + currentProb + ")");
-            System.out.println("This only fires if you have assumed probability. If you remove assumed chance, this error will be fixed.");
-            System.out.println("If everything looks right in your config, contact @codeHusky on Sponge Forums.");
+            HuskyCrates.instance.logger.error("If this error occurs, please contact Loki immediately. This should never happen in recent versions.");
+        }
+
+        try {
+            CommentedConfigurationNode root = config.load();
+            pendingKeys.addAll(root.getNode("keys",id).getList(TypeToken.of(String.class)));
+            HuskyCrates.instance.logger.info("Loaded " + pendingKeys.size() + " " + id + " key UUIDs");
+        } catch (IOException | ObjectMappingException e) {
+            HuskyCrates.instance.logger.error("Failed to load key UUIDs. Keys will not work!");
+            e.printStackTrace();
         }
 
         //Self resolving crate
@@ -231,13 +241,12 @@ public class VirtualCrate {
     /***
      * Retrieve the crate item
      * @since 0.10.2
-     * @param quantity the quantity of keys you want.
      * @return the ItemStack with the keys.
      */
-    public ItemStack getCrateKey(int quantity){
+    public ItemStack getCrateKey(){
         ItemStack key = ItemStack.builder()
                 .itemType(keyType)
-                .quantity(quantity)
+                .quantity(1)
                 .add(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(displayName + " Key")).build();
         ArrayList<Text> itemLore = new ArrayList<>();
         itemLore.add(Text.of(TextColors.WHITE, "A key for a ", TextSerializers.FORMATTING_CODE.deserialize(displayName), TextColors.WHITE, "."));
@@ -246,10 +255,56 @@ public class VirtualCrate {
         if(keyDamage != null){
             key = ItemStack.builder().fromContainer(key.toContainer().set(DataQuery.of("UnsafeDamage"),keyDamage)).build();
         }
-
-        return ItemStack.builder().fromContainer(key.toContainer().set(DataQuery.of("UnsafeData","crateID"),id)).build();//
+        String keyUUID = registerKey();
+        if(keyUUID == null){
+            HuskyCrates.instance.logger.error("Throwing NullPointerException: Key failed to register.");
+            throw new NullPointerException();
+        }
+        return ItemStack.builder().fromContainer(key.toContainer().set(DataQuery.of("UnsafeData","crateID"),id).set(DataQuery.of("UnsafeData","keyUUID"),keyUUID)).build();//
 
     }
+
+    /***
+     * Generates a registered single-use key uuid.
+     * @since 1.6.0-PRE2
+     * @return Registered key UUID
+     */
+    private String registerKey() {
+        String keyUUID = UUID.randomUUID().toString();
+        pendingKeys.add(keyUUID);
+        try {
+            CommentedConfigurationNode root = HuskyCrates.instance.crateConfig.load();
+            root.getNode("keys",id).getAppendedNode().setValue(keyUUID);
+            HuskyCrates.instance.crateConfig.save(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return keyUUID;
+    }
+
+    public boolean expireKey(String uuid){
+        if(pendingKeys.contains(uuid)){
+            try {
+                pendingKeys.remove(uuid);
+                CommentedConfigurationNode root = HuskyCrates.instance.crateConfig.load();
+                root.getNode("keys",id).setValue(null);
+                for(String e : pendingKeys){
+                    root.getNode("keys",id).getAppendedNode().setValue(e);
+                }
+                HuskyCrates.instance.crateConfig.save(root);
+            } catch (IOException e) {
+                HuskyCrates.instance.logger.error("User attempted to use key with uuid " + uuid + " that has not been expired. Do not enforce dupe rules on user.");
+                e.printStackTrace();
+                pendingKeys.add(uuid);
+                return false;
+            }
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     /***
      * Retrieve the crate item
      * @since 1.2.1
