@@ -1,3 +1,4 @@
+<img src="https://img.shields.io/github/downloads/codeHusky/HuskyCrates-Sponge/total.svg"> <img src="https://github-basic-badges.herokuapp.com/release/codeHusky/HuskyCrates-Sponge.svg">
 <img src="http://i.imgur.com/ZRN1RVN.png">
 
 # HuskyCrates
