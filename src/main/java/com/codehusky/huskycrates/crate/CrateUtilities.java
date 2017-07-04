@@ -190,6 +190,11 @@ public class CrateUtilities {
                         String id = key.get().toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString();
                         String keyUUID = key.get().toContainer().get(DataQuery.of("UnsafeData", "keyUUID")).get().toString();
                         if (id.equals(crate.vc.id)) {
+                            if(using.hasPermission("huskycrates.tester") && crate.vc.keyIsValid(keyUUID)){
+                                return 1;
+                            }else if(using.hasPermission("huskycrates.tester")){
+                                return -3;
+                            }
                             if(useKey(id,keyUUID)) {
                                 return 1;
                             }else{

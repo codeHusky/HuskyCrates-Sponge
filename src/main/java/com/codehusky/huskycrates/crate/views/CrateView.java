@@ -31,8 +31,8 @@ public class CrateView {
         ArrayList<Object[]> scrambled = new ArrayList<>();
         ArrayList<Object[]> toSift = (ArrayList<Object[]>) items.clone();
         while(toSift.size() > 0){
-            System.out.println(toSift.size());
-            int pick = -1;
+            //System.out.println(toSift.size());
+            int pick;
             if(toSift.size() == 1) pick = 0;
             else pick = new Random().nextInt(toSift.size()-1);
             scrambled.add(toSift.get(pick));
