@@ -74,7 +74,7 @@ import java.util.function.Consumer;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.6.0-PRE2", description = "A CratesReloaded Replacement for Sponge? lol",dependencies = {@Dependency(id="huskyui",version = "0.1.0")})
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.6.0-PRE3", description = "A CratesReloaded Replacement for Sponge? lol",dependencies = {@Dependency(id="huskyui",version = "0.1.0")})
 public class HuskyCrates {
     //@Inject
     public Logger logger;
@@ -315,7 +315,7 @@ public class HuskyCrates {
                             ee = new Location<World>(Sponge.getServer().getWorld(node.getNode("location","WorldName").getString()).get(),node.getNode("location","X").getDouble(),node.getNode("location","Y").getDouble(),node.getNode("location","Z").getDouble());
                         }
                         if(!crateUtilities.physicalCrates.containsKey(ee))
-                            crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance));
+                            crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance,node.getNode("location","BlockType").getString().equals("minecraft:air")));
                         logger.info("PROGRESS: "  + Math.round((count/max)*100) + "%");
                     }
                 } catch (Exception e) {
@@ -390,7 +390,7 @@ public class HuskyCrates {
                     ee = new Location<World>(Sponge.getServer().getWorld(node.getNode("location","WorldName").getString()).get(),node.getNode("location","X").getDouble(),node.getNode("location","Y").getDouble(),node.getNode("location","Z").getDouble());
                 }
                 if(!crateUtilities.physicalCrates.containsKey(ee))
-                    crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance));
+                    crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance,node.getNode("location","BlockType").getString().equals("minecraft:air")));
             }
             crateUtilities.startParticleEffects();
         } catch (Exception e) {
@@ -423,9 +423,9 @@ public class HuskyCrates {
                 Location<World> location = event.getTransactions().get(0).getOriginal().getLocation().get();
                 location.getBlock().toContainer().set(DataQuery.of("rock"), 1);
                 //location.getBlock().with()
-                System.out.println(event instanceof ChangeBlockEvent.Break);
+                //System.out.println(event instanceof ChangeBlockEvent.Break);
                 if (validCrateBlocks.contains(t)) {
-                    System.out.println("valid block");
+                    //System.out.println("valid block");
                     //crateUtilities.recognizeChest(event.getTransactions().get(0).getOriginal().getLocation().get());
 
                     if(event instanceof ChangeBlockEvent.Place) {
@@ -438,7 +438,7 @@ public class HuskyCrates {
                                     return;
                                 }
                                 if(!crateUtilities.physicalCrates.containsKey(location))
-                                    crateUtilities.physicalCrates.put(location, new PhysicalCrate(location, crateID, this));
+                                    crateUtilities.physicalCrates.put(location, new PhysicalCrate(location, crateID, this,false));
 
                                 crateUtilities.physicalCrates.get(location).createHologram();
                                 updatePhysicalCrates();
@@ -477,7 +477,7 @@ public class HuskyCrates {
                 try {
                     node.getNode("crateID").setValue(crateUtilities.physicalCrates.get(e).vc.id);
                 }catch(NullPointerException err){
-                    System.out.println("removing a crate!");
+                    //System.out.println("removing a crate!");
                     node.setValue(null);
                     crateUtilities.physicalCrates.remove(ob);
                     logger.warn("Invalid crate at (" + e.getPosition().getFloorX() + ", " + e.getPosition().getFloorY() + ", " + e.getPosition().getFloorZ() + ")!");
@@ -670,7 +670,7 @@ public class HuskyCrates {
                             //System.out.println(event.getTargetEntity().getLocation().getBlockPosition());
                             event.getTargetEntity().offer(Keys.AI_ENABLED,false);
                             event.getTargetEntity().offer(Keys.IS_SILENT,true);
-                            crateUtilities.physicalCrates.put(event.getTargetEntity().getLocation(), new PhysicalCrate(event.getTargetEntity().getLocation(), hand.toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString(), this));
+                            crateUtilities.physicalCrates.put(event.getTargetEntity().getLocation(), new PhysicalCrate(event.getTargetEntity().getLocation(), hand.toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString(), this,true));
                             crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()).createHologram();
                             updatePhysicalCrates();
                         }else{

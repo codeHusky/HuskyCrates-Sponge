@@ -31,6 +31,7 @@ public class PhysicalCrate {
     public VirtualCrate vc;
     public ArmorStand as = null;
     private HuskyCrates huskyCrates;
+    private boolean isEntity = false;
     double randomTimeOffset = new Random().nextDouble()*2000;
     public static Vector3d offset = new Vector3d(0.5,1,0.5);
     public HashMap<UUID,LocalDateTime> lastUsed = new HashMap<>();
@@ -40,19 +41,21 @@ public class PhysicalCrate {
         }
         lastUsed.put(player.getUniqueId(), LocalDateTime.now());
     }
-    public PhysicalCrate(Location<World> crateLocation, String crateId, HuskyCrates huskyCrates){
+    public PhysicalCrate(Location<World> crateLocation, String crateId, HuskyCrates huskyCrates, boolean isEntity){
         this.location = crateLocation;
         this.crateId = crateId;
         this.huskyCrates = huskyCrates;
         this.vc = huskyCrates.crateUtilities.getVirtualCrate(crateId);
         if(crateLocation != null)
             createHologram();
+
+        this.isEntity = isEntity;
     }
     public void createHologram() {
         if(as == null || !as.isLoaded()) {
             as = (ArmorStand)  location.getExtent().createEntity(EntityTypes.ARMOR_STAND,location.getPosition());
             //System.out.println(location.getBlock().getType());
-            if(location.getBlock().getType() != BlockTypes.AIR) {
+            if(!isEntity) {
                 as.setLocation(location.copy().add(offset));
                 //System.out.println("BLOCK");
             }else {

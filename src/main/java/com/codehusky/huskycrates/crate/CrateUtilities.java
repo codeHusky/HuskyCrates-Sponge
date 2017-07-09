@@ -163,7 +163,7 @@ public class CrateUtilities {
         return null;
     }
     public int isAcceptedKey(VirtualCrate crate, Optional<ItemStack> key, Player using) {
-        return isAcceptedKey(new PhysicalCrate(null,crate.id,HuskyCrates.instance),key,using);
+        return isAcceptedKey(new PhysicalCrate(null,crate.id,HuskyCrates.instance,false),key,using);
     }
     public int isAcceptedKey(PhysicalCrate crate, Optional<ItemStack> key, Player using) {
         if (crate != null) {
