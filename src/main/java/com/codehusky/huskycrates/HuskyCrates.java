@@ -101,7 +101,7 @@ public class HuskyCrates {
         logger = LoggerFactory.getLogger(pC.getName());
         instance = this;
         for(PluginContainer pc: Sponge.getPluginManager().getPlugins()){
-            if(pc.getId().equalsIgnoreCase("inventorytweaks")){
+            if(pc.getId().equalsIgnoreCase("inventorytweaks")||pc.getId().equalsIgnoreCase("inventorysorter")||pc.getId().equalsIgnoreCase("mousetweaks")){
                 logger.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 logger.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 logger.error(pc.getName() + " is loaded! This plugin or mod is on a blacklist for HuskyCrates, and as a result, HuskyCrates is not starting. ");
