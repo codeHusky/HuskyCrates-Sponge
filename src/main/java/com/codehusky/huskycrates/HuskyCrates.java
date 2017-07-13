@@ -17,6 +17,7 @@ import com.google.inject.Inject;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Dependency;
@@ -74,7 +76,7 @@ import java.util.function.Consumer;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.6.0-PRE3", description = "A CratesReloaded Replacement for Sponge? lol",dependencies = {@Dependency(id="huskyui",version = "0.1.0")})
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.6.0", description = "A CratesReloaded Replacement for Sponge? lol",dependencies = {@Dependency(id="huskyui",version = "0.2.1")})
 public class HuskyCrates {
     //@Inject
     public Logger logger;
@@ -242,37 +244,57 @@ public class HuskyCrates {
         logger.info("Crates has been started.");
     }
 
-    @Listener(order = Order.POST)
-    public void postGameStart(GameStartedServerEvent event){
+    public OutOfDateData oodd = new OutOfDateData();
+    public void checkVersion() {
         Sponge.getScheduler().createTaskBuilder().async().execute(new Consumer<Task>() {
             @Override
             public void accept(Task task) {
                 try {
                     JSONObject obj = JsonReader.readJsonFromUrl("https://api.github.com/repos/codehusky/HuskyCrates-Sponge/releases");
-                    //String[] thisVersion = "1.5.0".split("\\.");
-                    //String[] remoteVersion = obj.getJSONArray("releases").getJSONObject(0).getString("tag_name").replace("v","").split("\\.");
-                    //for(int i = 0; i < Math.min(remoteVersion.length,thisVersion.length); i++){
-
-                        if(obj.getJSONArray("releases").getJSONObject(0).getString("tag_name").equals("v" + pC.getVersion().get())){
-                            //we're ahead
-                            logger.warn("----------------------------------------------------");
-                            logger.warn("Running pre-released version.");
-                            logger.warn("----------------------------------------------------");
-                        }else{
-                            //we're behind
-                            logger.warn("----------------------------------------------------");
-                            logger.warn("Your version of HuskyCrates does not match the current public copy");
-                            logger.warn("Check GitHub for info.");
-                            logger.warn("----------------------------------------------------");
+                    boolean foundLatest = false;
+                    JSONObject newPre = null;
+                    for(int i = 0; i < obj.getJSONArray("releases").length() && !foundLatest; i++) {
+                        if(obj.getJSONArray("releases").getJSONObject(i).getBoolean("prerelease") && !pC.getVersion().get().contains("PRE")){
+                            if(newPre == null) {
+                                newPre = obj.getJSONArray("releases").getJSONObject(i);
+                            }
+                            continue;
                         }
-                        //return;
-
-                    //}
+                        foundLatest = true;
+                        if (obj.getJSONArray("releases").getJSONObject(i).getString("tag_name").equals("v" + pC.getVersion().get())) {
+                            //we're ahead
+                            if(newPre != null){
+                                logger.warn("----------------------------------------------------");
+                                logger.warn("HuskyCrates is up to date, but a pre-release is out.");
+                                logger.warn("Running v" + pC.getVersion().get());
+                                logger.warn("PreRelease: " + newPre.getString("tag_name"));
+                                logger.warn("----------------------------------------------------");
+                            }else {
+                                logger.info("----------------------------------------------------");
+                                logger.info("HuskyCrates is up to date.");
+                                logger.info("Running v" + pC.getVersion().get());
+                                logger.info("----------------------------------------------------");
+                            }
+                        } else {
+                            //we're behind
+                            oodd = new OutOfDateData(obj.getJSONArray("releases").getJSONObject(0).getString("tag_name"));
+                            logger.error("----------------------------------------------------");
+                            logger.error("Your version of HuskyCrates is out of date!");
+                            logger.error("Latest: " + obj.getJSONArray("releases").getJSONObject(0).getString("tag_name"));
+                            logger.error("Yours: v" + pC.getVersion().get());
+                            logger.error("Check GitHub Releases for downloads.");
+                            logger.error("----------------------------------------------------");
+                        }
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }).submit(this);
+    }
+    @Listener(order = Order.POST)
+    public void postGameStart(GameStartedServerEvent event){
+        checkVersion();
         if(forceStop) {
             //logger.error("Since a blacklisted mod is loaded, HuskyCrates will not start. Please check higher in your logs for the reasoning.");
             return;
@@ -401,8 +423,10 @@ public class HuskyCrates {
             }
             return;
         }
-
-
+        checkVersion();
+        for(Player plr: Sponge.getServer().getOnlinePlayers()){
+            notifyOutOfDate(plr);
+        }
     }
     private boolean blockCanBeCrate(BlockType type){
         return type==BlockTypes.CHEST ||
@@ -706,5 +730,21 @@ public class HuskyCrates {
 
     public String getHuskyCrateIdentifier() {
         return huskyCrateIdentifier;
+    }
+
+    public void notifyOutOfDate(Player plr){
+        if(plr.hasPermission("huskycrates.adminlog") && oodd.isOutOfDate()){
+            plr.sendMessage(Text.of(TextColors.RED,"------------------------------------------"));
+            plr.sendMessage(Text.of(TextColors.RED,"HuskyCrates is out of date!"));
+            plr.sendMessage(Text.of(TextColors.WHITE,"Latest: " + oodd.latestVersion()));
+            plr.sendMessage(Text.of(TextColors.WHITE,"Yours: v" + pC.getVersion().get()));
+            plr.sendMessage(Text.of(TextColors.RED,"Please update your HuskyCrates soon."));
+            plr.sendMessage(Text.of(TextColors.RED,"------------------------------------------"));
+        }
+    }
+
+    @Listener
+    public void playerJoin(ClientConnectionEvent.Join event){
+        notifyOutOfDate(event.getTargetEntity());
     }
 }
