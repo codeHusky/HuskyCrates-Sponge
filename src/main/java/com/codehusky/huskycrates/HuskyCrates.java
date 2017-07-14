@@ -180,7 +180,7 @@ public class HuskyCrates {
                 .executor(new VirtualKeyAll())
                 .build();
         CommandSpec wand = CommandSpec.builder()
-                .description(Text.of("Give yourself an entity wand for crates."))
+                .description(Text.of("Give Runningelf an entity wand for crates."))
                 .arguments(
                         new CrateElement(Text.of("type"))
                 )
@@ -257,33 +257,46 @@ public class HuskyCrates {
                         if(obj.getJSONArray("releases").getJSONObject(i).getBoolean("prerelease") && !pC.getVersion().get().contains("PRE")){
                             if(newPre == null) {
                                 newPre = obj.getJSONArray("releases").getJSONObject(i);
+                                if(newPre.getString("tag_name").contains(pC.getVersion().get())){
+                                    newPre = null;
+                                }
                             }
                             continue;
                         }
                         foundLatest = true;
-                        if (obj.getJSONArray("releases").getJSONObject(i).getString("tag_name").equals("v" + pC.getVersion().get())) {
-                            //we're ahead
-                            if(newPre != null){
+
+                        if(obj.getJSONArray("releases").getJSONObject(i).getString("tag_name").equals("v" + pC.getVersion().get())){
+                            logger.info("----------------------------------------------------");
+                            logger.info("HuskyCrates is up to date.");
+                            logger.info("Running v" + pC.getVersion().get());
+                            logger.info("----------------------------------------------------");
+                        } else if (newPre != null) {
+                            logger.warn("----------------------------------------------------");
+                            logger.warn("HuskyCrates is up to date, but a pre-release is out.");
+                            logger.warn("Running v" + pC.getVersion().get());
+                            logger.warn("PreRelease: " + newPre.getString("tag_name"));
+                            logger.warn("----------------------------------------------------");
+                        }else {
+                            String latestTag = obj.getJSONArray("releases").getJSONObject(0).getString("tag_name");
+                            boolean preCheck = latestTag.contains(pC.getVersion().get()) && obj.getJSONArray("releases").getJSONObject(0).getBoolean("prerelease");
+                            boolean majorCheck = Integer.parseInt(latestTag.replace("v","").substring(0,1)) > Integer.parseInt(pC.getVersion().get().substring(0,1));
+                            boolean minorCheck = !majorCheck && Integer.parseInt(latestTag.replace("v","").substring(2,3)) > Integer.parseInt(pC.getVersion().get().substring(2,3));
+                            boolean bugCheck = !minorCheck && Integer.parseInt(latestTag.replace("v","").substring(4,5)) > Integer.parseInt(pC.getVersion().get().substring(4,5));
+                            if(preCheck || majorCheck || minorCheck || bugCheck){
                                 logger.warn("----------------------------------------------------");
-                                logger.warn("HuskyCrates is up to date, but a pre-release is out.");
+                                logger.warn("HuskyCrates is running an unreleased version.");
                                 logger.warn("Running v" + pC.getVersion().get());
-                                logger.warn("PreRelease: " + newPre.getString("tag_name"));
                                 logger.warn("----------------------------------------------------");
                             }else {
-                                logger.info("----------------------------------------------------");
-                                logger.info("HuskyCrates is up to date.");
-                                logger.info("Running v" + pC.getVersion().get());
-                                logger.info("----------------------------------------------------");
+                                //we're behind
+                                oodd = new OutOfDateData(obj.getJSONArray("releases").getJSONObject(i).getString("tag_name"));
+                                logger.error("----------------------------------------------------");
+                                logger.error("Your version of HuskyCrates is out of date!");
+                                logger.error("Latest: " + obj.getJSONArray("releases").getJSONObject(i).getString("tag_name"));
+                                logger.error("Running: v" + pC.getVersion().get());
+                                logger.error("Check GitHub Releases for downloads.");
+                                logger.error("----------------------------------------------------");
                             }
-                        } else {
-                            //we're behind
-                            oodd = new OutOfDateData(obj.getJSONArray("releases").getJSONObject(0).getString("tag_name"));
-                            logger.error("----------------------------------------------------");
-                            logger.error("Your version of HuskyCrates is out of date!");
-                            logger.error("Latest: " + obj.getJSONArray("releases").getJSONObject(0).getString("tag_name"));
-                            logger.error("Yours: v" + pC.getVersion().get());
-                            logger.error("Check GitHub Releases for downloads.");
-                            logger.error("----------------------------------------------------");
                         }
                     }
                 } catch (IOException e) {
@@ -737,7 +750,7 @@ public class HuskyCrates {
             plr.sendMessage(Text.of(TextColors.RED,"------------------------------------------"));
             plr.sendMessage(Text.of(TextColors.RED,"HuskyCrates is out of date!"));
             plr.sendMessage(Text.of(TextColors.WHITE,"Latest: " + oodd.latestVersion()));
-            plr.sendMessage(Text.of(TextColors.WHITE,"Yours: v" + pC.getVersion().get()));
+            plr.sendMessage(Text.of(TextColors.WHITE,"Running: v" + pC.getVersion().get()));
             plr.sendMessage(Text.of(TextColors.RED,"Please update your HuskyCrates soon."));
             plr.sendMessage(Text.of(TextColors.RED,"------------------------------------------"));
         }

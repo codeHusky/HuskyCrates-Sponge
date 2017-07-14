@@ -41,6 +41,7 @@ public class VirtualCrate {
     public String id;
     public BlockType crateBlockType;
     public ItemType crateBlockItemType;
+    public int crateBlockDamage = 0;
     public String crateType;
     private float maxProb = 100;
     private HashMap<String,Object> options = new HashMap<>();
@@ -92,6 +93,9 @@ public class VirtualCrate {
             freeCrate = gops.getNode("freeCrate").getBoolean(false);
             if(freeCrate){
                 options.put("freeCrateDelay",gops.getNode("freeCrateDelay").getInt(0)); // IN SECONDS
+            }
+            if(!gops.getNode("crateBlockDamage").isVirtual()){
+                crateBlockDamage = gops.getNode("crateBlockDamage").getInt(0);
             }
             if(!gops.getNode("crateBlockID").isVirtual()){
                 try {
@@ -364,6 +368,9 @@ public class VirtualCrate {
                 .itemType(crateBlockItemType)
                 .quantity(quantity)
                 .add(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(displayName)).build();
+        stacky = ItemStack.builder()
+                .fromContainer(stacky.toContainer().set(DataQuery.of("UnsafeDamage"),crateBlockDamage)) //OVERRIDE DAMAGE VAL! :)
+                .build();
         ArrayList<Text> itemLore = new ArrayList<>();
         itemLore.add(Text.of(TextColors.WHITE, "A placeable ", TextSerializers.FORMATTING_CODE.deserialize(displayName), TextColors.WHITE, " crate."));
         itemLore.add(Text.of(TextColors.DARK_GRAY, "HuskyCrates"));
