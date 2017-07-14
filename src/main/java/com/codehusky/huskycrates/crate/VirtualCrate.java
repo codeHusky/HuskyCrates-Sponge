@@ -52,7 +52,7 @@ public class VirtualCrate {
     public boolean isGUI;
     public boolean freeCrate = false;
     public boolean virtualKeys = false;
-    public boolean showRewardsOnRight = false;
+    public boolean showRewardsOnLeft = false;
     public boolean scrambleRewards = false;
     public VirtualCrate(String id, ConfigurationLoader<CommentedConfigurationNode> config, CommentedConfigurationNode node){
         this.id = id;
@@ -158,8 +158,8 @@ public class VirtualCrate {
             if(!gops.getNode("damage").isVirtual()){
                 keyDamage = gops.getNode("damage").getInt(0);
             }
-            if(!gops.getNode("showRewardsOnRight").isVirtual()){
-                showRewardsOnRight = gops.getNode("showRewardsOnRight").getBoolean(false);
+            if(!gops.getNode("showRewardsOnLeft").isVirtual()){
+                showRewardsOnLeft = gops.getNode("showRewardsOnLeft").getBoolean(false);
             }
             if(!gops.getNode("scrambleRewards").isVirtual()){
                 scrambleRewards = gops.getNode("scrambleRewards").getBoolean(false);

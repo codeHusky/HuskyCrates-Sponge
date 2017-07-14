@@ -664,7 +664,7 @@ public class HuskyCrates {
         }
     }
     public void listRewards(Player player, VirtualCrate vc){
-        if(!vc.showRewardsOnRight) return;
+        if(!vc.showRewardsOnLeft) return;
         /* Home */
         StateContainer test = new StateContainer();
         Page.PageBuilder rewards = Page.builder();
