@@ -282,7 +282,8 @@ public class HuskyCrates {
                             boolean majorCheck = Integer.parseInt(latestTag.replace("v","").substring(0,1)) > Integer.parseInt(pC.getVersion().get().substring(0,1));
                             boolean minorCheck = !majorCheck && Integer.parseInt(latestTag.replace("v","").substring(2,3)) > Integer.parseInt(pC.getVersion().get().substring(2,3));
                             boolean bugCheck = !minorCheck && Integer.parseInt(latestTag.replace("v","").substring(4,5)) > Integer.parseInt(pC.getVersion().get().substring(4,5));
-                            if(preCheck || majorCheck || minorCheck || bugCheck){
+                            boolean releaseCheck = majorCheck || minorCheck || bugCheck;
+                            if(preCheck && !releaseCheck || !preCheck && releaseCheck){
                                 logger.warn("----------------------------------------------------");
                                 logger.warn("HuskyCrates is running an unreleased version.");
                                 logger.warn("Running v" + pC.getVersion().get());
