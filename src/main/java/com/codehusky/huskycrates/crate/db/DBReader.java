@@ -35,7 +35,7 @@ public class DBReader {
             }
         }
         if(dbSource == null) {
-            dbSource = Sponge.getServiceManager().provide(SqlService.class).get().getDataSource("jdbc:h2:" + HuskyCrates.instance.configDir.toString() + "/data;MV_STORE=FALSE;MVCC=FALSE");
+            dbSource = Sponge.getServiceManager().provide(SqlService.class).get().getDataSource("jdbc:h2:" + HuskyCrates.instance.configDir.toString() + "/data");
         }
         dbConnection = dbSource.getConnection();
     }
