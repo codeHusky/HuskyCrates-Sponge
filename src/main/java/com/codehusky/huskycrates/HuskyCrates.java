@@ -74,6 +74,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -322,6 +323,14 @@ public class HuskyCrates {
             //logger.error("Since a blacklisted mod is loaded, HuskyCrates will not start. Please check higher in your logs for the reasoning.");
             return;
         }
+        Sponge.getScheduler().createTaskBuilder().execute(() -> {
+            try {
+                DBReader.saveHuskyData();
+                logger.info("Updated Database.");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }).interval(15, TimeUnit.MINUTES).async().submit(this);
         Sponge.getScheduler().createTaskBuilder().execute(new Consumer<Task>() {
             @Override
             public void accept(Task task) {
