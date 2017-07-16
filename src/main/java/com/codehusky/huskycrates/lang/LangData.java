@@ -130,7 +130,7 @@ public class LangData {
             formatted = formatted.replace("%P", plr.getName());
             formatted = formatted.replace("%p", TextSerializers.FORMATTING_CODE.stripCodes(plr.getName()));
             if(vc != null) {
-                formatted = formatted.replace("%bal%", HuskyCrates.instance.crateUtilities.getVirtualKeyBalance(plr,vc) + "");
+                formatted = formatted.replace("%bal%", vc.getVirtualKeyBalance(plr) + "");
             }
         }
         if(amount != null){

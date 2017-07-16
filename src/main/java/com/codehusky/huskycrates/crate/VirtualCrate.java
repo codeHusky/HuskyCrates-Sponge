@@ -12,6 +12,7 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -25,10 +26,7 @@ import com.codehusky.huskycrates.crate.config.CrateConfigParser;
 import com.codehusky.huskycrates.lang.LangData;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by lokio on 12/29/2016.
@@ -45,13 +43,13 @@ public class VirtualCrate {
     public String crateType;
     private float maxProb = 100;
     private HashMap<String,Object> options = new HashMap<>();
-    private HashMap<String,Integer> pendingKeys = new HashMap<>();
+    public HashMap<String,Integer> pendingKeys = new HashMap<>();
+    public HashMap<String, Integer> virtualBalances = new HashMap<>();
     private ItemType keyType;
     private Integer keyDamage= null;
     private LangData langData;
     public boolean isGUI;
     public boolean freeCrate = false;
-    public boolean virtualKeys = false;
     public boolean showRewardsOnLeft = false;
     public boolean scrambleRewards = false;
     public VirtualCrate(String id, ConfigurationLoader<CommentedConfigurationNode> config, CommentedConfigurationNode node){
@@ -89,7 +87,6 @@ public class VirtualCrate {
         }
         if(!node.getNode("options").isVirtual()){
             ConfigurationNode gops = node.getNode("options");
-            virtualKeys = gops.getNode("useVirtualKeys").getBoolean(false);
             freeCrate = gops.getNode("freeCrate").getBoolean(false);
             if(freeCrate){
                 options.put("freeCrateDelay",gops.getNode("freeCrateDelay").getInt(0)); // IN SECONDS
@@ -210,20 +207,24 @@ public class VirtualCrate {
         try {
             CommentedConfigurationNode root = config.load();
             //System.out.println(root.getNode("keys"));
-            if(root.getNode("keys",id).hasListChildren()){
-                HuskyCrates.instance.logger.error("Please manually transfer your keys from the crate " + id + " to use the new format.");
-            }else {
-                for (Object key : root.getNode("keys", id).getChildrenMap().keySet()) {
-                    CommentedConfigurationNode nn = root.getNode("keys", id).getChildrenMap().get(key);
-                    if (nn.getInt(0) == 0) {
-                        nn.setValue(null);
-                    } else {
-                        pendingKeys.put(key.toString(), nn.getInt(1));
+            if(!root.getNode("keys").isVirtual()) {
+                HuskyCrates.instance.logger.warn("Legacy key data detected. As long as you have placed crates, we'll convert.");
+                if (root.getNode("keys", id).hasListChildren()) {
+                    HuskyCrates.instance.logger.error("Please manually transfer your keys from the crate " + id + " to use the new format.");
+                } else {
+                    for (Object key : root.getNode("keys", id).getChildrenMap().keySet()) {
+                        CommentedConfigurationNode nn = root.getNode("keys", id).getChildrenMap().get(key);
+                        if (nn.getInt(0) == 0) {
+                            nn.setValue(null);
+                        } else {
+                            pendingKeys.put(key.toString(), nn.getInt(1));
+                        }
                     }
                 }
+                config.save(root);
+                HuskyCrates.instance.logger.info("Loaded " + pendingKeys.size() + " " + id + " key UUIDs (LEGACY METHOD)");
             }
-            config.save(root);
-            HuskyCrates.instance.logger.info("Loaded " + pendingKeys.size() + " " + id + " key UUIDs");
+
         } catch (IOException  e) {
             HuskyCrates.instance.logger.error("Failed to load key UUIDs. Keys will not work!");
             e.printStackTrace();
@@ -384,5 +385,39 @@ public class VirtualCrate {
 
     public LangData getLangData() {
         return langData;
+    }
+
+    /* The mess of Virtual Key methods */
+    public int getVirtualKeyBalance(User player) {
+        if(virtualBalances.containsKey(player.getUniqueId().toString())) {
+            return virtualBalances.get(player.getUniqueId().toString());
+        }
+        return 0;
+    }
+    public void takeVirtualKey(User player,int count){
+        if(virtualBalances.containsKey(player.getUniqueId().toString())) {
+            virtualBalances.put(player.getUniqueId().toString(),virtualBalances.get(player.getUniqueId().toString())-count);
+        }
+    }
+    public void takeVirtualKey(User player){
+        takeVirtualKey(player,1);
+    }
+    public void giveVirtualKeys(User player, int count){
+        if(virtualBalances.containsKey(player.getUniqueId().toString())) {
+            virtualBalances.put(player.getUniqueId().toString(),virtualBalances.get(player.getUniqueId().toString())+count);
+        }else{
+            virtualBalances.put(player.getUniqueId().toString(),count);
+        }
+    }
+    public void givePlayersVirtualKeys(Collection<Player> players, int count){
+
+        for(Player player : players) {
+            if(virtualBalances.containsKey(player.getUniqueId().toString())) {
+                virtualBalances.put(player.getUniqueId().toString(),virtualBalances.get(player.getUniqueId().toString())+count);
+            }else{
+                virtualBalances.put(player.getUniqueId().toString(),count);
+            }
+        }
+
     }
 }

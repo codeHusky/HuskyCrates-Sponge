@@ -31,7 +31,7 @@ public class PhysicalCrate {
     public VirtualCrate vc;
     public ArmorStand as = null;
     private HuskyCrates huskyCrates;
-    private boolean isEntity = false;
+    public boolean isEntity = false;
     double randomTimeOffset = new Random().nextDouble()*2000;
     public static Vector3d offset = new Vector3d(0.5,1,0.5);
     public HashMap<UUID,LocalDateTime> lastUsed = new HashMap<>();
@@ -53,14 +53,10 @@ public class PhysicalCrate {
     }
     public void createHologram() {
         if(as == null || !as.isLoaded()) {
-            as = (ArmorStand)  location.getExtent().createEntity(EntityTypes.ARMOR_STAND,location.getPosition());
-            //System.out.println(location.getBlock().getType());
             if(!isEntity) {
-                as.setLocation(location.copy().add(offset));
-                //System.out.println("BLOCK");
+                as = (ArmorStand)  location.getExtent().createEntity(EntityTypes.ARMOR_STAND,location.getPosition().add(offset));
             }else {
-                //System.out.println("AIR");
-                as.setLocation(location.copy().add(0, 1, 0));
+                as = (ArmorStand)  location.getExtent().createEntity(EntityTypes.ARMOR_STAND,location.getPosition().add(0,1,0));
             }
             location.getExtent().spawnEntity(as,huskyCrates.genericCause);
         }

@@ -39,7 +39,7 @@ public class VirtualKey implements CommandExecutor {
             }
 
 
-            HuskyCrates.instance.crateUtilities.giveVirtualKeys(player.get(),virtualCrate,quantity);
+            virtualCrate.giveVirtualKeys(player.get(),quantity);
             commandSource.sendMessage(Text.of("Gave " + player.get().getName() + " " + quantity + " vkeys."));
             if(commandSource != player.get() && player.get() instanceof Player) {
                 ((Player)player.get()).sendMessage(Text.of(TextColors.GREEN,"You received " + quantity + " virtual keys for a ", TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName),"."));

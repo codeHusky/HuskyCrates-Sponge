@@ -25,7 +25,7 @@ import java.util.*;
  */
 @SuppressWarnings("deprecation")
 public class CrateUtilities {
-    private HashMap<String,VirtualCrate> crateTypes = new HashMap<>();
+    public HashMap<String,VirtualCrate> crateTypes = new HashMap<>();
     public HashMap<Location<World>,PhysicalCrate> physicalCrates = new HashMap<>();
     public boolean hasInitalizedVirtualCrates = false;
     private HuskyCrates plugin;
@@ -34,7 +34,6 @@ public class CrateUtilities {
     }
     public void launchCrateForPlayer(String crateType, Player target,HuskyCrates plugin){
         if(!crateTypes.containsKey(crateType)) {
-            System.out.println(crateType);
             target.openInventory(new NullCrateView(plugin,target,null).getInventory(), plugin.genericCause);
         }else{
             if(crateTypes.get(crateType).isGUI) {
@@ -53,7 +52,6 @@ public class CrateUtilities {
     private ArrayList<Location<World>> toCheck;
     public void generateVirtualCrates(ConfigurationLoader<CommentedConfigurationNode> config){
         toCheck = new ArrayList<>();
-        physicalCrates = new HashMap<>();
         //System.out.println("GEN VC CALLED");
         try {
             CommentedConfigurationNode configRoot = config.load();
@@ -208,7 +206,7 @@ public class CrateUtilities {
                 }
             }
         }
-        if(getVirtualKeyBalance(using,crate.vc) > 0){
+        if(crate.vc.getVirtualKeyBalance(using) > 0){
             return 2;
         }
         return 0;
@@ -233,55 +231,5 @@ public class CrateUtilities {
         return false;
     }
 
-    /* The mess of Virtual Key methods */
-    public int getVirtualKeyBalance(User player, VirtualCrate vc) {
-        try {
-            CommentedConfigurationNode root = HuskyCrates.instance.crateConfig.load();
-            if(!root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).isVirtual()){
-                return root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).getInt(0);
-            }
-        } catch (Exception e) {
-            exceptionHandler(e);
 
-        }
-        return 0;
-    }
-    public void takeVirtualKey(User player, VirtualCrate vc,int count){
-        try {
-            CommentedConfigurationNode root = HuskyCrates.instance.crateConfig.load();
-            //if(!root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).isVirtual()){
-            root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).setValue(root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).getInt(0) - count);
-            //}
-            HuskyCrates.instance.crateConfig.save(root);
-        } catch (Exception e) {
-            exceptionHandler(e);
-        }
-    }
-    public void takeVirtualKey(User player, VirtualCrate vc){
-        takeVirtualKey(player,vc,1);
-    }
-    public void giveVirtualKeys(User player, VirtualCrate vc, int count){
-        try {
-            CommentedConfigurationNode root = HuskyCrates.instance.crateConfig.load();
-            //if(!root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).isVirtual()){
-            root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).setValue(root.getNode("users",player.getUniqueId().toString(),"keys",vc.id).getInt(0) + count);
-            //}
-            HuskyCrates.instance.crateConfig.save(root);
-        } catch (Exception e) {
-            exceptionHandler(e);
-
-        }
-    }
-    public void givePlayersVirtualKeys(Collection<Player> players, VirtualCrate vc, int count){
-        try {
-            CommentedConfigurationNode root = HuskyCrates.instance.crateConfig.load();
-            for(Player player : players) {
-                root.getNode("users", player.getUniqueId().toString(), "keys", vc.id).setValue(root.getNode("users", player.getUniqueId().toString(), "keys", vc.id).getInt(0) + count);
-            }
-            HuskyCrates.instance.crateConfig.save(root);
-        } catch (Exception e) {
-            exceptionHandler(e);
-
-        }
-    }
 }

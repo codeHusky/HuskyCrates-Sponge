@@ -26,7 +26,7 @@ public class VirtualKeyAll implements CommandExecutor {
                 return CommandResult.empty();
             }
             commandSource.sendMessage(Text.of("Gave everyone " + quantity + " vkeys."));
-            HuskyCrates.instance.crateUtilities.givePlayersVirtualKeys(Sponge.getServer().getOnlinePlayers(),virtualCrate,quantity);
+            virtualCrate.givePlayersVirtualKeys(Sponge.getServer().getOnlinePlayers(),quantity);
             for(Player e: Sponge.getServer().getOnlinePlayers()){
                 if(commandSource != e) {
                     e.sendMessage(Text.of(TextColors.GREEN,"You received " + quantity + " virtual keys for a ", TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName),"."));

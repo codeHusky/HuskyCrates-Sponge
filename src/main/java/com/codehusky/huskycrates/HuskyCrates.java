@@ -5,6 +5,7 @@ import com.codehusky.huskycrates.crate.CrateUtilities;
 import com.codehusky.huskycrates.crate.PhysicalCrate;
 import com.codehusky.huskycrates.crate.VirtualCrate;
 import com.codehusky.huskycrates.crate.config.CrateReward;
+import com.codehusky.huskycrates.crate.db.DBReader;
 import com.codehusky.huskyui.StateContainer;
 import com.codehusky.huskyui.states.Page;
 import com.codehusky.huskyui.states.State;
@@ -27,6 +28,7 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
@@ -69,6 +71,8 @@ import com.codehusky.huskycrates.commands.elements.CrateElement;
 import com.codehusky.huskycrates.lang.LangData;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -84,6 +88,11 @@ public class HuskyCrates {
 
     @Inject
     public PluginContainer pC;
+
+    @Inject
+    @ConfigDir(sharedRoot = false)
+    public Path configDir;
+
     @Inject
     @DefaultConfig(sharedRoot = false)
     public ConfigurationLoader<CommentedConfigurationNode> crateConfig;
@@ -335,25 +344,55 @@ public class HuskyCrates {
                 }
                 crateUtilities.hasInitalizedVirtualCrates = true; // doublecheck
                 logger.info("Done initalizing config.");
-                logger.info("Populating physical crates...");
+                logger.info("Attempting legacy Physical Crates method (this will be removed in a later version)");
                 CommentedConfigurationNode root = null;
+                boolean convertFired = false;
                 try {
                     root = crateConfig.load();
                     double max = root.getNode("positions").getChildrenList().size();
                     double count = 0;
-                    for(CommentedConfigurationNode node : root.getNode("positions").getChildrenList()){
-                        count++;
-                        Location<World> ee;
-                        try {
-                            ee = node.getNode("location").getValue(TypeToken.of(Location.class));
-                        }catch(InvalidDataException err2){
-                            logger.warn("Bug sponge developers about world UUIDs!");
-                            ee = new Location<World>(Sponge.getServer().getWorld(node.getNode("location","WorldName").getString()).get(),node.getNode("location","X").getDouble(),node.getNode("location","Y").getDouble(),node.getNode("location","Z").getDouble());
+                    for(VirtualCrate vc : crateUtilities.crateTypes.values()){
+                        if(vc.pendingKeys.size() > 0){
+                            logger.warn("legacy keys loaded! warn warn warn.");
+                            if(!root.getNode("keys").isVirtual()){
+                                root.removeChild("keys");
+                            }
+                            convertFired = true;
                         }
-                        if(!crateUtilities.physicalCrates.containsKey(ee))
-                            crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance,node.getNode("location","BlockType").getString().equals("minecraft:air")));
-                        logger.info("PROGRESS: "  + Math.round((count/max)*100) + "%");
                     }
+                    if(!root.getNode("positions").isVirtual()) {
+                        convertFired = true;
+                        logger.warn("Legacy position data detected. Will convert.");
+                        for (CommentedConfigurationNode node : root.getNode("positions").getChildrenList()) {
+                            count++;
+                            Location<World> ee;
+                            try {
+                                ee = node.getNode("location").getValue(TypeToken.of(Location.class));
+                            } catch (InvalidDataException err2) {
+                                logger.warn("Bug sponge developers about world UUIDs!");
+                                ee = new Location<World>(Sponge.getServer().getWorld(node.getNode("location", "WorldName").getString()).get(), node.getNode("location", "X").getDouble(), node.getNode("location", "Y").getDouble(), node.getNode("location", "Z").getDouble());
+                            }
+                            if (!crateUtilities.physicalCrates.containsKey(ee))
+                                crateUtilities.physicalCrates.put(ee, new PhysicalCrate(ee, node.getNode("crateID").getString(), HuskyCrates.instance, node.getNode("location", "BlockType").getString().equals("minecraft:air")));
+                            logger.info("(LEGACY) PROGRESS: " + Math.round((count / max) * 100) + "%");
+                        }
+                        root.removeChild("positions");
+
+
+                    }
+                    if(!root.getNode("users").isVirtual()){
+                        for(Object uuidPre: root.getNode("users").getChildrenMap().keySet()){
+                            for(Object crateIDPre: root.getNode("users",uuidPre,"keys").getChildrenMap().keySet()){
+                                String uuid = uuidPre.toString();
+                                String crateID = crateIDPre.toString();
+                                int amount = root.getNode("users",uuid,"keys",crateID).getInt(0);
+                                HuskyCrates.instance.crateUtilities.crateTypes.get(crateID).virtualBalances.put(uuid,amount);
+                            }
+                        }
+                        root.removeChild("users");
+                    }
+                    crateConfig.save(root);
+
                 } catch (Exception e) {
                     crateUtilities.exceptionHandler(e);
                     if(event.getCause().root() instanceof Player){
@@ -362,8 +401,21 @@ public class HuskyCrates {
                     }
                     return;
                 }
+                logger.info("Done with legacy loading technique");
+                logger.info("Running DB data loading. (or saving if convert required)");
+                try {
+                    DBReader.dbInitCheck();
+                    if (convertFired) {
+                        DBReader.saveHuskyData();
+                    } else {
+                        DBReader.loadHuskyData();
+                    }
+                }catch (SQLException e){
+                    e.printStackTrace();
+                }
+                logger.info("DB Data loaded / saved.");
                 crateUtilities.startParticleEffects();
-                logger.info("Done populating physical crates.");
+
                 logger.info("Initalization complete.");
             }
         }).delayTicks(1).submit(this);
@@ -384,6 +436,12 @@ public class HuskyCrates {
     }
     @Listener
     public void gameReloaded(GameReloadEvent event){
+        try{
+            DBReader.dbInitCheck();
+            DBReader.saveHuskyData();
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
         langData = null;
         if(forceStop) {
             if(event.getCause().root() instanceof Player){
@@ -417,18 +475,7 @@ public class HuskyCrates {
             else
                 logger.info("Using default lang settings.");
             crateUtilities.generateVirtualCrates(crateConfig);
-            for(CommentedConfigurationNode node : root.getNode("positions").getChildrenList()){
-                Location<World> ee;
-                try {
-                    ee = node.getNode("location").getValue(TypeToken.of(Location.class));
-                }catch(InvalidDataException err2){
-                    logger.warn("Bug sponge developers about world UUIDs!");
-                    ee = new Location<World>(Sponge.getServer().getWorld(node.getNode("location","WorldName").getString()).get(),node.getNode("location","X").getDouble(),node.getNode("location","Y").getDouble(),node.getNode("location","Z").getDouble());
-                }
-                if(!crateUtilities.physicalCrates.containsKey(ee))
-                    crateUtilities.physicalCrates.put(ee,new PhysicalCrate(ee,node.getNode("crateID").getString(),HuskyCrates.instance,node.getNode("location","BlockType").getString().equals("minecraft:air")));
-            }
-            crateUtilities.startParticleEffects();
+
         } catch (Exception e) {
             crateUtilities.exceptionHandler(e);
             if(event.getCause().root() instanceof Player){
@@ -437,6 +484,13 @@ public class HuskyCrates {
             }
             return;
         }
+        try {
+
+            DBReader.loadHuskyData();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        crateUtilities.startParticleEffects();
         checkVersion();
         for(Player plr: Sponge.getServer().getOnlinePlayers()){
             notifyOutOfDate(plr);
@@ -505,28 +559,8 @@ public class HuskyCrates {
             return;
         updating = true;
         try {
-            CommentedConfigurationNode root = crateConfig.load();
-            root.getNode("positions").setValue(null);
-            for(Object ob: ((HashMap)crateUtilities.physicalCrates.clone()).keySet()) {
-                Location<World> e = (Location<World>)ob;
-                CommentedConfigurationNode node = root.getNode("positions").getAppendedNode();
-                node.getNode("location").setValue(TypeToken.of(Location.class),e);
-                //System.out.println("echo");
-                try {
-                    node.getNode("crateID").setValue(crateUtilities.physicalCrates.get(e).vc.id);
-                }catch(NullPointerException err){
-                    //System.out.println("removing a crate!");
-                    node.setValue(null);
-                    crateUtilities.physicalCrates.remove(ob);
-                    logger.warn("Invalid crate at (" + e.getPosition().getFloorX() + ", " + e.getPosition().getFloorY() + ", " + e.getPosition().getFloorZ() + ")!");
-                }
-            }
-            crateConfig.save(root);
-        } catch (IOException e) {
-
-             e.printStackTrace();
-
-        } catch (ObjectMappingException e) {
+            DBReader.loadHuskyData();
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         crateUtilities.flag = false;
@@ -549,7 +583,7 @@ public class HuskyCrates {
                 }
             }else if(keyResult == 2){
                 if(!plr.hasPermission("huskycrates.tester")) {
-                    crateUtilities.takeVirtualKey(plr, vc);
+                    vc.takeVirtualKey(plr);
                     plr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
                             vc.getLangData().formatter(vc.getLangData().vkeyUseNotifier, null, plr, vc, null, crateUtilities.physicalCrates.get(blk), null)
                     ));

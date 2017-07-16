@@ -34,10 +34,10 @@ public class WithdrawKey implements CommandExecutor {
                 commandSource.sendMessage(Text.of("Invalid crate id: " + type + ". Try using tab auto completion."));
                 return CommandResult.empty();
             }
-            int balance = HuskyCrates.instance.crateUtilities.getVirtualKeyBalance(player,virtualCrate);
+            int balance = virtualCrate.getVirtualKeyBalance(player);
             if(balance >= quantity && quantity > 0){
                 ItemStack key = virtualCrate.getCrateKey(quantity);
-                HuskyCrates.instance.crateUtilities.takeVirtualKey(player, virtualCrate, quantity);
+                virtualCrate.takeVirtualKey(player, quantity);
                 player.getInventory().offer(key);
                 commandSource.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
                         virtualCrate.getLangData().formatter(virtualCrate.getLangData().withdrawSuccess,null,player,virtualCrate,null,null,quantity)
