@@ -35,7 +35,7 @@ public class DBReader {
             }
         }
         if(dbSource == null) {
-            dbSource = Sponge.getServiceManager().provide(SqlService.class).get().getDataSource("jdbc:h2:" + HuskyCrates.instance.configDir.toString() + "/data");
+            dbSource = Sponge.getServiceManager().provide(SqlService.class).get().getDataSource("jdbc:h2:" + HuskyCrates.instance.configDir.toString() + "/data;MV_STORE=FALSE;MVCC=FALSE");
         }
         dbConnection = dbSource.getConnection();
     }
@@ -72,6 +72,7 @@ public class DBReader {
             int id = worldInfo.getInt("ID");
             Optional<World> preWorld = Sponge.getServer().getWorld(UUID.fromString(worldUUID));
             if(!preWorld.isPresent()){
+                HuskyCrates.instance.logger.warn("Invalid World UUID (BUG SPONGE DEVS)");
                 preWorld = Sponge.getServer().getWorld(worldName);
             }
             if(preWorld.isPresent()) {
