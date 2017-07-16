@@ -81,7 +81,7 @@ import java.util.function.Consumer;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.6.0", description = "A CratesReloaded Replacement for Sponge? lol",dependencies = {@Dependency(id="huskyui",version = "0.2.1")})
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.7.0", description = "A CratesReloaded Replacement for Sponge? lol",dependencies = {@Dependency(id="huskyui",version = "0.2.1")})
 public class HuskyCrates {
     //@Inject
     public Logger logger;
@@ -276,11 +276,13 @@ public class HuskyCrates {
                         foundLatest = true;
 
                         if(obj.getJSONArray("releases").getJSONObject(i).getString("tag_name").equals("v" + pC.getVersion().get())){
+                            oodd = new OutOfDateData();
                             logger.info("----------------------------------------------------");
                             logger.info("HuskyCrates is up to date.");
                             logger.info("Running v" + pC.getVersion().get());
                             logger.info("----------------------------------------------------");
                         } else if (newPre != null) {
+                            oodd = new OutOfDateData();
                             logger.warn("----------------------------------------------------");
                             logger.warn("HuskyCrates is up to date, but a pre-release is out.");
                             logger.warn("Running v" + pC.getVersion().get());
@@ -293,7 +295,8 @@ public class HuskyCrates {
                             boolean minorCheck = !majorCheck && Integer.parseInt(latestTag.replace("v","").substring(2,3)) > Integer.parseInt(pC.getVersion().get().substring(2,3));
                             boolean bugCheck = !minorCheck && Integer.parseInt(latestTag.replace("v","").substring(4,5)) > Integer.parseInt(pC.getVersion().get().substring(4,5));
                             boolean releaseCheck = majorCheck || minorCheck || bugCheck;
-                            if(preCheck && !releaseCheck || !preCheck && releaseCheck){
+                            if(preCheck && !releaseCheck || !preCheck && !releaseCheck){
+                                oodd = new OutOfDateData();
                                 logger.warn("----------------------------------------------------");
                                 logger.warn("HuskyCrates is running an unreleased version.");
                                 logger.warn("Running v" + pC.getVersion().get());
@@ -316,6 +319,20 @@ public class HuskyCrates {
             }
         }).submit(this);
     }
+    public void removeArmorstands() {
+        for(World bit: Sponge.getServer().getWorlds()) {
+            for (Entity ent : bit.getEntities()) {
+                if (ent instanceof ArmorStand) {
+                    ArmorStand arm = (ArmorStand) ent;
+                    if (arm.getCreator().isPresent()) {
+                        if (arm.getCreator().get().equals(UUID.fromString(armorStandIdentifier))) {
+                            arm.remove();
+                        }
+                    }
+                }
+            }
+        }
+    }
     @Listener(order = Order.POST)
     public void postGameStart(GameStartedServerEvent event){
         checkVersion();
@@ -323,30 +340,12 @@ public class HuskyCrates {
             //logger.error("Since a blacklisted mod is loaded, HuskyCrates will not start. Please check higher in your logs for the reasoning.");
             return;
         }
-        Sponge.getScheduler().createTaskBuilder().execute(() -> {
-            try {
-                DBReader.saveHuskyData();
-                logger.info("Updated Database.");
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }).interval(15, TimeUnit.MINUTES).async().submit(this);
+
         Sponge.getScheduler().createTaskBuilder().execute(new Consumer<Task>() {
             @Override
             public void accept(Task task) {
                 logger.info("Deleting existing armor stands...");
-                for(World bit: Sponge.getServer().getWorlds()) {
-                    for (Entity ent : bit.getEntities()) {
-                        if (ent instanceof ArmorStand) {
-                            ArmorStand arm = (ArmorStand) ent;
-                            if (arm.getCreator().isPresent()) {
-                                if (arm.getCreator().get().equals(UUID.fromString(armorStandIdentifier))) {
-                                    arm.remove();
-                                }
-                            }
-                        }
-                    }
-                }
+                removeArmorstands();
                 logger.info("Initalizing config...");
                 if(!crateUtilities.hasInitalizedVirtualCrates){
                     crateUtilities.generateVirtualCrates(crateConfig);
@@ -426,6 +425,15 @@ public class HuskyCrates {
                 crateUtilities.startParticleEffects();
 
                 logger.info("Initalization complete.");
+                Sponge.getScheduler().createTaskBuilder().execute(() -> {
+                    try {
+                        DBReader.dbInitCheck();
+                        DBReader.saveHuskyData();
+                        logger.info("Updated Database.");
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }).interval(15, TimeUnit.MINUTES).delay(15, TimeUnit.MINUTES).async().submit(HuskyCrates.instance);
             }
         }).delayTicks(1).submit(this);
     }
@@ -463,18 +471,7 @@ public class HuskyCrates {
             CommandSource cs = (CommandSource) event.getCause().root();
             cs.sendMessage(Text.of(TextColors.GOLD,"HuskyCrates",TextColors.WHITE,":",TextColors.YELLOW," Please check console to verify that any config modifications you've done are valid."));
         }
-        for(World bit: Sponge.getServer().getWorlds()) {
-            for (Entity ent : bit.getEntities()) {
-                if (ent instanceof ArmorStand) {
-                    ArmorStand arm = (ArmorStand) ent;
-                    if (arm.getCreator().isPresent()) {
-                        if (arm.getCreator().get().equals(UUID.fromString(armorStandIdentifier))) {
-                            arm.remove();
-                        }
-                    }
-                }
-            }
-        }
+        removeArmorstands();
         langData = new LangData();
         CommentedConfigurationNode root = null;
         try {
@@ -567,7 +564,10 @@ public class HuskyCrates {
         if(updating)
             return;
         updating = true;
+        removeArmorstands();
         try {
+            DBReader.dbInitCheck();
+            DBReader.saveHuskyData();
             DBReader.loadHuskyData();
         } catch (SQLException e) {
             e.printStackTrace();

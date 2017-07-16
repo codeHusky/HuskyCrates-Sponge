@@ -24,7 +24,7 @@ import java.util.UUID;
 /**
  * Created by lokio on 1/2/2017.
  */
-@SuppressWarnings("deprecation")
+
 public class PhysicalCrate {
     public Location<World> location;
     private String crateId;
@@ -52,27 +52,34 @@ public class PhysicalCrate {
         this.isEntity = isEntity;
     }
     public void createHologram() {
-        if(as == null || !as.isLoaded()) {
-            if(!isEntity) {
-                as = (ArmorStand)  location.getExtent().createEntity(EntityTypes.ARMOR_STAND,location.getPosition().add(offset));
-            }else {
-                as = (ArmorStand)  location.getExtent().createEntity(EntityTypes.ARMOR_STAND,location.getPosition().add(0,1,0));
+        if(location.getExtent().getChunk(location.getChunkPosition()).isPresent()) {
+            if (location.getExtent().getChunk(location.getChunkPosition()).get().isLoaded()) {
+                if (as == null || !as.isLoaded()) {
+                    if (!isEntity) {
+                        as = (ArmorStand) location.getExtent().createEntity(EntityTypes.ARMOR_STAND, location.getPosition().add(offset));
+                    } else {
+                        as = (ArmorStand) location.getExtent().createEntity(EntityTypes.ARMOR_STAND, location.getPosition().add(0, 1, 0));
+                    }
+                    as.setCreator(UUID.fromString(huskyCrates.armorStandIdentifier));
+                    as.offer(Keys.HAS_GRAVITY, false);
+                    as.offer(Keys.INVISIBLE, true);
+                    as.offer(Keys.ARMOR_STAND_MARKER, true);
+                    as.offer(Keys.CUSTOM_NAME_VISIBLE, true);
+                    String name = "&cERROR, CHECK CONSOLE!";
+                    try {
+                        name = /*crateId*/ huskyCrates.crateUtilities.getVirtualCrate(crateId).displayName;
+                    } catch (Exception e) {
+                        //e.printStackTrace();
+                    }
+                    as.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(name));
+                    boolean worked = location.getExtent().spawnEntity(as, huskyCrates.genericCause);
+                    if (!worked) {
+                        as = null;
+                        return;
+                    }
+                }
             }
-            location.getExtent().spawnEntity(as,huskyCrates.genericCause);
         }
-        as.setCreator(UUID.fromString(huskyCrates.armorStandIdentifier));
-        as.offer(Keys.HAS_GRAVITY,false);
-        as.offer(Keys.INVISIBLE,true);
-        as.offer(Keys.ARMOR_STAND_MARKER,true);
-        as.offer(Keys.CUSTOM_NAME_VISIBLE,true);
-        String name = "&cERROR, CHECK CONSOLE!";
-        try {
-            name = /*crateId*/ huskyCrates.crateUtilities.getVirtualCrate(crateId).displayName;
-        }catch(Exception e){
-            //e.printStackTrace();
-        }
-        as.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(name));
-
     }
     void runParticles() {
         try {

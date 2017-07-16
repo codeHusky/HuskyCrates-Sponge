@@ -59,10 +59,6 @@ public class DBReader {
             dbConnection.prepareStatement("CREATE TABLE WORLDINFO (ID INTEGER NOT NULL AUTO_INCREMENT,uuid CHARACTER, name CHARACTER,  PRIMARY KEY(ID))").executeUpdate();
         }
 
-        if(!cP || !cKU || !kB || !wI){
-            //assuming we need to move data.
-            saveHuskyData();
-        }
         dbConnection.close();
     }
 
