@@ -81,7 +81,7 @@ import java.util.function.Consumer;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.7.0", description = "A CratesReloaded Replacement for Sponge? lol",dependencies = {@Dependency(id="huskyui",version = "0.2.1")})
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "1.7.1", description = "A CratesReloaded Replacement for Sponge? lol",dependencies = {@Dependency(id="huskyui",version = "0.2.1")})
 public class HuskyCrates {
     //@Inject
     public Logger logger;
@@ -410,18 +410,22 @@ public class HuskyCrates {
                     return;
                 }
                 logger.info("Done with legacy loading technique");
-                logger.info("Running DB data loading. (or saving if convert required)");
+                logger.info("Running DB routine.");
                 try {
                     DBReader.dbInitCheck();
                     if (convertFired) {
+                        logger.info("Saving data.");
                         DBReader.saveHuskyData();
+                        logger.info("Done saving data.");
                     } else {
+                        logger.info("Loading data.");
                         DBReader.loadHuskyData();
+                        logger.info("Done loading data.");
                     }
                 }catch (SQLException e){
                     e.printStackTrace();
                 }
-                logger.info("DB Data loaded / saved.");
+                logger.info("DB Data routine finished.");
                 crateUtilities.startParticleEffects();
 
                 logger.info("Initalization complete.");
