@@ -4,6 +4,7 @@ import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.crate.CrateCommandSource;
 import com.codehusky.huskycrates.crate.VirtualCrate;
 import com.codehusky.huskycrates.exceptions.RandomItemSelectionFailureException;
+import com.codehusky.huskycrates.lang.LangData;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -63,6 +64,7 @@ public class CrateView {
             }
         }
         boolean mult = false;
+        LangData thisData = giveToPlayer.getLangData();
         if (!giveToPlayer.treatAsSingle() && giveToPlayer.getRewards().size() == 1 && giveToPlayer.getRewards().get(0) instanceof ItemStack) {
             if (((ItemStack) giveToPlayer.getRewards().get(0)).getQuantity() > 1) {
                     /*ourplr.sendMessage(Text.of("You won ", TextColors.YELLOW,
@@ -70,11 +72,11 @@ public class CrateView {
                             TextSerializers.FORMATTING_CODE.deserialize(giveToPlayer.getReward().getRewardName()), TextColors.RESET, " from a ",
                             TextSerializers.FORMATTING_CODE.deserialize(vc.displayName), TextColors.RESET, "!"));*/
                 ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                        vc.getLangData().formatter(vc.getLangData().rewardMessage, ((ItemStack) giveToPlayer.getRewards().get(0)).getQuantity() + "", ourplr, vc, giveToPlayer, null, null)
+                        thisData.formatter(thisData.rewardMessage, ((ItemStack) giveToPlayer.getRewards().get(0)).getQuantity() + "", ourplr, vc, giveToPlayer, null, null)
                 ));
                 if (giveToPlayer.shouldAnnounce()) {
                     Sponge.getServer().getBroadcastChannel().send(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.getLangData().formatter(vc.getLangData().rewardAnnounceMessage, ((ItemStack) giveToPlayer.getRewards().get(0)).getQuantity() + "", ourplr, vc, giveToPlayer, null, null)
+                            thisData.formatter(thisData.rewardAnnounceMessage, ((ItemStack) giveToPlayer.getRewards().get(0)).getQuantity() + "", ourplr, vc, giveToPlayer, null, null)
                     ));
                 }
                 mult = true;
@@ -84,20 +86,20 @@ public class CrateView {
             String[] vowels = {"a", "e", "i", "o", "u"};
             if (Arrays.asList(vowels).contains(giveToPlayer.getRewardName().substring(0, 1).toLowerCase())) {
                 ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                        vc.getLangData().formatter(vc.getLangData().rewardMessage, "an", ourplr, vc, giveToPlayer, null, null)
+                        thisData.formatter(thisData.rewardMessage, "an", ourplr, vc, giveToPlayer, null, null)
                 ));
                 if (giveToPlayer.shouldAnnounce()) {
                     Sponge.getServer().getBroadcastChannel().send(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.getLangData().formatter(vc.getLangData().rewardAnnounceMessage, "an", ourplr, vc, giveToPlayer, null, null)
+                            thisData.formatter(thisData.rewardAnnounceMessage, "an", ourplr, vc, giveToPlayer, null, null)
                     ));
                 }
             } else {
                 ourplr.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
-                        vc.getLangData().formatter(vc.getLangData().rewardMessage, "a", ourplr, vc, giveToPlayer, null, null)
+                        thisData.formatter(thisData.rewardMessage, "a", ourplr, vc, giveToPlayer, null, null)
                 ));
                 if (giveToPlayer.shouldAnnounce()) {
                     Sponge.getServer().getBroadcastChannel().send(TextSerializers.FORMATTING_CODE.deserialize(
-                            vc.getLangData().formatter(vc.getLangData().rewardAnnounceMessage, "a", ourplr, vc, giveToPlayer, null, null)
+                            thisData.formatter(thisData.rewardAnnounceMessage, "a", ourplr, vc, giveToPlayer, null, null)
                     ));
                 }
             }
