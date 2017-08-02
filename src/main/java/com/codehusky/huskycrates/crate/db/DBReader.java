@@ -12,6 +12,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import javax.sql.DataSource;
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -35,7 +36,7 @@ public class DBReader {
             }
         }
         if(dbSource == null) {
-            dbSource = Sponge.getServiceManager().provide(SqlService.class).get().getDataSource("jdbc:h2:" + HuskyCrates.instance.configDir.toString() + "/data");
+            dbSource = Sponge.getServiceManager().provide(SqlService.class).get().getDataSource("jdbc:h2:" + HuskyCrates.instance.configDir.toString() + File.separator + "data");
         }
         dbConnection = dbSource.getConnection();
     }
