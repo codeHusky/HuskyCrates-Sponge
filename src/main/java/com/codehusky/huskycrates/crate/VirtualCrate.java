@@ -1,5 +1,6 @@
 package com.codehusky.huskycrates.crate;
 
+import com.codehusky.huskycrates.crate.db.DBReader;
 import com.codehusky.huskycrates.crate.views.*;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -26,6 +27,7 @@ import com.codehusky.huskycrates.crate.config.CrateConfigParser;
 import com.codehusky.huskycrates.lang.LangData;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -221,6 +223,7 @@ public class VirtualCrate {
                         }
                     }
                 }
+                root.removeChild("keys");
                 config.save(root);
                 HuskyCrates.instance.logger.info("Loaded " + pendingKeys.size() + " " + id + " key UUIDs (LEGACY METHOD)");
             }
@@ -292,12 +295,9 @@ public class VirtualCrate {
         String keyUUID = UUID.randomUUID().toString();
         pendingKeys.put(keyUUID,quantity);
         try {
-            CommentedConfigurationNode root = HuskyCrates.instance.crateConfig.load();
-            root.getNode("keys",id,keyUUID).setValue(quantity);
-            HuskyCrates.instance.crateConfig.save(root);
-        } catch (IOException e) {
+            DBReader.saveHuskyData();
+        } catch (SQLException e) {
             e.printStackTrace();
-            return null;
         }
         return keyUUID;
     }
@@ -315,13 +315,8 @@ public class VirtualCrate {
                 }else{
                     pendingKeys.put(uuid,pendingKeys.get(uuid)-1);
                 }
-                CommentedConfigurationNode root = HuskyCrates.instance.crateConfig.load();
-                root.getNode("keys",id).setValue(null);
-                for(String e : pendingKeys.keySet()){
-                    root.getNode("keys",id,e).setValue(pendingKeys.get(e));
-                }
-                HuskyCrates.instance.crateConfig.save(root);
-            } catch (IOException e) {
+                DBReader.saveHuskyData();
+            } catch (SQLException e) {
                 HuskyCrates.instance.logger.error("User attempted to use key with uuid " + uuid + " that has not been expired. Do not enforce dupe rules on user.");
                 e.printStackTrace();
                 pendingKeys.put(uuid,count);

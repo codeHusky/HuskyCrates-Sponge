@@ -67,7 +67,10 @@ public class DBReader {
         connectDB();
         HashMap<Integer,World> worldIDtoWorld = new HashMap<>();
         ResultSet worldInfo = dbConnection.prepareStatement("SELECT * FROM WORLDINFO").executeQuery();
+        //HuskyCrates.instance.logger.info("wasNull: " + worldInfo.wasNull());
+        //HuskyCrates.instance.logger.info("isClosed: " + worldInfo.isClosed());
         while(worldInfo.next()){
+            //HuskyCrates.instance.logger.info("worldInfo thing!");
             String worldUUID = worldInfo.getString("uuid");
             String worldName = worldInfo.getString("name");
             int id = worldInfo.getInt("ID");
@@ -89,7 +92,10 @@ public class DBReader {
         }
         ResultSet cratePositions = dbConnection.prepareStatement("SELECT * FROM CRATELOCATIONS").executeQuery();
         HuskyCrates.instance.crateUtilities.physicalCrates = new HashMap<>();
+        //HuskyCrates.instance.logger.info("wasNull: " + cratePositions.wasNull());
+        //HuskyCrates.instance.logger.info("isClosed: " + cratePositions.isClosed());
         while(cratePositions.next()){
+            //HuskyCrates.instance.logger.info("cratePositions thing!");
             int id = cratePositions.getInt("ID");
             double x = cratePositions.getDouble("X");
             double y = cratePositions.getDouble("Y");
@@ -111,11 +117,14 @@ public class DBReader {
             }
         }
         ResultSet crateKeyUUIDs = dbConnection.prepareStatement("SELECT * FROM VALIDKEYS").executeQuery();
+        //HuskyCrates.instance.logger.info("wasNull: " + crateKeyUUIDs.wasNull());
+        //HuskyCrates.instance.logger.info("isClosed: " + crateKeyUUIDs.isClosed());
         for(VirtualCrate vc : HuskyCrates.instance.crateUtilities.crateTypes.values()){
             vc.pendingKeys = new HashMap<>();
             vc.virtualBalances = new HashMap<>();
         }
         while(crateKeyUUIDs.next()){
+            //HuskyCrates.instance.logger.info("crateKeyUUIDs thing!");
             UUID keyUUID = UUID.fromString(crateKeyUUIDs.getString("keyUUID"));
             String crateID = crateKeyUUIDs.getString("crateID");
             int amount = crateKeyUUIDs.getInt("amount");
@@ -131,7 +140,10 @@ public class DBReader {
             }
         }
         ResultSet keyBalances = dbConnection.prepareStatement("SELECT * FROM KEYBALANCES").executeQuery();
+        //HuskyCrates.instance.logger.info("wasNull: " + keyBalances.wasNull());
+        //HuskyCrates.instance.logger.info("isClosed: " + keyBalances.isClosed());
         while(keyBalances.next()){
+            //HuskyCrates.instance.logger.info("keyBalances thing!");
             UUID userUUID = UUID.fromString(keyBalances.getString("userUUID"));
             String crateID = keyBalances.getString("crateID");
             int amount = keyBalances.getInt("amount");
