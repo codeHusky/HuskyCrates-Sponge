@@ -5,6 +5,7 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
+import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Tristate;
@@ -22,6 +23,7 @@ public class CrateCommandSource implements CommandSource {
         return "HuskyCrates";
     }
 
+
     @Override
     public Optional<CommandSource> getCommandSource() {
         return null;
@@ -30,6 +32,16 @@ public class CrateCommandSource implements CommandSource {
     @Override
     public SubjectCollection getContainingCollection() {
         return null;
+    }
+
+    @Override
+    public SubjectReference asSubjectReference() {
+        return null;
+    }
+
+    @Override
+    public boolean isSubjectDataPersisted() {
+        return false;
     }
 
     @Override
@@ -48,12 +60,12 @@ public class CrateCommandSource implements CommandSource {
     }
 
     @Override
-    public boolean isChildOf(Set<Context> set, Subject subject) {
+    public boolean isChildOf(Set<Context> set, SubjectReference subjectReference) {
         return false;
     }
 
     @Override
-    public List<Subject> getParents(Set<Context> set) {
+    public List<SubjectReference> getParents(Set<Context> set) {
         return null;
     }
 
@@ -86,15 +98,4 @@ public class CrateCommandSource implements CommandSource {
     public void setMessageChannel(MessageChannel messageChannel) {
 
     }
-
-    @Override
-    public boolean hasPermission(Set<Context> contexts, String permission) {
-        return true;
-    }
-
-    @Override
-    public boolean hasPermission(String permission) {
-        return true;
-    }
-
 }

@@ -83,7 +83,7 @@ public class VirtualCrate {
             }
         }
         if(!node.getNode("lang").isVirtual()){
-            langData = new LangData(node.getNode("lang"));
+            langData = new LangData(HuskyCrates.instance.langData,node.getNode("lang"));
         }else{
             langData = HuskyCrates.instance.langData;
         }

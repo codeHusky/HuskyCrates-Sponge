@@ -33,7 +33,7 @@ public class CrateConfigParser {
         String name;
         boolean single = false;
         boolean announce = false;
-        LangData langData = HuskyCrates.instance.langData;
+        LangData langData = vc.getLangData();
         if(!holderNode.getNode("huskydata","lang").isVirtual()){
             langData = new LangData(vc.getLangData(),holderNode.getNode("huskydata","lang"));
         }
