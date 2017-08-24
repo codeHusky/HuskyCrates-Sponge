@@ -141,7 +141,7 @@ public class HuskyCrates {
             return;
         }
 
-        HuskyCommandManager huskyCommandManager = new HuskyCommandManager(this);
+        HuskyCommandManager huskyCommandManager = new HuskyCommandManager();
 
         scheduler = Sponge.getScheduler();
         genericCause = Cause.of(NamedCause.of("PluginContainer",pC));

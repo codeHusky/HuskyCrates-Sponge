@@ -9,11 +9,8 @@ import org.spongepowered.api.text.Text;
 
 public class HuskyCommandManager {
 
-    private HuskyCrates huskyCrates;
+    private HuskyCrates huskyCrates = HuskyCrates.instance;
 
-    public HuskyCommandManager(HuskyCrates plugin) {
-        this.huskyCrates = plugin;
-    }
 
     public CommandSpec getHuskySpec() {
         return huskySpec;
