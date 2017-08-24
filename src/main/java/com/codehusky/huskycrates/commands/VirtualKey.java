@@ -52,7 +52,7 @@ public class VirtualKey implements CommandExecutor {
                         ((Player) player.get()).sendMessage(Text.of(TextColors.GREEN, "Your virtual key balance was set to " + quantity + " for a ", TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName), "."));
                     }
                 } else if(operation.equalsIgnoreCase("remove")) {
-                    virtualCrate.takeVirtualKey(player.get(), quantity);
+                    virtualCrate.takeVirtualKeys(player.get(), quantity);
                     commandSource.sendMessage(Text.of("Took " + player.get().getName() + " " + quantity + " vkeys."));
                     if (commandSource != player.get() && player.get() instanceof Player) {
                         ((Player) player.get()).sendMessage(Text.of(TextColors.GREEN, "You lost " + quantity + " virtual keys for a ", TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName), "."));

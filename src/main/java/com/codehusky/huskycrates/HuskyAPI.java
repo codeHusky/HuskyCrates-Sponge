@@ -2,7 +2,6 @@ package com.codehusky.huskycrates;
 
 import com.codehusky.huskycrates.crate.VirtualCrate;
 import org.spongepowered.api.entity.living.player.User;
-
 import java.util.Optional;
 
 public class HuskyAPI {
@@ -29,7 +28,23 @@ public class HuskyAPI {
 
     public void setKeyBal(User user, String id, int balance) {
         VirtualCrate vc = huskyCrates.crateUtilities.getVirtualCrate(id);
-        vc.setVirtualKeys(user, balance);
+        if(vc != null) {
+            vc.setVirtualKeys(user, balance);
+        }
+    }
+
+    public void takeKeyBal(User user, String id, int val) {
+        VirtualCrate vc = huskyCrates.crateUtilities.getVirtualCrate(id);
+        if(vc != null) {
+            vc.takeVirtualKeys(user, val);
+        }
+    }
+
+    public void giveKeyBal(User user, String id, int val) {
+        VirtualCrate vc = huskyCrates.crateUtilities.getVirtualCrate(id);
+        if(vc != null) {
+            vc.giveVirtualKeys(user, val);
+        }
     }
 
 
