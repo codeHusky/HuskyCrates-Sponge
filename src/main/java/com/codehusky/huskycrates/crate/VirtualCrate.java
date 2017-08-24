@@ -400,7 +400,7 @@ public class VirtualCrate {
     public void giveVirtualKeys(User player, int count){
         if(virtualBalances.containsKey(player.getUniqueId().toString())) {
             virtualBalances.put(player.getUniqueId().toString(),virtualBalances.get(player.getUniqueId().toString())+count);
-        }else{
+        } else{
             virtualBalances.put(player.getUniqueId().toString(),count);
         }
     }
@@ -414,5 +414,8 @@ public class VirtualCrate {
             }
         }
 
+    }
+    public void setVirtualKeys(User player, int count) {
+        virtualBalances.put(player.getUniqueId().toString(),count);
     }
 }

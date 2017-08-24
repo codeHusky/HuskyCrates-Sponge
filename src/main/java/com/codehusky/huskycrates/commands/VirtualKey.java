@@ -23,30 +23,53 @@ import java.util.Optional;
 public class VirtualKey implements CommandExecutor {
 
     @Override public CommandResult execute(CommandSource commandSource, CommandContext commandContext) throws CommandException {
-        if(commandContext.getOne("type").isPresent()) {
-            String type = commandContext.<String>getOne("type").get();
-            Optional<User> player = commandContext.getOne("player");
-            VirtualCrate virtualCrate = HuskyCrates.instance.getCrateUtilities().getVirtualCrate(type);
-            int quantity = commandContext.getOne("quantity").isPresent() ? commandContext.<Integer>getOne("quantity").get() : 1;
-            if (virtualCrate == null) {
-                commandSource.sendMessage(Text.of("Invalid crate id: " + type + ". Please check your config."));
-                return CommandResult.empty();
-            }
+        if(commandContext.getOne("operation").isPresent()) {
+            if (commandContext.getOne("type").isPresent()) {
+                String type = commandContext.<String>getOne("type").get();
+                Optional<User> player = commandContext.getOne("player");
+                VirtualCrate virtualCrate = HuskyCrates.instance.getCrateUtilities().getVirtualCrate(type);
+                int quantity = commandContext.getOne("quantity").isPresent() ? commandContext.<Integer>getOne("quantity").get() : 1;
+                if (virtualCrate == null) {
+                    commandSource.sendMessage(Text.of("Invalid crate id: " + type + ". Please check your config."));
+                    return CommandResult.empty();
+                }
 
-            if (!player.isPresent()) {
-                commandSource.sendMessage(Text.of("You need to be in game or specify a player for this command to work."));
-                return CommandResult.empty();
+                if (!player.isPresent()) {
+                    commandSource.sendMessage(Text.of("You need to be in game or specify a player for this command to work."));
+                    return CommandResult.empty();
+                }
+                String operation = commandContext.<String>getOne("operation").get();
+                if(operation.equalsIgnoreCase("add")) {
+                    virtualCrate.giveVirtualKeys(player.get(), quantity);
+                    commandSource.sendMessage(Text.of("Gave " + player.get().getName() + " " + quantity + " vkeys."));
+                    if (commandSource != player.get() && player.get() instanceof Player) {
+                        ((Player) player.get()).sendMessage(Text.of(TextColors.GREEN, "You received " + quantity + " virtual keys for a ", TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName), "."));
+                    }
+                } else if(operation.equalsIgnoreCase("set")) {
+                    virtualCrate.setVirtualKeys(player.get(), quantity);
+                    commandSource.sendMessage(Text.of("Set " + player.get().getName() + " " + quantity + " vkeys."));
+                    if (commandSource != player.get() && player.get() instanceof Player) {
+                        ((Player) player.get()).sendMessage(Text.of(TextColors.GREEN, "Your virtual key balance was set to " + quantity + " for a ", TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName), "."));
+                    }
+                } else if(operation.equalsIgnoreCase("remove")) {
+                    virtualCrate.takeVirtualKey(player.get(), quantity);
+                    commandSource.sendMessage(Text.of("Took " + player.get().getName() + " " + quantity + " vkeys."));
+                    if (commandSource != player.get() && player.get() instanceof Player) {
+                        ((Player) player.get()).sendMessage(Text.of(TextColors.GREEN, "You lost " + quantity + " virtual keys for a ", TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName), "."));
+                    }
+                } else {
+                    //invalid operation
+                }
+            } else {
+                printUsage(commandSource);
             }
-
-
-            virtualCrate.giveVirtualKeys(player.get(),quantity);
-            commandSource.sendMessage(Text.of("Gave " + player.get().getName() + " " + quantity + " vkeys."));
-            if(commandSource != player.get() && player.get() instanceof Player) {
-                ((Player)player.get()).sendMessage(Text.of(TextColors.GREEN,"You received " + quantity + " virtual keys for a ", TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName),"."));
-            }
-        }else{
-            commandSource.sendMessage(Text.of("Usage: /crate vkey <id> [player] [count]"));
+        } else {
+            printUsage(commandSource);
         }
         return CommandResult.success();
+    }
+
+    private void printUsage(CommandSource source){
+        source.sendMessage(Text.of("Usage: /crate vkey <add/set/remove> <id> [player] [count]"));
     }
 }
