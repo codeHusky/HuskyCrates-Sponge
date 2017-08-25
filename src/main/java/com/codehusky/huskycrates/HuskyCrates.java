@@ -95,6 +95,7 @@ public class HuskyCrates {
     public String huskyCrateIdentifier = "☼1☼2☼3HUSKYCRATE-";
     public String armorStandIdentifier = "ABABABAB-CDDE-0000-8374-CAAAECAAAECA";
     public static HuskyCrates instance;
+    public HuskyAPI huskyAPI;
     public LangData langData = new LangData();
     public Set<BlockType> validCrateBlocks = new HashSet<>();
     private boolean forceStop = false;
@@ -102,6 +103,7 @@ public class HuskyCrates {
     public void gameInit(GamePreInitializationEvent event){
         logger = LoggerFactory.getLogger(pC.getName());
         instance = this;
+        huskyAPI = new HuskyAPI();
         for(PluginContainer pc: Sponge.getPluginManager().getPlugins()){
             if(pc.getId().equalsIgnoreCase("inventorytweaks")||pc.getId().equalsIgnoreCase("inventorysorter")||pc.getId().equalsIgnoreCase("mousetweaks")){
                 logger.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -679,6 +681,10 @@ public class HuskyCrates {
             }
         }
 
+    }
+
+    public HuskyAPI getHuskyAPI(){
+        return this.huskyAPI;
     }
 
     public CrateUtilities getCrateUtilities() {

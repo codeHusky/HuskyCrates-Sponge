@@ -43,6 +43,7 @@ public class HuskyCommandManager {
     CommandSpec vKey = CommandSpec.builder()
             .description(Text.of("Credits a user an amount of virtual keys for a specified crate."))
             .arguments(
+                    new OperationElement(Text.of("operation")),
                     new CrateElement(Text.of("type")),
                     GenericArguments.userOrSource(Text.of("player")),
                     GenericArguments.optional(GenericArguments.integer(Text.of("quantity")))
@@ -54,7 +55,6 @@ public class HuskyCommandManager {
     CommandSpec vKeyAll = CommandSpec.builder()
             .description(Text.of("Credits everyone a specified amount of virtual keys for a crate."))
             .arguments(
-                    new OperationElement(Text.of("operation")),
                     new CrateElement(Text.of("type")),
                     GenericArguments.optional(GenericArguments.integer(Text.of("quantity")))
             )

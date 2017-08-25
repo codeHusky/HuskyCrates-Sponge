@@ -2,23 +2,12 @@ package com.codehusky.huskycrates;
 
 import com.codehusky.huskycrates.crate.VirtualCrate;
 import org.spongepowered.api.entity.living.player.User;
-
 import java.util.HashMap;
 import java.util.Optional;
 
 public class HuskyAPI {
 
-    private HuskyCrates huskyCrates = HuskyCrates.instance;
-
-    private static HuskyAPI huskyAPI;
-
-    public HuskyAPI() {
-        huskyAPI = this;
-    }
-
-    public static HuskyAPI getAPI() {
-        return huskyAPI;
-    }
+    private static final HuskyCrates huskyCrates = HuskyCrates.instance;
 
     public HashMap<String, Integer> getKeyBals(User user) {
         HashMap<String, Integer> bals = new HashMap<>();
