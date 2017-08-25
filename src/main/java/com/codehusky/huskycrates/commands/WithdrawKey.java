@@ -37,7 +37,7 @@ public class WithdrawKey implements CommandExecutor {
             int balance = virtualCrate.getVirtualKeyBalance(player);
             if(balance >= quantity && quantity > 0){
                 ItemStack key = virtualCrate.getCrateKey(quantity);
-                virtualCrate.takeVirtualKey(player, quantity);
+                virtualCrate.takeVirtualKeys(player, quantity);
                 player.getInventory().offer(key);
                 commandSource.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(
                         virtualCrate.getLangData().formatter(virtualCrate.getLangData().withdrawSuccess,null,player,virtualCrate,null,null,quantity)

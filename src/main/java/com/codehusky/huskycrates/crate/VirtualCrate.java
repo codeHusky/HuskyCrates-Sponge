@@ -389,18 +389,18 @@ public class VirtualCrate {
         }
         return 0;
     }
-    public void takeVirtualKey(User player,int count){
+    public void takeVirtualKeys(User player,int count){
         if(virtualBalances.containsKey(player.getUniqueId().toString())) {
             virtualBalances.put(player.getUniqueId().toString(),virtualBalances.get(player.getUniqueId().toString())-count);
         }
     }
     public void takeVirtualKey(User player){
-        takeVirtualKey(player,1);
+        takeVirtualKeys(player,1);
     }
     public void giveVirtualKeys(User player, int count){
         if(virtualBalances.containsKey(player.getUniqueId().toString())) {
             virtualBalances.put(player.getUniqueId().toString(),virtualBalances.get(player.getUniqueId().toString())+count);
-        }else{
+        } else{
             virtualBalances.put(player.getUniqueId().toString(),count);
         }
     }
@@ -414,5 +414,8 @@ public class VirtualCrate {
             }
         }
 
+    }
+    public void setVirtualKeys(User player, int count) {
+        virtualBalances.put(player.getUniqueId().toString(),count);
     }
 }
