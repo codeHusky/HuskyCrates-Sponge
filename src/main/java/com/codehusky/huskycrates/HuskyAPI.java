@@ -2,6 +2,8 @@ package com.codehusky.huskycrates;
 
 import com.codehusky.huskycrates.crate.VirtualCrate;
 import org.spongepowered.api.entity.living.player.User;
+
+import java.util.HashMap;
 import java.util.Optional;
 
 public class HuskyAPI {
@@ -16,6 +18,15 @@ public class HuskyAPI {
 
     public static HuskyAPI getAPI() {
         return huskyAPI;
+    }
+
+    public HashMap<String, Integer> getKeyBals(User user) {
+        HashMap<String, Integer> bals = new HashMap<>();
+        for(String type : huskyCrates.crateUtilities.getCrateTypes()) {
+            VirtualCrate vc = huskyCrates.crateUtilities.getVirtualCrate(type);
+            bals.put(type, vc.getVirtualKeyBalance(user));
+        }
+        return bals;
     }
 
     public Optional<Integer> getKeyBal(User user, String id) {
