@@ -1,5 +1,6 @@
 package com.codehusky.huskycrates.commands;
 
+import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.crate.VirtualCrate;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
@@ -12,7 +13,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import com.codehusky.huskycrates.HuskyCrates;
 
 
 public class KeyAll implements CommandExecutor {

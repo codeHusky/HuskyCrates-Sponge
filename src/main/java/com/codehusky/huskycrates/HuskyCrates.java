@@ -6,6 +6,7 @@ import com.codehusky.huskycrates.crate.PhysicalCrate;
 import com.codehusky.huskycrates.crate.VirtualCrate;
 import com.codehusky.huskycrates.crate.config.CrateReward;
 import com.codehusky.huskycrates.crate.db.DBReader;
+import com.codehusky.huskycrates.lang.LangData;
 import com.codehusky.huskyui.StateContainer;
 import com.codehusky.huskyui.states.Page;
 import com.codehusky.huskyui.states.element.Element;
@@ -58,7 +59,6 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
-import com.codehusky.huskycrates.lang.LangData;
 
 import java.io.IOException;
 import java.nio.file.Path;

@@ -1,24 +1,19 @@
 package com.codehusky.huskycrates.crate.db;
 
 import com.codehusky.huskycrates.HuskyCrates;
-import com.codehusky.huskycrates.commands.Husky;
 import com.codehusky.huskycrates.crate.PhysicalCrate;
 import com.codehusky.huskycrates.crate.VirtualCrate;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import javax.sql.DataSource;
 import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;

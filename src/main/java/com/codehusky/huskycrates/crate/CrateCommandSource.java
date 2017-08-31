@@ -2,7 +2,6 @@ package com.codehusky.huskycrates.crate;
 
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.service.permission.SubjectReference;

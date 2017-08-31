@@ -1,5 +1,6 @@
 package com.codehusky.huskycrates.crate;
 
+import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.crate.views.NullCrateView;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -8,13 +9,11 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import com.codehusky.huskycrates.HuskyCrates;
 
 import java.io.IOException;
 import java.time.LocalDateTime;

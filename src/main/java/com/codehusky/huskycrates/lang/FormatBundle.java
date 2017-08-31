@@ -1,9 +1,9 @@
 package com.codehusky.huskycrates.lang;
 
-import com.codehusky.huskycrates.crate.VirtualCrate;
-import org.spongepowered.api.entity.living.player.Player;
 import com.codehusky.huskycrates.crate.PhysicalCrate;
+import com.codehusky.huskycrates.crate.VirtualCrate;
 import com.codehusky.huskycrates.crate.config.CrateReward;
+import org.spongepowered.api.entity.living.player.Player;
 
 public class FormatBundle {
     private String toFormat;

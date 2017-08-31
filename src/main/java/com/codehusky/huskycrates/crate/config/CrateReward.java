@@ -1,7 +1,7 @@
 package com.codehusky.huskycrates.crate.config;
 
-import org.spongepowered.api.item.inventory.ItemStack;
 import com.codehusky.huskycrates.lang.LangData;
+import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.util.ArrayList;
 

@@ -1,5 +1,6 @@
 package com.codehusky.huskycrates.commands;
 
+import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.crate.VirtualCrate;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -11,7 +12,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import com.codehusky.huskycrates.HuskyCrates;
 
 /**
  * Created By KasperFranz.

@@ -1,7 +1,11 @@
 package com.codehusky.huskycrates.crate;
 
+import com.codehusky.huskycrates.HuskyCrates;
+import com.codehusky.huskycrates.crate.config.CrateConfigParser;
+import com.codehusky.huskycrates.crate.config.CrateReward;
 import com.codehusky.huskycrates.crate.db.DBReader;
 import com.codehusky.huskycrates.crate.views.*;
+import com.codehusky.huskycrates.lang.LangData;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -21,10 +25,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.Color;
-import com.codehusky.huskycrates.HuskyCrates;
-import com.codehusky.huskycrates.crate.config.CrateReward;
-import com.codehusky.huskycrates.crate.config.CrateConfigParser;
-import com.codehusky.huskycrates.lang.LangData;
 
 import java.io.IOException;
 import java.sql.SQLException;

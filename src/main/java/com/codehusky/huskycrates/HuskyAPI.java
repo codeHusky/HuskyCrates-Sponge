@@ -2,6 +2,7 @@ package com.codehusky.huskycrates;
 
 import com.codehusky.huskycrates.crate.VirtualCrate;
 import org.spongepowered.api.entity.living.player.User;
+
 import java.util.HashMap;
 import java.util.Optional;
 

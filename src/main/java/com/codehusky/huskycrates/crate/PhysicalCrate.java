@@ -1,8 +1,8 @@
 package com.codehusky.huskycrates.crate;
 
+import com.codehusky.huskycrates.HuskyCrates;
 import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleOptions;
@@ -14,7 +14,6 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import com.codehusky.huskycrates.HuskyCrates;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;

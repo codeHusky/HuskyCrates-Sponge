@@ -1,5 +1,6 @@
 package com.codehusky.huskycrates.commands;
 
+import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.crate.VirtualCrate;
 import com.codehusky.huskycrates.events.VKeyBalanceChangeEvent;
 import org.spongepowered.api.Sponge;
@@ -13,7 +14,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import com.codehusky.huskycrates.HuskyCrates;
 
 import java.util.Optional;
 
