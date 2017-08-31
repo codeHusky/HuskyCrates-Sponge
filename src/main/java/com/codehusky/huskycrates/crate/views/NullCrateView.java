@@ -46,5 +46,6 @@ public class NullCrateView extends CrateView {
 	}
 
 	@Override
-	public void updateTick() {}
+	public void updateTick() {
+	}
 }

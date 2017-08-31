@@ -30,5 +30,6 @@ public class InstantView extends CrateView {
 	}
 
 	@Override
-	public void updateTick() {}
+	public void updateTick() {
+	}
 }

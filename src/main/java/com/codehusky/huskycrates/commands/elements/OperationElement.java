@@ -14,24 +14,24 @@ import java.util.List;
 
 /**
  * Created By Rob5Underscores.
- *
+ * <p>
  * This CommandElement is used to determine the desired operation to take place (on the key balance).
  */
 public class OperationElement extends CommandElement {
 
-    public OperationElement(Text key) {
-        super(key);
-    }
+	public OperationElement(Text key) {
+		super(key);
+	}
 
-    @Nullable
-    @Override
-    protected Object parseValue(CommandSource commandSource, CommandArgs commandArgs) throws ArgumentParseException {
-        return commandArgs.next();
-    }
+	@Nullable
+	@Override
+	protected Object parseValue(CommandSource commandSource, CommandArgs commandArgs) throws ArgumentParseException {
+		return commandArgs.next();
+	}
 
-    @Override
-    public List<String> complete(CommandSource commandSource, CommandArgs commandArgs, CommandContext commandContext) {
-        return new ArrayList<>(Arrays.asList("add", "set", "remove"));
-    }
+	@Override
+	public List<String> complete(CommandSource commandSource, CommandArgs commandArgs, CommandContext commandContext) {
+		return new ArrayList<>(Arrays.asList("add", "set", "remove"));
+	}
 
 }

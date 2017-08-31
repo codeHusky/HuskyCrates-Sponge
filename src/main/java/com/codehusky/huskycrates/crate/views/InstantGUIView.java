@@ -41,6 +41,7 @@ public class InstantGUIView extends CrateView {
 			viewer.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, viewer.getLocation().getPosition(), 1);
 		}).delay(3, TimeUnit.SECONDS).submit(HuskyCrates.instance);
 	}
+
 	private int tickCount = 0;
 
 	private void updateView(int state) {

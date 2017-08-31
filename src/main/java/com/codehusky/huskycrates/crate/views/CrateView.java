@@ -61,7 +61,8 @@ public abstract class CrateView {
 		}
 	}
 
-	private void updateView(int state) {}
+	private void updateView(int state) {
+	}
 
 	public abstract void updateTick();
 

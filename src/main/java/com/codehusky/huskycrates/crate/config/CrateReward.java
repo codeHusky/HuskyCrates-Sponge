@@ -6,47 +6,49 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import java.util.ArrayList;
 
 public class CrateReward {
-    private ItemStack displayItem;
-    private ArrayList<Object> rewards;
-    private double chance;
-    private LangData langData;
-    private String rewardName;
-    private boolean shouldAnnounce;
-    private boolean single;
-    public CrateReward(ItemStack disp, ArrayList<Object> rewards, String rewardName, double chance, LangData langData, boolean shouldAnnounce, boolean single) {
-        this.rewards = rewards;
-        this.displayItem = disp;
-        this.chance = chance;
-        this.langData = langData;
-        this.shouldAnnounce = shouldAnnounce;
-        this.rewardName = rewardName;
-        this.single = single;
-    }
+	private ItemStack displayItem;
+	private ArrayList<Object> rewards;
+	private double chance;
+	private LangData langData;
+	private String rewardName;
+	private boolean shouldAnnounce;
+	private boolean single;
 
-    public ArrayList<Object> getRewards() {
-        return rewards;
-    }
+	public CrateReward(ItemStack disp, ArrayList<Object> rewards, String rewardName, double chance, LangData langData, boolean shouldAnnounce, boolean single) {
+		this.rewards = rewards;
+		this.displayItem = disp;
+		this.chance = chance;
+		this.langData = langData;
+		this.shouldAnnounce = shouldAnnounce;
+		this.rewardName = rewardName;
+		this.single = single;
+	}
 
-    public double getChance() {
-        return chance;
-    }
+	public ArrayList<Object> getRewards() {
+		return rewards;
+	}
 
-    public LangData getLangData() {
-        return langData;
-    }
+	public double getChance() {
+		return chance;
+	}
 
-    public ItemStack getDisplayItem() {
-        return displayItem;
-    }
+	public LangData getLangData() {
+		return langData;
+	}
 
-    public String getRewardName() {
-        return rewardName;
-    }
+	public ItemStack getDisplayItem() {
+		return displayItem;
+	}
 
-    public boolean shouldAnnounce() {
-        return shouldAnnounce;
-    }
-    public boolean treatAsSingle() {
-        return single;
-    }
+	public String getRewardName() {
+		return rewardName;
+	}
+
+	public boolean shouldAnnounce() {
+		return shouldAnnounce;
+	}
+
+	public boolean treatAsSingle() {
+		return single;
+	}
 }
