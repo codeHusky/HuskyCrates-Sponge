@@ -62,6 +62,8 @@ public class SpinnerCrateView extends CrateView {
 			System.out.println("--------------------------------");
 			System.out.println("--------------------------------");
 		}
+
+		startUpdateTask();
 	}
 
 	@Override
@@ -125,6 +127,8 @@ public class SpinnerCrateView extends CrateView {
 	private int trueclicks = 0;
 
 	protected void updateTick() {
+		plugin.logger.info("TICK");
+
 		//revDampening = 1.15;
 		waitCurrent++;
 		//int revolutions = (int) Math.floor(clicks / items.size());
