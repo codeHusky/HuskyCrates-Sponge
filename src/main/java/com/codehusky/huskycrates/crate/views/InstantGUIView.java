@@ -21,10 +21,9 @@ import java.util.concurrent.TimeUnit;
 public class InstantGUIView extends CrateView {
 	private CrateReward holder = null;
 
-	public InstantGUIView(HuskyCrates plugin, Player viewer, VirtualCrate virtualCrate) {
+	public InstantGUIView(Player viewer, VirtualCrate virtualCrate) {
 		super(viewer, InventoryArchetypes.DISPENSER, virtualCrate.displayName);
 
-		this.plugin = plugin;
 		vc = virtualCrate;
 		items = vc.getItemSet();
 
@@ -44,7 +43,8 @@ public class InstantGUIView extends CrateView {
 
 	private int tickCount = 0;
 
-	private void updateView(int state) {
+	@Override
+	protected void updateView(int state) {
 		int slotNum = 0;
 		for (Inventory e : inventory.slots()) {
 			double speed = 3;

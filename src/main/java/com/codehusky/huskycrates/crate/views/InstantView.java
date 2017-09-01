@@ -1,6 +1,5 @@
 package com.codehusky.huskycrates.crate.views;
 
-import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.crate.VirtualCrate;
 import com.codehusky.huskycrates.crate.config.CrateReward;
 import com.codehusky.huskycrates.exceptions.RandomItemSelectionFailureException;
@@ -9,10 +8,9 @@ import org.spongepowered.api.entity.living.player.Player;
 
 public class InstantView extends CrateView {
 
-	public InstantView(HuskyCrates plugin, Player viewer, VirtualCrate virtualCrate) {
+	public InstantView(Player viewer, VirtualCrate virtualCrate) {
 		super(viewer, null, null);
 
-		this.plugin = plugin;
 		vc = virtualCrate;
 		items = vc.getItemSet();
 

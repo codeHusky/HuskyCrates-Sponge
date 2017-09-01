@@ -91,7 +91,7 @@ public class HuskyCrates {
 	private ArrayList<Extent> pendingExtents = new ArrayList<>();
 	public Cause genericCause;
 	public Scheduler scheduler;
-	public CrateUtilities crateUtilities = new CrateUtilities(this);
+	public CrateUtilities crateUtilities = new CrateUtilities();
 	public String huskyCrateIdentifier = "☼1☼2☼3HUSKYCRATE-";
 	public String armorStandIdentifier = "ABABABAB-CDDE-0000-8374-CAAAECAAAECA";
 	public static HuskyCrates instance;
@@ -516,7 +516,7 @@ public class HuskyCrates {
 			Task.Builder upcoming = scheduler.createTaskBuilder();
 			crateUtilities.physicalCrates.get(blk).handleUse(plr);
 			upcoming.execute(() -> {
-				crateUtilities.launchCrateForPlayer(crateType, plr, this);
+				crateUtilities.launchCrateForPlayer(crateType, plr);
 			}).delayTicks(1).submit(this);
 			return;
 

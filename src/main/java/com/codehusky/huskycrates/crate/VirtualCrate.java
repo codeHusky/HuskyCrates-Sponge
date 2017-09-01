@@ -107,7 +107,6 @@ public class VirtualCrate {
 				}
 			}
 			if (!gops.getNode("particle1").isVirtual()) {
-				HashMap<String, Integer> color = new HashMap<>();
 				if (!gops.getNode("particle1", "color").isVirtual()) {
 					List<Integer> arr;
 					try {
@@ -124,12 +123,9 @@ public class VirtualCrate {
 					} catch (ObjectMappingException e) {
 						e.printStackTrace();
 					}
-
 				}
-
 			}
 			if (!gops.getNode("particle2").isVirtual()) {
-				HashMap<String, Integer> color = new HashMap<>();
 				if (!gops.getNode("particle2", "color").isVirtual()) {
 					List<Integer> arr;
 					try {
@@ -171,10 +167,9 @@ public class VirtualCrate {
 		float currentProb = 0;
 		itemSet = new ArrayList<>();
 		commandSet = new HashMap<>();
-		///System.out.println("???");
+
 		for (CommentedConfigurationNode e : items) {
-			CrateReward rewardHolder = null;
-//            System.out.println(e.getNode("formatversion").getValue());
+			CrateReward rewardHolder;
 			if (e.getNode("formatversion").isVirtual()) {
 				HuskyCrates.instance.logger.error("Out of date item in " + id + "! Please update your config with HuskyCrates Config Updater!");
 				continue;
@@ -186,8 +181,6 @@ public class VirtualCrate {
 			Object[] t = {rewardHolder.getChance(), rewardHolder};
 			currentProb += rewardHolder.getChance();
 			itemSet.add(t);
-
-
 		}
 		if (equality.size() > 0) {
 			int remaining = (int) (100 - currentProb);
@@ -232,7 +225,6 @@ public class VirtualCrate {
 			HuskyCrates.instance.logger.error("Failed to load key UUIDs. Keys will not work!");
 			e.printStackTrace();
 		}
-
 		//Self resolving crate
 	}
 
@@ -248,17 +240,17 @@ public class VirtualCrate {
 		return maxProb;
 	}
 
-	public CrateView generateViewForCrate(HuskyCrates plugin, Player plr) {
+	public CrateView generateViewForCrate(Player plr) {
 		if (crateType.equalsIgnoreCase("spinner")) {
-			return new SpinnerCrateView(plugin, plr, this);
+			return new SpinnerCrateView(plr, this);
 		} else if (crateType.equalsIgnoreCase("roulette")) {
-			return new RouletteCrateView(plugin, plr, this);
+			return new RouletteCrateView(plr, this);
 		} else if (crateType.equalsIgnoreCase("instant")) {
-			return new InstantView(plugin, plr, this);
+			return new InstantView(plr, this);
 		} else if (crateType.equalsIgnoreCase("simple")) {
-			return new InstantGUIView(plugin, plr, this);
+			return new InstantGUIView(plr, this);
 		}
-		return new NullCrateView(plugin, plr, this);
+		return new NullCrateView(plr, this);
 	}
 
 
@@ -285,7 +277,6 @@ public class VirtualCrate {
 			throw new NullPointerException();
 		}
 		return ItemStack.builder().fromContainer(key.toContainer().set(DataQuery.of("UnsafeData", "crateID"), id).set(DataQuery.of("UnsafeData", "keyUUID"), keyUUID)).build();//
-
 	}
 
 	/***
@@ -347,9 +338,7 @@ public class VirtualCrate {
 		if (keyDamage != null) {
 			key = ItemStack.builder().fromContainer(key.toContainer().set(DataQuery.of("UnsafeDamage"), keyDamage)).build();
 		}
-
 		return ItemStack.builder().fromContainer(key.toContainer().set(DataQuery.of("UnsafeData", "crateID"), id)).build();//
-
 	}
 
 	public ItemType getKeyType() {
@@ -412,7 +401,6 @@ public class VirtualCrate {
 	}
 
 	public void givePlayersVirtualKeys(Collection<Player> players, int count) {
-
 		for (Player player : players) {
 			if (virtualBalances.containsKey(player.getUniqueId().toString())) {
 				virtualBalances.put(player.getUniqueId().toString(), virtualBalances.get(player.getUniqueId().toString()) + count);

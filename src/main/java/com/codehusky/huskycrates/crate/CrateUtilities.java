@@ -9,6 +9,7 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
@@ -27,20 +28,17 @@ public class CrateUtilities {
 	public HashMap<String, VirtualCrate> crateTypes = new HashMap<>();
 	public HashMap<Location<World>, PhysicalCrate> physicalCrates = new HashMap<>();
 	public boolean hasInitalizedVirtualCrates = false;
-	private HuskyCrates plugin;
 
-	public CrateUtilities(HuskyCrates plugin) {
-		this.plugin = plugin;
-	}
+	public void launchCrateForPlayer(String crateType, Player target) {
+		Cause genericCause = HuskyCrates.instance.genericCause;
 
-	public void launchCrateForPlayer(String crateType, Player target, HuskyCrates plugin) {
 		if (!crateTypes.containsKey(crateType)) {
-			target.openInventory(new NullCrateView(plugin, target, null).getInventory(), plugin.genericCause);
+			target.openInventory(new NullCrateView(target, null).getInventory(), genericCause);
 		} else {
 			if (crateTypes.get(crateType).isGUI) {
-				target.openInventory(crateTypes.get(crateType).generateViewForCrate(plugin, target).getInventory(), plugin.genericCause);
+				target.openInventory(crateTypes.get(crateType).generateViewForCrate(target).getInventory(), genericCause);
 			} else {
-				crateTypes.get(crateType).generateViewForCrate(plugin, target);
+				crateTypes.get(crateType).generateViewForCrate(target);
 			}
 		}
 	}
@@ -91,7 +89,7 @@ public class CrateUtilities {
 		}
 		Scheduler scheduler = Sponge.getScheduler();
 		Task.Builder taskBuilder = scheduler.createTaskBuilder();
-		runner = taskBuilder.execute(this::particleRunner).intervalTicks(1).submit(plugin);
+		runner = taskBuilder.execute(this::particleRunner).intervalTicks(1).submit(HuskyCrates.instance);
 	}
 
 	/*public void recognizeChest(Location<World> location){
@@ -244,6 +242,4 @@ public class CrateUtilities {
 		}
 		return false;
 	}
-
-
 }

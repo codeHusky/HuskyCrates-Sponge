@@ -34,11 +34,10 @@ public class RouletteCrateView extends CrateView {
 	private boolean firedEnd = false;
 	private boolean outOfTime = false;
 
-	public RouletteCrateView(HuskyCrates plugin, Player viewer, VirtualCrate virtualCrate) {
+	public RouletteCrateView(Player viewer, VirtualCrate virtualCrate) {
 		super(viewer, null, null);
 		// Tell the super class not to build an inventory (we have to create the inventory and update the state ourselves)
 
-		this.plugin = plugin;
 		vc = virtualCrate;
 		items = vc.getItemSet();
 
@@ -66,7 +65,8 @@ public class RouletteCrateView extends CrateView {
 
 	private int tickCount = 0;
 
-	private void updateView(int state) {
+	@Override
+	protected void updateView(int state) {
 		int secRemain = (10 - Math.round(tickCount / 20));
 		if (secRemain < 0)
 			stopped = true;

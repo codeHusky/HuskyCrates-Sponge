@@ -18,11 +18,9 @@ import org.spongepowered.api.text.format.TextColors;
 public class NullCrateView extends CrateView {
 	private HuskyCrates plugin;
 
-	public NullCrateView(HuskyCrates plugin, Player viewer, VirtualCrate virtualCrate) {
+	public NullCrateView(Player viewer, VirtualCrate virtualCrate) {
 		super(viewer, null, null);
 		// Tell the super class not to build an inventory
-
-		this.plugin = plugin;
 	}
 
 	@Override

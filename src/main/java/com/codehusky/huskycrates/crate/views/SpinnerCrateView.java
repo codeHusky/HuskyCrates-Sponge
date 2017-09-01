@@ -1,6 +1,5 @@
 package com.codehusky.huskycrates.crate.views;
 
-import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.crate.VirtualCrate;
 import com.codehusky.huskycrates.crate.config.CrateReward;
 import com.codehusky.huskycrates.exceptions.RandomItemSelectionFailureException;
@@ -27,11 +26,10 @@ public class SpinnerCrateView extends CrateView {
 	private double dampening = 1.05;
 	private int maxClicks = 45; // maximum times the spinner "clicks" in one spin
 
-	public SpinnerCrateView(HuskyCrates plugin, Player viewer, VirtualCrate virtualCrate) {
+	public SpinnerCrateView(Player viewer, VirtualCrate virtualCrate) {
 		super(viewer, InventoryArchetypes.CHEST, virtualCrate.displayName);
 
-		this.vc = virtualCrate;
-		this.plugin = plugin;
+		vc = virtualCrate;
 		items = virtualCrate.getItemSet();
 
 		if (virtualCrate.scrambleRewards) {
@@ -66,7 +64,8 @@ public class SpinnerCrateView extends CrateView {
 		}
 	}
 
-	private void updateInv(int state) {
+	@Override
+	protected void updateView(int state) {
 		ItemStack border = ItemStack.builder().itemType(ItemTypes.STAINED_GLASS_PANE).add(Keys.DYE_COLOR, DyeColors.BLACK).build();
 		border.offer(Keys.DISPLAY_NAME, Text.of(TextStyles.RESET, "HuskyCrates"));
 		//border.offer(Keys.ITEM_LORE,lore);
@@ -125,7 +124,7 @@ public class SpinnerCrateView extends CrateView {
 	private int tickerState = 0;
 	private int trueclicks = 0;
 
-	public void updateTick() {
+	protected void updateTick() {
 		//revDampening = 1.15;
 		waitCurrent++;
 		//int revolutions = (int) Math.floor(clicks / items.size());
@@ -134,7 +133,7 @@ public class SpinnerCrateView extends CrateView {
 			//System.out.println(clicks + " : " + offset);
 			waitCurrent = 0;
 			updateMax *= dampening;
-			updateInv(-1);
+			updateView(-1);
 			viewer.playSound(SoundTypes.UI_BUTTON_CLICK, viewer.getLocation().getPosition(), 0.25);
 			clicks++;
 			trueclicks++;
@@ -153,7 +152,7 @@ public class SpinnerCrateView extends CrateView {
 				handleReward(giveToPlayer);
 				viewer.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, viewer.getLocation().getPosition(), 1);
 			} else if (waitCurrent % 5 == 0) {
-				updateInv(2);
+				updateView(2);
 			}
 		}
 	}

@@ -32,7 +32,9 @@ public abstract class CrateView {
 	ArrayList<Object[]> items;
 
 	public CrateView(Player viewer, InventoryArchetype type, String displayName) {
+		this.plugin = HuskyCrates.instance;
 		this.viewer = viewer;
+
 		if (type != null) {
 			buildInventory(type, displayName);
 			updateView(0);
@@ -61,10 +63,11 @@ public abstract class CrateView {
 		}
 	}
 
-	private void updateView(int state) {
+	protected void updateView(int state) {
+
 	}
 
-	public abstract void updateTick();
+	protected abstract void updateTick();
 
 	public void scrambleRewards() {
 		ArrayList<Object[]> scrambled = new ArrayList<>();
