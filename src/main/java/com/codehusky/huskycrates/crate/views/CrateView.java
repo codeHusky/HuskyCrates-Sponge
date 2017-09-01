@@ -34,6 +34,7 @@ public abstract class CrateView {
 	public CrateView(Player viewer, InventoryArchetype type, String displayName) {
 		this.plugin = HuskyCrates.instance;
 		this.viewer = viewer;
+		this.items = new ArrayList<>();
 
 		if (type != null) {
 			buildInventory(type, displayName);

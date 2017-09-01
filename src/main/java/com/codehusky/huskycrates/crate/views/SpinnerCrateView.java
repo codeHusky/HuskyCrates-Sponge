@@ -77,16 +77,17 @@ public class SpinnerCrateView extends CrateView {
 		int slotnum = 0;
 		for (Inventory e : inventory.slots()) {
 			if (state == 0 && (slotnum == 4 || slotnum == 22)) {
-
 				e.set(selector);
 			} else if (slotnum > 9 && slotnum < 17 && state != 2) {
 				//int itemNum = items.size() - 1 - Math.abs(((slotnum - 10) + (clicks)) % items.size());
 
-				int itemNum = Math.abs(clicks + (slotnum - 9) - 4) % items.size();
-				e.set(((CrateReward) items.get(itemNum)[1]).getDisplayItem());
-				if (slotnum == 13) {
-					//System.out.println(itemNum);
-					giveToPlayer = (CrateReward) items.get(itemNum)[1];
+				if (items.size() > 0) {
+					int itemNum = Math.abs(clicks + (slotnum - 9) - 4) % items.size();
+					e.set(((CrateReward) items.get(itemNum)[1]).getDisplayItem());
+					if (slotnum == 13) {
+						//System.out.println(itemNum);
+						giveToPlayer = (CrateReward) items.get(itemNum)[1];
+					}
 				}
 			} else if (slotnum != 13) {
 				if (state == 2) {
@@ -127,8 +128,6 @@ public class SpinnerCrateView extends CrateView {
 	private int trueclicks = 0;
 
 	protected void updateTick() {
-		plugin.logger.info("TICK");
-
 		//revDampening = 1.15;
 		waitCurrent++;
 		//int revolutions = (int) Math.floor(clicks / items.size());
