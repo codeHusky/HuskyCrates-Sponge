@@ -52,7 +52,7 @@ public class InstantGUIView extends CrateView {
         updater = taskBuilder.execute(this::updateTick).intervalTicks(1).submit(plugin);
         scheduler.createTaskBuilder().execute(() -> {
             updater.cancel();
-            ourplr.closeInventory(plugin.genericCause);
+            ourplr.closeInventory();
             handleReward(holder);
             ourplr.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP,ourplr.getLocation().getPosition(),1);
         }).delay(3, TimeUnit.SECONDS).submit(HuskyCrates.instance);

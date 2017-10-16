@@ -72,7 +72,7 @@ public class PhysicalCrate {
                         //e.printStackTrace();
                     }
                     as.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(name));
-                    boolean worked = location.getExtent().spawnEntity(as, huskyCrates.genericCause);
+                    boolean worked = location.getExtent().spawnEntity(as);
                     if (!worked) {
                         as = null;
                         return;

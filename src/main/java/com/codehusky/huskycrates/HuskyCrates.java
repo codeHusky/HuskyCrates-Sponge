@@ -37,7 +37,8 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -146,7 +147,7 @@ public class HuskyCrates {
         HuskyCommandManager huskyCommandManager = new HuskyCommandManager();
 
         scheduler = Sponge.getScheduler();
-        genericCause = Cause.of(NamedCause.of("PluginContainer",pC));
+        //genericCause = Cause.of(EventContext.);
         Sponge.getCommandManager().register(this, huskyCommandManager.getCrateSpec(), "crate");
         Sponge.getCommandManager().register(this, huskyCommandManager.getHuskySpec(), "husky","huskycrates","hc");
         logger.info("Crates has been started.");

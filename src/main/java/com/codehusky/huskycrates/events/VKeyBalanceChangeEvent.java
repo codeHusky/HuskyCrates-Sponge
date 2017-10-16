@@ -34,7 +34,7 @@ public class VKeyBalanceChangeEvent extends AbstractEvent implements TargetUserE
 
     @Override
     public Cause getCause() {
-        return Cause.source(HuskyCrates.instance).build();
+        return null;
     }
 
     @Override

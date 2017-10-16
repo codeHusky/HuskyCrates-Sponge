@@ -34,10 +34,10 @@ public class CrateUtilities {
     }
     public void launchCrateForPlayer(String crateType, Player target,HuskyCrates plugin){
         if(!crateTypes.containsKey(crateType)) {
-            target.openInventory(new NullCrateView(plugin,target,null).getInventory(), plugin.genericCause);
+            target.openInventory(new NullCrateView(plugin,target,null).getInventory());
         }else{
             if(crateTypes.get(crateType).isGUI) {
-                target.openInventory(crateTypes.get(crateType).generateViewForCrate(plugin, target).getInventory(), plugin.genericCause);
+                target.openInventory(crateTypes.get(crateType).generateViewForCrate(plugin, target).getInventory());
             }else{
                 crateTypes.get(crateType).generateViewForCrate(plugin, target);
             }
