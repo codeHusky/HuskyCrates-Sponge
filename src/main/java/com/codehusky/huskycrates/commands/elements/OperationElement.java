@@ -19,19 +19,19 @@ import java.util.List;
  */
 public class OperationElement extends CommandElement {
 
-	public OperationElement(Text key) {
-		super(key);
-	}
+    public OperationElement(Text key) {
+        super(key);
+    }
 
-	@Nullable
-	@Override
-	protected Object parseValue(CommandSource commandSource, CommandArgs commandArgs) throws ArgumentParseException {
-		return commandArgs.next();
-	}
+    @Nullable
+    @Override
+    protected Object parseValue(CommandSource commandSource, CommandArgs commandArgs) throws ArgumentParseException {
+        return commandArgs.next();
+    }
 
-	@Override
-	public List<String> complete(CommandSource commandSource, CommandArgs commandArgs, CommandContext commandContext) {
-		return new ArrayList<>(Arrays.asList("add", "set", "remove"));
-	}
+    @Override
+    public List<String> complete(CommandSource commandSource, CommandArgs commandArgs, CommandContext commandContext) {
+        return new ArrayList<>(Arrays.asList("add", "set", "remove"));
+    }
 
 }

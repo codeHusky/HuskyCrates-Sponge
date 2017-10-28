@@ -17,93 +17,93 @@ import java.util.Set;
  * Created by lokio on 1/16/2017.
  */
 public class CrateCommandSource implements CommandSource {
-	@Override
-	public String getName() {
-		return "HuskyCrates";
-	}
+    @Override
+    public String getName() {
+        return "HuskyCrates";
+    }
 
-	@Override
-	public boolean hasPermission(String permission) {
-		return true;
-	}
+    @Override
+    public boolean hasPermission(String permission) {
+        return true;
+    }
 
-	@Override
-	public boolean hasPermission(Set<Context> contexts, String permission) {
-		return true;
-	}
+    @Override
+    public boolean hasPermission(Set<Context> contexts, String permission) {
+        return true;
+    }
 
-	@Override
-	public Optional<CommandSource> getCommandSource() {
-		return null;
-	}
+    @Override
+    public Optional<CommandSource> getCommandSource() {
+        return null;
+    }
 
-	@Override
-	public SubjectCollection getContainingCollection() {
-		return null;
-	}
+    @Override
+    public SubjectCollection getContainingCollection() {
+        return null;
+    }
 
-	@Override
-	public SubjectReference asSubjectReference() {
-		return null;
-	}
+    @Override
+    public SubjectReference asSubjectReference() {
+        return null;
+    }
 
-	@Override
-	public boolean isSubjectDataPersisted() {
-		return false;
-	}
+    @Override
+    public boolean isSubjectDataPersisted() {
+        return false;
+    }
 
-	@Override
-	public SubjectData getSubjectData() {
-		return null;
-	}
+    @Override
+    public SubjectData getSubjectData() {
+        return null;
+    }
 
-	@Override
-	public SubjectData getTransientSubjectData() {
-		return null;
-	}
+    @Override
+    public SubjectData getTransientSubjectData() {
+        return null;
+    }
 
-	@Override
-	public Tristate getPermissionValue(Set<Context> set, String s) {
-		return null;
-	}
+    @Override
+    public Tristate getPermissionValue(Set<Context> set, String s) {
+        return null;
+    }
 
-	@Override
-	public boolean isChildOf(Set<Context> set, SubjectReference subjectReference) {
-		return false;
-	}
+    @Override
+    public boolean isChildOf(Set<Context> set, SubjectReference subjectReference) {
+        return false;
+    }
 
-	@Override
-	public List<SubjectReference> getParents(Set<Context> set) {
-		return null;
-	}
+    @Override
+    public List<SubjectReference> getParents(Set<Context> set) {
+        return null;
+    }
 
-	@Override
-	public Optional<String> getOption(Set<Context> set, String s) {
-		return null;
-	}
+    @Override
+    public Optional<String> getOption(Set<Context> set, String s) {
+        return null;
+    }
 
-	@Override
-	public String getIdentifier() {
-		return null;
-	}
+    @Override
+    public String getIdentifier() {
+        return null;
+    }
 
-	@Override
-	public Set<Context> getActiveContexts() {
-		return null;
-	}
+    @Override
+    public Set<Context> getActiveContexts() {
+        return null;
+    }
 
-	@Override
-	public void sendMessage(Text text) {
+    @Override
+    public void sendMessage(Text text) {
 
-	}
+    }
 
-	@Override
-	public MessageChannel getMessageChannel() {
-		return null;
-	}
+    @Override
+    public MessageChannel getMessageChannel() {
+        return null;
+    }
 
-	@Override
-	public void setMessageChannel(MessageChannel messageChannel) {
+    @Override
+    public void setMessageChannel(MessageChannel messageChannel) {
 
-	}
+    }
 }

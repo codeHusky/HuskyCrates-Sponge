@@ -29,119 +29,119 @@ import java.util.concurrent.TimeUnit;
  * Created by lokio on 12/29/2016.
  */
 public class RouletteCrateView extends CrateView {
-	private boolean stopped = false;
-	private CrateReward holder;
-	private boolean firedEnd = false;
-	private boolean outOfTime = false;
+    private boolean stopped = false;
+    private CrateReward holder;
+    private boolean firedEnd = false;
+    private boolean outOfTime = false;
 
-	public RouletteCrateView(Player viewer, VirtualCrate virtualCrate) {
-		super(viewer, null, null);
-		// Tell the super class not to build an inventory (we have to create the inventory and update the state ourselves)
+    public RouletteCrateView(Player viewer, VirtualCrate virtualCrate) {
+        super(viewer, null, null);
+        // Tell the super class not to build an inventory (we have to create the inventory and update the state ourselves)
 
-		vc = virtualCrate;
-		items = vc.getItemSet();
+        vc = virtualCrate;
+        items = vc.getItemSet();
 
-		if (virtualCrate.scrambleRewards) {
-			scrambleRewards();
-		}
+        if (virtualCrate.scrambleRewards) {
+            scrambleRewards();
+        }
 
-		inventory = Inventory.builder()
-				.of(InventoryArchetypes.DISPENSER)
-				.listener(InteractInventoryEvent.class, evt -> {
-					if (!(evt instanceof InteractInventoryEvent.Open) && !(evt instanceof InteractInventoryEvent.Close)) {
-						evt.setCancelled(true);
-						if (!stopped && evt instanceof ClickInventoryEvent) {
-							viewer.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH, viewer.getLocation().getPosition(), 1);
-						}
-						stopped = true;
-					}
-				})
-				.property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName)))
-				.build(plugin);
+        inventory = Inventory.builder()
+                .of(InventoryArchetypes.DISPENSER)
+                .listener(InteractInventoryEvent.class, evt -> {
+                    if (!(evt instanceof InteractInventoryEvent.Open) && !(evt instanceof InteractInventoryEvent.Close)) {
+                        evt.setCancelled(true);
+                        if (!stopped && evt instanceof ClickInventoryEvent) {
+                            viewer.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH, viewer.getLocation().getPosition(), 1);
+                        }
+                        stopped = true;
+                    }
+                })
+                .property(InventoryTitle.PROPERTY_NAME, InventoryTitle.of(TextSerializers.FORMATTING_CODE.deserialize(virtualCrate.displayName)))
+                .build(plugin);
 
-		updateView(0);
-		startUpdateTask(); // Start the update task, which calls updateTick
-	}
+        updateView(0);
+        startUpdateTask(); // Start the update task, which calls updateTick
+    }
 
-	private int tickCount = 0;
+    private int tickCount = 0;
 
-	@Override
-	protected void updateView(int state) {
-		int secRemain = (10 - Math.round(tickCount / 20));
-		if (secRemain < 0)
-			stopped = true;
-		int slotNum = 0;
-		for (Inventory e : inventory.slots()) {
-			double speed = 3;
-			double confettiSpeed = 2;
-			if (slotNum != 4) {
-				if (stopped) {
-					if (tickCount == 0 || Math.round(tickCount / confettiSpeed) > Math.round((tickCount - 1) / confettiSpeed)) {
-						e.set(confetti());
-					} else {
-						e.set(e.peek().get());
-					}
-				} else {
-					ItemStack border;
-					if (Math.floor(slotNum / 3) != 1) {
-						border = ItemStack.builder().itemType(ItemTypes.STAINED_GLASS_PANE).add(Keys.DYE_COLOR, DyeColors.BLACK).build();
-					} else {
-						border = ItemStack.builder().itemType(ItemTypes.STAINED_GLASS_PANE).add(Keys.DYE_COLOR, DyeColors.GRAY).build();
-					}
-					border.offer(Keys.DISPLAY_NAME, Text.of(TextStyles.RESET, "HuskyCrates"));
-					ArrayList<Text> itemLore = new ArrayList<>();
-					itemLore.add(Text.of(TextColors.DARK_GRAY, "Click anywhere to stop!"));
-					itemLore.add(Text.of(TextColors.DARK_GRAY, "Seconds remaining: " + secRemain));
-					border.offer(Keys.ITEM_LORE, itemLore);
-					e.set(border);
-				}
-			} else if (!stopped && (tickCount == 0 || Math.round(tickCount / speed) > Math.round((tickCount - 1) / speed))) {
-				try {
-					int i = itemIndexSelected();
-					e.set(((CrateReward) items.get(i)[1]).getDisplayItem());
-					holder = (CrateReward) items.get(i)[1];
-					viewer.playSound(SoundTypes.UI_BUTTON_CLICK, viewer.getLocation().getPosition(), 0.25);
-				} catch (RandomItemSelectionFailureException e1) {
-					plugin.logger.error("Random Item Selection failed in Roulette Crate View: " + vc.displayName);
-				}
+    @Override
+    protected void updateView(int state) {
+        int secRemain = (10 - Math.round(tickCount / 20));
+        if (secRemain < 0)
+            stopped = true;
+        int slotNum = 0;
+        for (Inventory e : inventory.slots()) {
+            double speed = 3;
+            double confettiSpeed = 2;
+            if (slotNum != 4) {
+                if (stopped) {
+                    if (tickCount == 0 || Math.round(tickCount / confettiSpeed) > Math.round((tickCount - 1) / confettiSpeed)) {
+                        e.set(confetti());
+                    } else {
+                        e.set(e.peek().get());
+                    }
+                } else {
+                    ItemStack border;
+                    if (Math.floor(slotNum / 3) != 1) {
+                        border = ItemStack.builder().itemType(ItemTypes.STAINED_GLASS_PANE).add(Keys.DYE_COLOR, DyeColors.BLACK).build();
+                    } else {
+                        border = ItemStack.builder().itemType(ItemTypes.STAINED_GLASS_PANE).add(Keys.DYE_COLOR, DyeColors.GRAY).build();
+                    }
+                    border.offer(Keys.DISPLAY_NAME, Text.of(TextStyles.RESET, "HuskyCrates"));
+                    ArrayList<Text> itemLore = new ArrayList<>();
+                    itemLore.add(Text.of(TextColors.DARK_GRAY, "Click anywhere to stop!"));
+                    itemLore.add(Text.of(TextColors.DARK_GRAY, "Seconds remaining: " + secRemain));
+                    border.offer(Keys.ITEM_LORE, itemLore);
+                    e.set(border);
+                }
+            } else if (!stopped && (tickCount == 0 || Math.round(tickCount / speed) > Math.round((tickCount - 1) / speed))) {
+                try {
+                    int i = itemIndexSelected();
+                    e.set(((CrateReward) items.get(i)[1]).getDisplayItem());
+                    holder = (CrateReward) items.get(i)[1];
+                    viewer.playSound(SoundTypes.UI_BUTTON_CLICK, viewer.getLocation().getPosition(), 0.25);
+                } catch (RandomItemSelectionFailureException e1) {
+                    plugin.logger.error("Random Item Selection failed in Roulette Crate View: " + vc.displayName);
+                }
 
-				//e.set(((CrateRewardHolder)items.get(Math.round(tickCount/2) % items.size())[1]).getDisplayItem());
-			} else {
-				if (stopped && !firedEnd) {
-					if (secRemain < 0) {
-						outOfTime = true;
-						viewer.playSound(SoundTypes.BLOCK_GLASS_BREAK, viewer.getLocation().getPosition(), 1);
-					}
-					Sponge.getScheduler().createTaskBuilder().execute(task -> {
-						updater.cancel();
-						viewer.closeInventory();
-						handleReward(holder);
-						viewer.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, viewer.getLocation().getPosition(), 1);
-					}).delay(3, TimeUnit.SECONDS).submit(HuskyCrates.instance);
-					firedEnd = true;
-				}
-				e.set(e.peek().get());
-			}
-			slotNum++;
-		}
-	}
+                //e.set(((CrateRewardHolder)items.get(Math.round(tickCount/2) % items.size())[1]).getDisplayItem());
+            } else {
+                if (stopped && !firedEnd) {
+                    if (secRemain < 0) {
+                        outOfTime = true;
+                        viewer.playSound(SoundTypes.BLOCK_GLASS_BREAK, viewer.getLocation().getPosition(), 1);
+                    }
+                    Sponge.getScheduler().createTaskBuilder().execute(task -> {
+                        updater.cancel();
+                        viewer.closeInventory();
+                        handleReward(holder);
+                        viewer.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, viewer.getLocation().getPosition(), 1);
+                    }).delay(3, TimeUnit.SECONDS).submit(HuskyCrates.instance);
+                    firedEnd = true;
+                }
+                e.set(e.peek().get());
+            }
+            slotNum++;
+        }
+    }
 
-	private ItemStack confetti() {
-		DyeColor[] colors = {DyeColors.BLUE, DyeColors.CYAN, DyeColors.LIME, DyeColors.LIGHT_BLUE, DyeColors.MAGENTA, DyeColors.ORANGE, DyeColors.PINK, DyeColors.PURPLE, DyeColors.RED, DyeColors.YELLOW};
-		ItemStack g = ItemStack.builder()
-				.itemType(ItemTypes.STAINED_GLASS_PANE)
-				.add(Keys.DYE_COLOR, colors[(int) Math.floor(Math.random() * colors.length)])
-				.build();
-		if (!outOfTime) {
-			g.offer(Keys.DISPLAY_NAME, Text.of(TextStyles.RESET, "Your prize awaits..."));
-		} else {
-			g.offer(Keys.DISPLAY_NAME, Text.of(TextStyles.RESET, TextColors.RED, "Ran out of time!"));
-		}
-		return g;
-	}
+    private ItemStack confetti() {
+        DyeColor[] colors = {DyeColors.BLUE, DyeColors.CYAN, DyeColors.LIME, DyeColors.LIGHT_BLUE, DyeColors.MAGENTA, DyeColors.ORANGE, DyeColors.PINK, DyeColors.PURPLE, DyeColors.RED, DyeColors.YELLOW};
+        ItemStack g = ItemStack.builder()
+                .itemType(ItemTypes.STAINED_GLASS_PANE)
+                .add(Keys.DYE_COLOR, colors[(int) Math.floor(Math.random() * colors.length)])
+                .build();
+        if (!outOfTime) {
+            g.offer(Keys.DISPLAY_NAME, Text.of(TextStyles.RESET, "Your prize awaits..."));
+        } else {
+            g.offer(Keys.DISPLAY_NAME, Text.of(TextStyles.RESET, TextColors.RED, "Ran out of time!"));
+        }
+        return g;
+    }
 
-	public void updateTick() {
-		updateView(0);
-		tickCount++;
-	}
+    public void updateTick() {
+        updateView(0);
+        tickCount++;
+    }
 }

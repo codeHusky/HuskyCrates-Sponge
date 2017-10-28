@@ -7,37 +7,37 @@ import org.spongepowered.api.event.user.TargetUserEvent;
 
 public class VKeyBalanceChangeEvent extends AbstractEvent implements TargetUserEvent {
 
-	private final User user;
-	private final String crateId;
-	private final Integer oldBalance;
-	private final Integer newBalance;
+    private final User user;
+    private final String crateId;
+    private final Integer oldBalance;
+    private final Integer newBalance;
 
-	public VKeyBalanceChangeEvent(User user, String crateId, Integer oldBalance, Integer newBalance) {
-		this.user = user;
-		this.crateId = crateId;
-		this.oldBalance = oldBalance;
-		this.newBalance = newBalance;
-	}
+    public VKeyBalanceChangeEvent(User user, String crateId, Integer oldBalance, Integer newBalance) {
+        this.user = user;
+        this.crateId = crateId;
+        this.oldBalance = oldBalance;
+        this.newBalance = newBalance;
+    }
 
-	public String getCrateId() {
-		return this.crateId;
-	}
+    public String getCrateId() {
+        return this.crateId;
+    }
 
-	public Integer getOldBalance() {
-		return this.oldBalance;
-	}
+    public Integer getOldBalance() {
+        return this.oldBalance;
+    }
 
-	public Integer getNewBalance() {
-		return this.newBalance;
-	}
+    public Integer getNewBalance() {
+        return this.newBalance;
+    }
 
-	@Override
-	public Cause getCause() {
-		return null;
-	}
+    @Override
+    public Cause getCause() {
+        return null;
+    }
 
-	@Override
-	public User getTargetUser() {
-		return this.user;
-	}
+    @Override
+    public User getTargetUser() {
+        return this.user;
+    }
 }

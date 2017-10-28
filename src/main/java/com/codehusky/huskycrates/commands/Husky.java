@@ -16,24 +16,24 @@ import org.spongepowered.api.text.format.TextStyles;
  */
 @SuppressWarnings("deprecation")
 public class Husky implements CommandExecutor {
-	private HuskyCrates plugin;
+    private HuskyCrates plugin;
 
-	public Husky(HuskyCrates ins) {
-		plugin = ins;
-	}
+    public Husky(HuskyCrates ins) {
+        plugin = ins;
+    }
 
-	@Override
-	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-		if (src instanceof Player) {
-			Player plr = (Player) src;
-			if (!plr.getUniqueId().toString().toLowerCase().equals("20db6d8a-d993-4dc5-a30e-8b633afaa438") && !plr.hasPermission("huskycrates.tester")) {
-				return CommandResult.empty();
-			}
-			src.sendMessage(Text.of(TextColors.GOLD, "bark bark!"));
-			src.sendMessage(Text.of(TextColors.GRAY, TextStyles.ITALIC, "Running HuskyCrates v" + HuskyCrates.instance.pC.getVersion().get() + " (BETA)"));
-		}
+    @Override
+    public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+        if (src instanceof Player) {
+            Player plr = (Player) src;
+            if (!plr.getUniqueId().toString().toLowerCase().equals("20db6d8a-d993-4dc5-a30e-8b633afaa438") && !plr.hasPermission("huskycrates.tester")) {
+                return CommandResult.empty();
+            }
+            src.sendMessage(Text.of(TextColors.GOLD, "bark bark!"));
+            src.sendMessage(Text.of(TextColors.GRAY, TextStyles.ITALIC, "Running HuskyCrates v" + HuskyCrates.instance.pC.getVersion().get() + " (BETA)"));
+        }
 
-		return CommandResult.success();
-	}
+        return CommandResult.success();
+    }
 
 }

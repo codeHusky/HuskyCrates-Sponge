@@ -18,21 +18,21 @@ import java.util.List;
  */
 public class CrateElement extends CommandElement {
 
-	public CrateElement(Text key) {
-		super(key);
-	}
+    public CrateElement(Text key) {
+        super(key);
+    }
 
-	@Nullable
-	@Override
-	protected Object parseValue(CommandSource commandSource, CommandArgs commandArgs) throws ArgumentParseException {
-		return commandArgs.next();
-	}
+    @Nullable
+    @Override
+    protected Object parseValue(CommandSource commandSource, CommandArgs commandArgs) throws ArgumentParseException {
+        return commandArgs.next();
+    }
 
-	@Override
-	public List<String> complete(CommandSource commandSource, CommandArgs commandArgs, CommandContext commandContext) {
+    @Override
+    public List<String> complete(CommandSource commandSource, CommandArgs commandArgs, CommandContext commandContext) {
 
-		//TODO: It is here we should do some perm check :)!
-		return HuskyCrates.instance.getCrateUtilities().getCrateTypes();
-	}
+        //TODO: It is here we should do some perm check :)!
+        return HuskyCrates.instance.getCrateUtilities().getCrateTypes();
+    }
 
 }

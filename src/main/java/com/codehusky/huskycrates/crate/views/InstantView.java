@@ -8,26 +8,26 @@ import org.spongepowered.api.entity.living.player.Player;
 
 public class InstantView extends CrateView {
 
-	public InstantView(Player viewer, VirtualCrate virtualCrate) {
-		super(viewer, null, null);
+    public InstantView(Player viewer, VirtualCrate virtualCrate) {
+        super(viewer, null, null);
 
-		vc = virtualCrate;
-		items = vc.getItemSet();
+        vc = virtualCrate;
+        items = vc.getItemSet();
 
-		if (virtualCrate.scrambleRewards) {
-			scrambleRewards();
-		}
+        if (virtualCrate.scrambleRewards) {
+            scrambleRewards();
+        }
 
-		try {
-			CrateReward rewardHolder = (CrateReward) vc.getItemSet().get(itemIndexSelected())[1];
-			handleReward(rewardHolder);
-			viewer.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, viewer.getLocation().getPosition(), 1);
-		} catch (RandomItemSelectionFailureException e) {
-			plugin.logger.error("Failed to load instant view item: " + vc.displayName);
-		}
-	}
+        try {
+            CrateReward rewardHolder = (CrateReward) vc.getItemSet().get(itemIndexSelected())[1];
+            handleReward(rewardHolder);
+            viewer.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, viewer.getLocation().getPosition(), 1);
+        } catch (RandomItemSelectionFailureException e) {
+            plugin.logger.error("Failed to load instant view item: " + vc.displayName);
+        }
+    }
 
-	@Override
-	public void updateTick() {
-	}
+    @Override
+    public void updateTick() {
+    }
 }
