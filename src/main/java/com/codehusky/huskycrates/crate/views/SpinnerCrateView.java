@@ -106,7 +106,7 @@ public class SpinnerCrateView extends CrateView {
 			slotnum++;
 		}
 		if (!viewer.isViewingInventory()) {
-			viewer.openInventory(inventory, plugin.genericCause);
+			viewer.openInventory(inventory);
 		}
 	}
 
@@ -143,7 +143,7 @@ public class SpinnerCrateView extends CrateView {
 			//HuskyCrates.instance.logger.info(maxClicks + " : " + trueclicks);
 
 		} else if (trueclicks >= maxClicks && tickerState == 0) {
-			viewer.openInventory(inventory, plugin.genericCause);
+			viewer.openInventory(inventory);
 			tickerState = 1;
 			viewer.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH, viewer.getLocation().getPosition(), 1);
 			updateMax = 100;
@@ -151,7 +151,7 @@ public class SpinnerCrateView extends CrateView {
 		} else if (tickerState == 1) {
 			if (waitCurrent == Math.round(updateMax)) {
 				updater.cancel();
-				viewer.closeInventory(plugin.genericCause);
+				viewer.closeInventory();
 				handleReward(giveToPlayer);
 				viewer.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, viewer.getLocation().getPosition(), 1);
 			} else if (waitCurrent % 5 == 0) {

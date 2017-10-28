@@ -30,13 +30,11 @@ public class CrateUtilities {
 	public boolean hasInitalizedVirtualCrates = false;
 
 	public void launchCrateForPlayer(String crateType, Player target) {
-		Cause genericCause = HuskyCrates.instance.genericCause;
-
 		if (!crateTypes.containsKey(crateType)) {
-			target.openInventory(new NullCrateView(target, null).getInventory(), genericCause);
+			target.openInventory(new NullCrateView(target, null).getInventory());
 		} else {
 			if (crateTypes.get(crateType).isGUI) {
-				target.openInventory(crateTypes.get(crateType).generateViewForCrate(target).getInventory(), genericCause);
+				target.openInventory(crateTypes.get(crateType).generateViewForCrate(target).getInventory());
 			} else {
 				crateTypes.get(crateType).generateViewForCrate(target);
 			}

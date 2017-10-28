@@ -60,7 +60,7 @@ public abstract class CrateView {
 
 	public void openInventory() {
 		if (!viewer.isViewingInventory()) {
-			viewer.openInventory(inventory, plugin.genericCause);
+			viewer.openInventory(inventory);
 		}
 	}
 

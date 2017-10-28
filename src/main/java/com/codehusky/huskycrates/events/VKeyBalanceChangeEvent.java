@@ -1,6 +1,5 @@
 package com.codehusky.huskycrates.events;
 
-import com.codehusky.huskycrates.HuskyCrates;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.impl.AbstractEvent;
@@ -34,7 +33,7 @@ public class VKeyBalanceChangeEvent extends AbstractEvent implements TargetUserE
 
 	@Override
 	public Cause getCause() {
-		return Cause.source(HuskyCrates.instance).build();
+		return null;
 	}
 
 	@Override
