@@ -140,43 +140,48 @@ public class SpinnerCrateView extends CrateView {
 
     private int tickerState = 0;
     private int trueclicks = 0;
+    private boolean done = false;
+    
     private void updateTick() {
         //revDampening = 1.15;
         waitCurrent++;
         //int revolutions = (int) Math.floor(clicks / items.size());
         //once clicks is greater than offset we stop the spinner
-        if (waitCurrent == Math.round(updateMax) &&
-                trueclicks < maxClicks &&
-                tickerState == 0) {
+        if (waitCurrent == Math.round(updateMax) && trueclicks < maxClicks && tickerState == 0 && !done) {
             //System.out.println(clicks + " : " + offset);
-
             waitCurrent = 0;
             updateMax *= dampening;
             updateInv(-1);
-            ourplr.playSound(SoundTypes.UI_BUTTON_CLICK,ourplr.getLocation().getPosition(),0.25);
+            ourplr.playSound(SoundTypes.UI_BUTTON_CLICK, ourplr.getLocation().getPosition(), 0.25);
             clicks++;
             trueclicks++;
             //HuskyCrates.instance.logger.info(maxClicks + " : " + trueclicks);
-
-        }else if(trueclicks
-                >=
-                maxClicks &&
-                tickerState == 0){
+        } else if (waitCurrent == Math.round(updateMax) && done) {
+            waitCurrent = 0;
+            updateMax *= dampening;
             ourplr.openInventory(disp);
             tickerState = 1;
-            ourplr.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH,ourplr.getLocation().getPosition(),1);
-            updateMax = 100;
-            waitCurrent = 0;
-        }else if(tickerState == 1){
+            ourplr.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH, ourplr.getLocation().getPosition(), 1);
+            updateMax = 100;            
+            done = false;
+
+        } else if (tickerState == 1)
+        {            
             if (waitCurrent == Math.round(updateMax)) {
                 updater.cancel();
                 ourplr.closeInventory();
                 handleReward(giveToPlayer);
-                ourplr.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP,ourplr.getLocation().getPosition(),1);
+                ourplr.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, ourplr.getLocation().getPosition(), 1);
 
-            }else if(waitCurrent % 5 == 0){
+            } else if (waitCurrent % 5 == 0) {
                 updateInv(2);
             }
+        } else if (waitCurrent == Math.round(updateMax) && trueclicks >= maxClicks && tickerState == 0) {
+            waitCurrent = 0;
+            updateMax *= dampening;
+            updateInv(-1);
+            ourplr.playSound(SoundTypes.UI_BUTTON_CLICK, ourplr.getLocation().getPosition(), 0.25);
+            done = true;
         }
 
     }

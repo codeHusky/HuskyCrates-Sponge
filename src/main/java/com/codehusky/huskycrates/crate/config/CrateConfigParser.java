@@ -10,10 +10,11 @@ import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.meta.ItemEnchantment;
-import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.enchantment.Enchantment;
+import org.spongepowered.api.item.enchantment.EnchantmentType;
+import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -149,18 +150,17 @@ public class CrateConfigParser {
                 item.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(itemRoot.getNode("name").getString()));
             }
             if(!itemRoot.getNode("enchants").isVirtual()) {
-                ArrayList<ItemEnchantment> enchantments = new ArrayList<>();
+                ArrayList<Enchantment> enchantments = new ArrayList<>();
                 for (Object key : itemRoot.getNode("enchants").getChildrenMap().keySet()) {
                     int level = itemRoot.getNode("enchants").getChildrenMap().get(key).getInt();
                     String enchantID = (String) key;
-                    Optional<Enchantment> pEnchant = Sponge.getRegistry().<Enchantment>getType(Enchantment.class,enchantID);
-                    if(!pEnchant.isPresent()){
+                    Optional<EnchantmentType> pEnchantType = Sponge.getRegistry().getType(EnchantmentType.class, enchantID);
+                    if(!pEnchantType.isPresent()){
                         HuskyCrates.instance.logger.error("INVALID ENCHANT ID: \"" + key + "\" || "+ itemRoot.getNode("name").getString("(no name)") + " (item #" + itemRoot.getKey()+  ") || " + itemRoot.getParent().getParent().getKey());
                         return ItemStack.of(ItemTypes.NONE,1);
                     }
-                    Enchantment enc = pEnchant.get(); // STRINGS ONLY!
-                    ItemEnchantment itemEnchantment = new ItemEnchantment(enc, level);
-                    enchantments.add(itemEnchantment);
+                    Enchantment pEnchant = Enchantment.of(pEnchantType.get(), level);                                        
+                    enchantments.add(pEnchant);
                 }
                 item.offer(Keys.ITEM_ENCHANTMENTS, enchantments);
             }
