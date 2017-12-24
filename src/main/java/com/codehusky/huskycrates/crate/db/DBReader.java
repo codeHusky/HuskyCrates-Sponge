@@ -15,6 +15,10 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
@@ -44,6 +48,7 @@ public class DBReader {
         boolean cKU = dbConnection.getMetaData().getTables(null,null,"VALIDKEYS",null).next();
         boolean kB = dbConnection.getMetaData().getTables(null,null,"KEYBALANCES",null).next();
         boolean wI = dbConnection.getMetaData().getTables(null,null,"WORLDINFO",null).next();
+        boolean cD = dbConnection.getMetaData().getTables(null,null,"LASTUSED",null).next();
         if(!cP){
             dbConnection.prepareStatement("CREATE TABLE CRATELOCATIONS (ID INTEGER NOT NULL AUTO_INCREMENT, X DOUBLE, Y DOUBLE, Z DOUBLE, worldID INTEGER, isEntityCrate BOOLEAN, crateID CHARACTER,  PRIMARY KEY(ID))").executeUpdate();
         }
@@ -56,7 +61,9 @@ public class DBReader {
         if(!wI){
             dbConnection.prepareStatement("CREATE TABLE WORLDINFO (ID INTEGER NOT NULL AUTO_INCREMENT,uuid CHARACTER, name CHARACTER,  PRIMARY KEY(ID))").executeUpdate();
         }
-
+        if(!cD){
+            dbConnection.prepareStatement("CREATE TABLE LASTUSED (userUUID CHARACTER, crateID CHARACTER, lastUsed BIGINT)").executeUpdate();
+        }
         dbConnection.close();
     }
 
@@ -119,6 +126,12 @@ public class DBReader {
         for(VirtualCrate vc : HuskyCrates.instance.crateUtilities.crateTypes.values()){
             vc.pendingKeys = new HashMap<>();
             vc.virtualBalances = new HashMap<>();
+            PreparedStatement statement = dbConnection.prepareStatement("SELECT * FROM LASTUSED WHERE crateID = ?");
+            statement.setString(1, vc.id);
+            ResultSet results = statement.executeQuery();
+            while(results.next()){
+                vc.lastUsed.put(UUID.fromString(results.getString(1)),LocalDateTime.ofInstant(Instant.ofEpochMilli(results.getLong(3)),ZoneOffset.systemDefault()));
+            }
         }
         while(crateKeyUUIDs.next()){
             //HuskyCrates.instance.logger.info("crateKeyUUIDs thing!");
@@ -173,6 +186,9 @@ public class DBReader {
         connectDB();
         //crate positions
         HashMap<UUID,Integer> worldsInserted = new HashMap<>();
+
+
+
         for(Location<World> location : HuskyCrates.instance.crateUtilities.physicalCrates.keySet()){
             if(!worldsInserted.keySet().contains(location.getExtent().getUniqueId())){
                 PreparedStatement statement = dbConnection.prepareStatement("SELECT * FROM WORLDINFO WHERE name = ? OR uuid = ?");
@@ -192,19 +208,32 @@ public class DBReader {
                     worldsInserted.put(location.getExtent().getUniqueId(),primResults.getInt(1));
                 }
             }
-            PhysicalCrate crate = HuskyCrates.instance.crateUtilities.physicalCrates.get(location);
-            PreparedStatement statement = dbConnection.prepareStatement("SELECT * FROM CRATELOCATIONS WHERE worldID = ? AND X = ? AND Y = ? AND Z = ? AND isEntityCrate = ?");
-            statement.setInt(1,worldsInserted.get(location.getExtent().getUniqueId()));
-            statement.setDouble(2,location.getX());
-            statement.setDouble(3,location.getY());
-            statement.setDouble(4,location.getZ());
-            statement.setBoolean(5,crate.isEntity);
-            ResultSet results = statement.executeQuery();
-            boolean exists = results.next();
-            if(!exists){
-                dbConnection.prepareStatement("INSERT INTO CRATELOCATIONS(X,Y,Z,worldID,isEntityCrate,crateID) VALUES(" + location.getX() + ","  + location.getY() + ","  + location.getZ() + ","  + worldsInserted.get(location.getExtent().getUniqueId()) + ","  + crate.isEntity + ",'"  + crate.vc.id + "')").executeUpdate();
+            if(!HuskyCrates.instance.crateUtilities.brokenCrates.contains(location)) {
+                PhysicalCrate crate = HuskyCrates.instance.crateUtilities.physicalCrates.get(location);
+                PreparedStatement statement = dbConnection.prepareStatement("SELECT * FROM CRATELOCATIONS WHERE worldID = ? AND X = ? AND Y = ? AND Z = ? AND isEntityCrate = ?");
+                statement.setInt(1, worldsInserted.get(location.getExtent().getUniqueId()));
+                statement.setDouble(2, location.getX());
+                statement.setDouble(3, location.getY());
+                statement.setDouble(4, location.getZ());
+                statement.setBoolean(5, crate.isEntity);
+                ResultSet results = statement.executeQuery();
+                boolean exists = results.next();
+                if (!exists) {
+                    dbConnection.prepareStatement("INSERT INTO CRATELOCATIONS(X,Y,Z,worldID,isEntityCrate,crateID) VALUES(" + location.getX() + "," + location.getY() + "," + location.getZ() + "," + worldsInserted.get(location.getExtent().getUniqueId()) + "," + crate.isEntity + ",'" + crate.vc.id + "')").executeUpdate();
+                }
             }
         }
+        for(Location<World> broken : HuskyCrates.instance.crateUtilities.brokenCrates){
+            PreparedStatement delState = dbConnection.prepareStatement("DELETE FROM CRATELOCATIONS WHERE worldID = ? AND X = ? AND Y = ? AND Z = ?");
+            delState.setInt(1,worldsInserted.get(broken.getExtent().getUniqueId()));
+            delState.setDouble(2,broken.getX());
+            delState.setDouble(3,broken.getY());
+            delState.setDouble(4,broken.getZ());
+            delState.executeUpdate();
+        }
+        HuskyCrates.instance.crateUtilities.brokenCrates.clear();
+
+
 
         //crate key uuids
 
@@ -224,6 +253,26 @@ public class DBReader {
                     dbConnection.prepareStatement("INSERT INTO VALIDKEYS(keyUUID,crateID,amount) VALUES('" + keyUUID + "','" + crate.id + "'," + amount + ")").executeUpdate();
                 }
                 //System.out.println(g);
+            }
+            for(UUID uuid : crate.lastUsed.keySet()) {
+                PreparedStatement statement = dbConnection.prepareStatement("SELECT * FROM LASTUSED WHERE crateID = ? AND userUUID = ?");
+                statement.setString(1, crate.id);
+                statement.setString(2, uuid.toString());
+                ResultSet results = statement.executeQuery();
+                long epoch = crate.lastUsed.get(uuid).atZone(ZoneId.systemDefault()).toEpochSecond();
+                if(results.next()){ // exists
+                    PreparedStatement crState = dbConnection.prepareStatement("UPDATE LASTUSED SET lastUsed = ? WHERE userUUID = ? AND crateID = ?");
+                    crState.setString(2,uuid.toString());
+                    crState.setString(3,crate.id);
+                    crState.setLong(1,epoch);
+                    crState.executeUpdate();
+                }else{
+                    PreparedStatement crState = dbConnection.prepareStatement("INSERT INTO LASTUSED(userUUID,crateID,lastUsed) VALUES(?,?,?)");
+                    crState.setString(1,uuid.toString());
+                    crState.setString(2,crate.id);
+                    crState.setLong(3,epoch);
+                    crState.executeUpdate();
+                }
             }
 
         }

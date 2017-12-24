@@ -28,6 +28,7 @@ import com.codehusky.huskycrates.lang.LangData;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -47,6 +48,7 @@ public class VirtualCrate {
     private HashMap<String,Object> options = new HashMap<>();
     public HashMap<String,Integer> pendingKeys = new HashMap<>();
     public HashMap<String, Integer> virtualBalances = new HashMap<>();
+    public HashMap<UUID, LocalDateTime> lastUsed = new HashMap<>();
     private ItemType keyType;
     private Integer keyDamage= null;
     private LangData langData;

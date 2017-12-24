@@ -1,5 +1,6 @@
 package com.codehusky.huskycrates.crate;
 
+import com.codehusky.huskycrates.crate.db.DBReader;
 import com.codehusky.huskycrates.crate.views.NullCrateView;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -17,6 +18,7 @@ import org.spongepowered.api.world.World;
 import com.codehusky.huskycrates.HuskyCrates;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -99,52 +101,58 @@ public class CrateUtilities {
         }
 
     }*/
-    public boolean flag = false;
+    public ArrayList<Location<World>> brokenCrates = new ArrayList<>();
     private void particleRunner(){
-        if(flag)
+        if(brokenCrates.size() > 0)
             return;
 
-            ArrayList<Location<World>> invalidLocations = new ArrayList<>();
-            HashSet<World> invalidLocationWorlds = new HashSet<>();
-            for (Location<World> b : physicalCrates.keySet()) {
-                PhysicalCrate c = physicalCrates.get(b);
-                try {
-                    if (c.vc.crateBlockType != c.location.getBlock().getType() && c.location.getExtent().isLoaded() && c.location.getExtent().getChunk(c.location.getChunkPosition()).isPresent()) {
-                        if(c.location.getExtent().getChunk(c.location.getChunkPosition()).get().isLoaded()) {
-                            invalidLocations.add(c.location);
-                            invalidLocationWorlds.add(c.location.getExtent());
-                            continue;
-                        }
+        ArrayList<Location<World>> invalidLocations = new ArrayList<>();
+        HashSet<World> invalidLocationWorlds = new HashSet<>();
+        for (Location<World> b : physicalCrates.keySet()) {
+            PhysicalCrate c = physicalCrates.get(b);
+            try {
+                if (c.vc.crateBlockType != c.location.getBlock().getType() && c.location.getExtent().isLoaded() && c.location.getExtent().getChunk(c.location.getChunkPosition()).isPresent()) {
+                    if(c.location.getExtent().getChunk(c.location.getChunkPosition()).get().isLoaded()) {
+                        invalidLocations.add(c.location);
+                        invalidLocationWorlds.add(c.location.getExtent());
+                        continue;
                     }
-                    c.runParticles();
-                }catch(Exception e){
-                    //e.printStackTrace();
-                    invalidLocations.add(c.location);
-                    invalidLocationWorlds.add(c.location.getExtent());
                 }
+                c.runParticles();
+            }catch(Exception e){
+                //e.printStackTrace();
+                invalidLocations.add(c.location);
+                invalidLocationWorlds.add(c.location.getExtent());
             }
-            for(World w : invalidLocationWorlds) {
-                for (Entity e : w.getEntities()) {
-                    if (invalidLocations.contains(e.getLocation()) && e.getType() != EntityTypes.ARMOR_STAND) {
-                        //System.out.println("woah");
+        }
+        for(World w : invalidLocationWorlds) {
+            for (Entity e : w.getEntities()) {
+                if (invalidLocations.contains(e.getLocation()) && e.getType() != EntityTypes.ARMOR_STAND) {
+                    if(physicalCrates.get(e.getLocation()).isEntity) {
                         invalidLocations.remove(e.getLocation());
                         physicalCrates.get(e.getLocation()).runParticles();
-
                     }
-                }
-            }
-            for(Location<World> l : invalidLocations){
-                PhysicalCrate c = physicalCrates.get(l);
-                HuskyCrates.instance.logger.warn("Removing crate that no longer exists! " + c.location.getPosition().toString());
-                    if(c.ent != null){
-                    c.ent.remove();
-                }
-                physicalCrates.remove(l);
-                flag = true;
-            }
 
-        if(flag)
-            HuskyCrates.instance.updatePhysicalCrates();
+                }
+            }
+        }
+        brokenCrates = invalidLocations;
+        for(Location<World> l : invalidLocations){
+            PhysicalCrate c = physicalCrates.get(l);
+            HuskyCrates.instance.logger.warn("Removing crate that no longer exists! " + c.location.getPosition().toString());
+            if(c.ent != null){
+                c.ent.remove();
+            }
+            physicalCrates.remove(l);
+        }
+
+        if(brokenCrates.size() > 0) {
+            try {
+                DBReader.saveHuskyData();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /***
@@ -172,11 +180,11 @@ public class CrateUtilities {
         if (crate != null) {
             if(crate.vc.freeCrate) {
                 //System.out.println("FREE?");
-                if (!crate.lastUsed.containsKey(using.getUniqueId())) {
+                if (!crate.vc.lastUsed.containsKey(using.getUniqueId())) {
                     return 1;
                 } else {
                     //System.out.println(crate.vc.getOptions());
-                    LocalDateTime lastUsed = crate.lastUsed.get(using.getUniqueId());
+                    LocalDateTime lastUsed = crate.vc.lastUsed.get(using.getUniqueId());
                     LocalDateTime minimumWait = lastUsed.plusSeconds((int) crate.vc.getOptions().get("freeCrateDelay"));
                     //HuskyCrates.instance.logger.info("" + LocalDateTime.now().compareTo(minimumWait));
                     if (LocalDateTime.now().compareTo(minimumWait) > 0) {

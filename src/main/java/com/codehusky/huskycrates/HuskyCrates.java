@@ -451,7 +451,11 @@ public class HuskyCrates {
                                     crateUtilities.physicalCrates.put(location, new PhysicalCrate(location, crateID, this,false));
 
                                 crateUtilities.physicalCrates.get(location).createHologram();
-                                updatePhysicalCrates();
+                                try {
+                                    DBReader.saveHuskyData();
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
                                 return;
                             }
                         }
@@ -462,11 +466,15 @@ public class HuskyCrates {
                             event.setCancelled(true);
                             return;
                         }
-                        crateUtilities.flag = true;
                         if(!crateUtilities.physicalCrates.get(location).isEntity)
                             crateUtilities.physicalCrates.get(location).ent.remove();
                         crateUtilities.physicalCrates.remove(location);
-                        updatePhysicalCrates();
+                        crateUtilities.brokenCrates.add(location);
+                        try {
+                            DBReader.saveHuskyData();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
@@ -485,7 +493,6 @@ public class HuskyCrates {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        crateUtilities.flag = false;
         updating = false;
     }
     public void keyHandler(Player plr, int keyResult, VirtualCrate vc, Location<World> blk,String crateType){
@@ -666,14 +673,23 @@ public class HuskyCrates {
                             event.getTargetEntity().offer(Keys.IS_SILENT,true);
                             crateUtilities.physicalCrates.put(event.getTargetEntity().getLocation(), new PhysicalCrate(event.getTargetEntity().getLocation(), hand.toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString(), this,true));
                             crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()).createHologram();
-                            updatePhysicalCrates();
+                            try {
+                                DBReader.saveHuskyData();
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
                         }else{
                             event.getTargetEntity().offer(Keys.AI_ENABLED,true);
                             event.getTargetEntity().offer(Keys.IS_SILENT,false);
                             event.getTargetEntity().offer(Keys.CUSTOM_NAME_VISIBLE,false);
                             event.getTargetEntity().offer(Keys.DISPLAY_NAME,Text.of());
                             crateUtilities.physicalCrates.remove(event.getTargetEntity().getLocation());
-                            updatePhysicalCrates();
+                            crateUtilities.brokenCrates.add(event.getTargetEntity().getLocation());
+                            try {
+                                DBReader.saveHuskyData();
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
                         }
                         event.setCancelled(true);
                         return;

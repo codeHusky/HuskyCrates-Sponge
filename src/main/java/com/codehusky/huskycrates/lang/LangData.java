@@ -138,7 +138,7 @@ public class LangData {
         }
         if(ps != null){
             if(ps.vc.getOptions().containsKey("freeCrateDelay")) {
-                LocalDateTime lastUsed = ps.lastUsed.get(plr.getUniqueId());
+                LocalDateTime lastUsed = ps.vc.lastUsed.get(plr.getUniqueId());
                 LocalDateTime minimumWait = lastUsed.plusSeconds((int) ps.vc.getOptions().get("freeCrateDelay"));
                 formatted = formatted.replace("%t", "" + (LocalDateTime.now().until(minimumWait, ChronoUnit.SECONDS) + 1));
             }

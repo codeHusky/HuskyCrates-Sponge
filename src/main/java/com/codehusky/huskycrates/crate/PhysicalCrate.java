@@ -1,5 +1,6 @@
 package com.codehusky.huskycrates.crate;
 
+import com.codehusky.huskycrates.crate.db.DBReader;
 import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
@@ -17,6 +18,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import com.codehusky.huskycrates.HuskyCrates;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,12 +39,16 @@ public class PhysicalCrate {
     public boolean isEntity = false;
     double randomTimeOffset = new Random().nextDouble()*2000;
     public static Vector3d offset = new Vector3d(0.5,1,0.5);
-    public HashMap<UUID,LocalDateTime> lastUsed = new HashMap<>();
     public void handleUse(Player player){
-        if(lastUsed.containsKey(player.getUniqueId())){
-            lastUsed.remove(player.getUniqueId());
+        if(vc.lastUsed.containsKey(player.getUniqueId())){
+            vc.lastUsed.remove(player.getUniqueId());
         }
-        lastUsed.put(player.getUniqueId(), LocalDateTime.now());
+        vc.lastUsed.put(player.getUniqueId(), LocalDateTime.now());
+        try {
+            DBReader.saveHuskyData();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
     public PhysicalCrate(Location<World> crateLocation, String crateId, HuskyCrates huskyCrates, boolean isEntity){
         this.location = crateLocation;
