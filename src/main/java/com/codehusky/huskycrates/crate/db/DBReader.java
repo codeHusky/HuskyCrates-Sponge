@@ -14,10 +14,7 @@ import org.spongepowered.api.world.World;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
@@ -81,7 +78,7 @@ public class DBReader {
             }
             if(preWorld.isPresent()) {
                 worldIDtoWorld.put(id,preWorld.get());
-                HuskyCrates.instance.logger.info("Loaded " + worldName + " successfully.");
+                HuskyCrates.instance.logger.info("Loaded world \"" + worldName + "\" successfully.");
             }else{
                 HuskyCrates.instance.logger.warn("WorldInfo #" + id + " provides invalid world info. Removing from table.");
                 Statement removal = dbConnection.createStatement();
@@ -167,46 +164,65 @@ public class DBReader {
     }
 
     public static void saveHuskyData() throws SQLException {
+        /*
+            CRATELOCATIONS (ID INTEGER NOT NULL AUTO_INCREMENT, X DOUBLE, Y DOUBLE, Z DOUBLE, worldID INTEGER, isEntityCrate BOOLEAN, crateID CHARACTER
+            VALIDKEYS (keyUUID CHARACTER, crateID CHARACTER, amount INTEGER
+            KEYBALANCES (userUUID CHARACTER, crateID CHARACTER, amount INTEGER
+            WORLDINFO (ID INTEGER NOT NULL AUTO_INCREMENT,uuid CHARACTER, name CHARACTER
+        */
         connectDB();
-
-
         //crate positions
-        Statement cratePositionClear = dbConnection.createStatement();
-        cratePositionClear.executeQuery("SELECT  * FROM CRATELOCATIONS");
-        cratePositionClear.executeUpdate("DELETE FROM CRATELOCATIONS");
-        cratePositionClear.execute("ALTER TABLE CRATELOCATIONS ALTER COLUMN ID RESTART WITH 1");
-        cratePositionClear.close();
-
-        Statement worldTableClear = dbConnection.createStatement();
-        worldTableClear.executeQuery("SELECT  * FROM WORLDINFO");
-        worldTableClear.executeUpdate("DELETE FROM WORLDINFO");
-        worldTableClear.execute("ALTER TABLE WORLDINFO ALTER COLUMN ID RESTART WITH 1");
-        worldTableClear.close();
-        int count = 1;
         HashMap<UUID,Integer> worldsInserted = new HashMap<>();
         for(Location<World> location : HuskyCrates.instance.crateUtilities.physicalCrates.keySet()){
             if(!worldsInserted.keySet().contains(location.getExtent().getUniqueId())){
-                worldsInserted.put(location.getExtent().getUniqueId(),count);
-                count++;
-                dbConnection.prepareStatement("INSERT INTO WORLDINFO(uuid,name) VALUES('" + location.getExtent().getUniqueId().toString() + "','"+ location.getExtent().getName() + "')").executeUpdate();
+                PreparedStatement statement = dbConnection.prepareStatement("SELECT * FROM WORLDINFO WHERE name = ? OR uuid = ?");
+                statement.setString(1,location.getExtent().getName());
+                statement.setString(2,location.getExtent().getUniqueId().toString());
+                ResultSet results = statement.executeQuery();
+                boolean exists = results.next();
+                if(exists) {
+                    worldsInserted.put(location.getExtent().getUniqueId(), results.getInt(1));
+                } else {
+                    dbConnection.prepareStatement("INSERT INTO WORLDINFO(uuid,name) VALUES('" + location.getExtent().getUniqueId().toString() + "','" + location.getExtent().getName() + "')").executeUpdate();
+                    PreparedStatement fetchPrim = dbConnection.prepareStatement("SELECT * FROM WORLDINFO WHERE name = ? OR uuid = ?");
+                    statement.setString(1,location.getExtent().getName());
+                    statement.setString(2,location.getExtent().getUniqueId().toString());
+                    ResultSet primResults = fetchPrim.executeQuery();
+                    primResults.next();
+                    worldsInserted.put(location.getExtent().getUniqueId(),primResults.getInt(1));
+                }
             }
             PhysicalCrate crate = HuskyCrates.instance.crateUtilities.physicalCrates.get(location);
-            dbConnection.prepareStatement("INSERT INTO CRATELOCATIONS(X,Y,Z,worldID,isEntityCrate,crateID) VALUES(" + location.getX() + ","  + location.getY() + ","  + location.getZ() + ","  + worldsInserted.get(location.getExtent().getUniqueId()) + ","  + crate.isEntity + ",'"  + crate.vc.id + "')").executeUpdate();
+            PreparedStatement statement = dbConnection.prepareStatement("SELECT * FROM CRATELOCATIONS WHERE worldID = ? AND X = ? AND Y = ? AND Z = ? AND isEntityCrate = ?");
+            statement.setInt(1,worldsInserted.get(location.getExtent().getUniqueId()));
+            statement.setDouble(2,location.getX());
+            statement.setDouble(3,location.getY());
+            statement.setDouble(4,location.getZ());
+            statement.setBoolean(5,crate.isEntity);
+            ResultSet results = statement.executeQuery();
+            boolean exists = results.next();
+            if(!exists){
+                dbConnection.prepareStatement("INSERT INTO CRATELOCATIONS(X,Y,Z,worldID,isEntityCrate,crateID) VALUES(" + location.getX() + ","  + location.getY() + ","  + location.getZ() + ","  + worldsInserted.get(location.getExtent().getUniqueId()) + ","  + crate.isEntity + ",'"  + crate.vc.id + "')").executeUpdate();
+            }
         }
 
         //crate key uuids
 
-        Statement crateKeyClear = dbConnection.createStatement();
-        crateKeyClear.executeQuery("SELECT  * FROM VALIDKEYS");
-        crateKeyClear.executeUpdate("DELETE FROM VALIDKEYS");
-        crateKeyClear.close();
-
-
-
         for(VirtualCrate crate : HuskyCrates.instance.crateUtilities.crateTypes.values()){
             for(String keyUUID : crate.pendingKeys.keySet()){
                 int amount = crate.pendingKeys.get(keyUUID);
-                dbConnection.prepareStatement("INSERT INTO VALIDKEYS(keyUUID,crateID,amount) VALUES('" + keyUUID + "','"  + crate.id + "'," + amount + ")").executeUpdate();
+                PreparedStatement statement = dbConnection.prepareStatement("SELECT * FROM VALIDKEYS WHERE keyUUID = ?");
+                statement.setString(1,keyUUID);
+                ResultSet results = statement.executeQuery();
+                boolean exists = results.next();
+                if(exists){
+                    PreparedStatement uState = dbConnection.prepareStatement("UPDATE VALIDKEYS SET amount = ? WHERE keyUUID = ?");
+                    uState.setInt(1,amount);
+                    uState.setString(2,keyUUID);
+                    uState.executeUpdate();
+                }else {
+                    dbConnection.prepareStatement("INSERT INTO VALIDKEYS(keyUUID,crateID,amount) VALUES('" + keyUUID + "','" + crate.id + "'," + amount + ")").executeUpdate();
+                }
                 //System.out.println(g);
             }
 
@@ -214,19 +230,26 @@ public class DBReader {
 
         // also user vkey balances
 
-        Statement keyBalClear = dbConnection.createStatement();
-        keyBalClear.executeQuery("SELECT  * FROM KEYBALANCES");
-        keyBalClear.executeUpdate("DELETE FROM KEYBALANCES");
-        keyBalClear.close();
-
-
-
         for(String vcID : HuskyCrates.instance.crateUtilities.getCrateTypes()){
             VirtualCrate vc = HuskyCrates.instance.crateUtilities.getVirtualCrate(vcID);
             String crateID = vc.id;
             for(String uuid : vc.virtualBalances.keySet()) {
                 int amount = vc.virtualBalances.get(uuid);
-                dbConnection.prepareStatement("INSERT INTO KEYBALANCES(userUUID,crateID,amount) VALUES('" + uuid + "','" + crateID + "'," + amount + ")").executeUpdate();
+                PreparedStatement statement = dbConnection.prepareStatement("SELECT * FROM KEYBALANCES WHERE userUUID = ? AND crateID = ?");
+                statement.setString(1,uuid);
+                statement.setString(2,crateID);
+                ResultSet results = statement.executeQuery();
+                boolean exists = results.next();
+                if(exists){
+                    PreparedStatement uState = dbConnection.prepareStatement("UPDATE KEYBALANCES SET amount = ? WHERE userUUID = ? AND crateID = ?");
+                    uState.setInt(1,amount);
+                    uState.setString(2,uuid);
+                    uState.setString(3,crateID);
+                    uState.executeUpdate();
+                }else {
+                    dbConnection.prepareStatement("INSERT INTO KEYBALANCES(userUUID,crateID,amount) VALUES('" + uuid + "','" + crateID + "'," + amount + ")").executeUpdate();
+                }
+
             }
         }
 
