@@ -103,20 +103,25 @@ public class CrateUtilities {
     private void particleRunner(){
         if(flag)
             return;
-        try {
+
             ArrayList<Location<World>> invalidLocations = new ArrayList<>();
             HashSet<World> invalidLocationWorlds = new HashSet<>();
             for (Location<World> b : physicalCrates.keySet()) {
                 PhysicalCrate c = physicalCrates.get(b);
-
-                if (c.vc.crateBlockType != c.location.getBlock().getType() && c.location.getExtent().isLoaded() && c.location.getExtent().getChunk(c.location.getChunkPosition()).isPresent()) {
-                    if(c.location.getExtent().getChunk(c.location.getChunkPosition()).get().isLoaded()) {
-                        invalidLocations.add(c.location);
-                        invalidLocationWorlds.add(c.location.getExtent());
-                        continue;
+                try {
+                    if (c.vc.crateBlockType != c.location.getBlock().getType() && c.location.getExtent().isLoaded() && c.location.getExtent().getChunk(c.location.getChunkPosition()).isPresent()) {
+                        if(c.location.getExtent().getChunk(c.location.getChunkPosition()).get().isLoaded()) {
+                            invalidLocations.add(c.location);
+                            invalidLocationWorlds.add(c.location.getExtent());
+                            continue;
+                        }
                     }
+                    c.runParticles();
+                }catch(Exception e){
+                    //e.printStackTrace();
+                    invalidLocations.add(c.location);
+                    invalidLocationWorlds.add(c.location.getExtent());
                 }
-                c.runParticles();
             }
             for(World w : invalidLocationWorlds) {
                 for (Entity e : w.getEntities()) {
@@ -137,9 +142,7 @@ public class CrateUtilities {
                 physicalCrates.remove(l);
                 flag = true;
             }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
+
         if(flag)
             HuskyCrates.instance.updatePhysicalCrates();
     }

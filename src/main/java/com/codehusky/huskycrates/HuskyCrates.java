@@ -422,7 +422,6 @@ public class HuskyCrates {
             if (event instanceof ChangeBlockEvent.Place || event instanceof ChangeBlockEvent.Break) {
                 BlockType t = event.getTransactions().get(0).getOriginal().getLocation().get().getBlock().getType();
                 Location<World> location = event.getTransactions().get(0).getOriginal().getLocation().get();
-                location.getBlock().toContainer().set(DataQuery.of("rock"), 1);
                 //location.getBlock().with()
                 //System.out.println(event instanceof ChangeBlockEvent.Break);
                 if (validCrateBlocks.contains(t)) {
