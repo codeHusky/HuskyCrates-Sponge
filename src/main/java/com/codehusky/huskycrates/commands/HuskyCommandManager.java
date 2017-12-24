@@ -63,7 +63,7 @@ public class HuskyCommandManager {
             .build();
 
     CommandSpec wand = CommandSpec.builder()
-            .description(Text.of("Give Runningelf an entity wand for crates."))
+            .description(Text.of("Give you an entity wand for a crate."))
             .arguments(
                     new CrateElement(Text.of("type"))
             )
@@ -109,7 +109,7 @@ public class HuskyCommandManager {
     CommandSpec crateSpec = CommandSpec.builder()
             .description(Text.of("Main crates command"))
             .child(key, "key")
-            .child(chest, "chest")
+            .child(chest, "block")
             .child(keyAll, "keyAll")
             .child(vKey, "vkey","virtualkey")
             .child(vKeyAll, "vkeyall","virtualkeyall")
@@ -122,6 +122,11 @@ public class HuskyCommandManager {
             .build();
     CommandSpec huskySpec = CommandSpec.builder()
             .executor(new Husky(huskyCrates))
+            .child(CommandSpec.builder()
+                    .description(Text.of("Reloads HuskyCrates."))
+                    .permission("huskycrates.reload")
+                    .executor(new Reload(huskyCrates))
+                    .build(), "reload")
             .build();
 
 }

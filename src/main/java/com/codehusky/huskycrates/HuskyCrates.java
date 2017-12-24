@@ -189,15 +189,25 @@ public class HuskyCrates {
                             logger.warn("----------------------------------------------------");
                         }else {
                             String latestTag = obj.getJSONArray("releases").getJSONObject(0).getString("tag_name");
+                            String remoteVersion = latestTag.replace("v","");
+                            String[] remoteSplit = remoteVersion.split("\\.");
+                            long rvSum = 0;
+                            for(int ri = 0; ri < remoteSplit.length; ri++){
+                                String[] fixer = remoteSplit[ri].split("-");
+                                rvSum += Integer.parseInt(fixer[0]) * Math.pow(10,(3-ri-1));
+                            }
+                            String[] localSplit = pC.getVersion().get().split("\\.");
+                            long lSum = 0;
+                            for(int li = 0; li < localSplit.length; li++){
+                                String[] fixer = localSplit[li].split("-");
+                                lSum += Integer.parseInt(fixer[0]) * Math.pow(10,(3-li-1));
+                            }
                             boolean preCheck = latestTag.contains(pC.getVersion().get()) && obj.getJSONArray("releases").getJSONObject(0).getBoolean("prerelease");
-                            boolean majorCheck = Integer.parseInt(latestTag.replace("v","").substring(0,1)) > Integer.parseInt(pC.getVersion().get().substring(0,1));
-                            boolean minorCheck = !majorCheck && Integer.parseInt(latestTag.replace("v","").substring(2,3)) > Integer.parseInt(pC.getVersion().get().substring(2,3));
-                            boolean bugCheck = !minorCheck && Integer.parseInt(latestTag.replace("v","").substring(4,5)) > Integer.parseInt(pC.getVersion().get().substring(4,5));
-                            boolean releaseCheck = majorCheck || minorCheck || bugCheck;
+                            boolean releaseCheck = rvSum > lSum;
                             if(preCheck && !releaseCheck || !preCheck && !releaseCheck){
                                 oodd = new OutOfDateData();
                                 logger.warn("----------------------------------------------------");
-                                logger.warn("HuskyCrates is running an unreleased version.");
+                                logger.warn("HuskyCrates is running a non-release version.");
                                 logger.warn("Running v" + pC.getVersion().get());
                                 logger.warn("----------------------------------------------------");
                             }else {
@@ -354,8 +364,7 @@ public class HuskyCrates {
             }
         }
     }
-    @Listener
-    public void gameReloaded(GameReloadEvent event){
+    public void reload(CommandSource cs) {
         try{
             DBReader.dbInitCheck();
             DBReader.saveHuskyData();
@@ -364,14 +373,12 @@ public class HuskyCrates {
         }
         langData = null;
         if(forceStop) {
-            if(event.getCause().root() instanceof Player){
-                CommandSource cs = (CommandSource) event.getCause().root();
+            if(cs != null){
                 cs.sendMessage(Text.of(TextColors.GOLD,"HuskyCrates",TextColors.WHITE,":",TextColors.RED," HuskyCrates is currently force stopped. Check the console for more information."));
             }
             return;
         }
-        if(event.getCause().root() instanceof Player){
-            CommandSource cs = (CommandSource) event.getCause().root();
+        if(cs != null){
             cs.sendMessage(Text.of(TextColors.GOLD,"HuskyCrates",TextColors.WHITE,":",TextColors.YELLOW," Please check console to verify that any config modifications you've done are valid."));
         }
         removeArmorstands();
@@ -387,8 +394,7 @@ public class HuskyCrates {
 
         } catch (Exception e) {
             crateUtilities.exceptionHandler(e);
-            if(event.getCause().root() instanceof Player){
-                CommandSource cs = (CommandSource) event.getCause().root();
+            if(cs != null){
                 cs.sendMessage(Text.of(TextColors.GOLD,"HuskyCrates",TextColors.WHITE,":",TextColors.RED," An error has occured. Please check the console for more information."));
             }
             return;
@@ -404,6 +410,10 @@ public class HuskyCrates {
         for(Player plr: Sponge.getServer().getOnlinePlayers()){
             notifyOutOfDate(plr);
         }
+    }
+    @Listener
+    public void gameReloaded(GameReloadEvent event){
+        reload((event.getCause().root() instanceof Player)?((CommandSource)event.getCause().root()):null);
     }
     private boolean blockCanBeCrate(BlockType type){
         return type==BlockTypes.CHEST ||
@@ -453,7 +463,8 @@ public class HuskyCrates {
                             return;
                         }
                         crateUtilities.flag = true;
-                        crateUtilities.physicalCrates.get(location).as.remove();
+                        if(!crateUtilities.physicalCrates.get(location).isEntity)
+                            crateUtilities.physicalCrates.get(location).ent.remove();
                         crateUtilities.physicalCrates.remove(location);
                         updatePhysicalCrates();
                     }
@@ -659,7 +670,8 @@ public class HuskyCrates {
                         }else{
                             event.getTargetEntity().offer(Keys.AI_ENABLED,true);
                             event.getTargetEntity().offer(Keys.IS_SILENT,false);
-                            crateUtilities.physicalCrates.get(event.getTargetEntity().getLocation()).as.remove();
+                            event.getTargetEntity().offer(Keys.CUSTOM_NAME_VISIBLE,false);
+                            event.getTargetEntity().offer(Keys.DISPLAY_NAME,Text.of());
                             crateUtilities.physicalCrates.remove(event.getTargetEntity().getLocation());
                             updatePhysicalCrates();
                         }

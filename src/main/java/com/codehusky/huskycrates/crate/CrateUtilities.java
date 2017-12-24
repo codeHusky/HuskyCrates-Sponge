@@ -136,8 +136,8 @@ public class CrateUtilities {
             for(Location<World> l : invalidLocations){
                 PhysicalCrate c = physicalCrates.get(l);
                 HuskyCrates.instance.logger.warn("Removing crate that no longer exists! " + c.location.getPosition().toString());
-                if(c.as != null){
-                    c.as.remove();
+                    if(c.ent != null){
+                    c.ent.remove();
                 }
                 physicalCrates.remove(l);
                 flag = true;

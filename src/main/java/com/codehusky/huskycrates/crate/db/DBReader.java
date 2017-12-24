@@ -107,7 +107,7 @@ public class DBReader {
                 World world = worldIDtoWorld.get(worldID);
                 Location<World> loco = new Location<>(world,x,y,z);
                 HuskyCrates.instance.crateUtilities.physicalCrates.put(loco,new PhysicalCrate(loco,crateID,HuskyCrates.instance,entityCrate));
-                HuskyCrates.instance.logger.info("Loaded " + crateID + " @ " + x + "," + y + "," + z);
+                HuskyCrates.instance.logger.info("Loaded " + crateID + " @ " + x + "," + y + "," + z + ((entityCrate)?" (ENTITY CRATE)":""));
             }else{
                 HuskyCrates.instance.logger.warn("CrateLocation #" + id + " provides an invalid world ID. Removing from table.");
                 Statement removal = dbConnection.createStatement();

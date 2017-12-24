@@ -49,32 +49,31 @@ public class PhysicalCrate {
         this.crateId = crateId;
         this.huskyCrates = huskyCrates;
         this.vc = huskyCrates.crateUtilities.getVirtualCrate(crateId);
+        this.isEntity = isEntity;
         if(crateLocation != null)
             createHologram();
-
-        this.isEntity = isEntity;
     }
     public void createHologram() {
         if(location.getExtent().getChunk(location.getChunkPosition()).isPresent()) {
             if (location.getExtent().getChunk(location.getChunkPosition()).get().isLoaded()) {
-                if(isEntity){
-                    System.out.println("...");
-                    Collection<Entity> potential = location.getExtent().getNearbyEntities(location.getPosition(),0.2);
-                    if(potential.size() != 0){
-                        ent = (Entity) potential.toArray()[0];
-                        ent.offer(Keys.HAS_GRAVITY, false);
-                        ent.offer(Keys.CUSTOM_NAME_VISIBLE, true);
-                        String name = "&cERROR, CHECK CONSOLE!";
-                        try {
-                            name = /*crateId*/ huskyCrates.crateUtilities.getVirtualCrate(crateId).displayName;
-                        } catch (Exception e) {
-                            //e.printStackTrace();
+                if (ent == null || !ent.isLoaded()) {
+                    if(isEntity){
+                        Collection<Entity> potential = location.getExtent().getNearbyEntities(location.getPosition(),0.2);
+                        if(potential.size() != 0){
+                            ent = (Entity) potential.toArray()[0];
+                            ent.offer(Keys.HAS_GRAVITY, false);
+                            ent.offer(Keys.CUSTOM_NAME_VISIBLE, true);
+                            String name = "&cERROR, CHECK CONSOLE!";
+                            try {
+                                name = /*crateId*/ huskyCrates.crateUtilities.getVirtualCrate(crateId).displayName;
+                            } catch (Exception e) {
+                                //e.printStackTrace();
+                            }
+                            ent.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(name));
                         }
-                        ent.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(name));
-                    }
-                }else {
-                    if (ent == null || !ent.isLoaded()) {
-                        ent = location.getExtent().createEntity(EntityTypes.ARMOR_STAND, location.getPosition().add(0, 1, 0));
+                    }else {
+
+                        ent = location.getExtent().createEntity(EntityTypes.ARMOR_STAND, location.getPosition().add(0.5, 1, 0.5));
                         ent.setCreator(UUID.fromString(huskyCrates.armorStandIdentifier));
                         ent.offer(Keys.HAS_GRAVITY, false);
                         ent.offer(Keys.INVISIBLE, true);
@@ -105,6 +104,8 @@ public class PhysicalCrate {
 
             double x = Math.sin(time) * size;
             double y = Math.sin(time * 2) * 0.2 - 0.45;
+            if(isEntity)
+                y+=1;
             double z = Math.cos(time) * size;
             Color clr1 = Color.ofRgb(100,100,100);
             Color clr2 = Color.ofRgb(255, 0, 0);
@@ -125,6 +126,8 @@ public class PhysicalCrate {
 
             x = Math.cos(time + 10) * size;
             y = Math.sin(time * 2 + 10) * 0.2 - 0.55;
+            if(isEntity)
+                y+=1;
             z = Math.sin(time + 10) * size;
             ent.getWorld().spawnParticles(
                     ParticleEffect.builder()
