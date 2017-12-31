@@ -20,9 +20,9 @@ import java.util.ArrayList;
  * Created by lokio on 12/28/2016.
  */
 @SuppressWarnings("deprecation")
-public class Crate implements CommandExecutor {
+public class HC implements CommandExecutor {
     private HuskyCrates plugin;
-    public Crate(HuskyCrates ins){
+    public HC(HuskyCrates ins){
         plugin = ins;
     }
     @Override
@@ -89,21 +89,21 @@ public class Crate implements CommandExecutor {
 */
         src.sendMessage(Text.of(TextColors.YELLOW,"HuskyCrates Commands"));
         if(src.hasPermission("huskycrates.chest"))
-            src.sendMessage(Text.of("  /crate chest <id> [player]"));
+            src.sendMessage(Text.of("  /hc chest <id> [player]"));
         if(src.hasPermission("huskycrates.key"))
-            src.sendMessage(Text.of("  /crate key <id> [player] [count]"));
+            src.sendMessage(Text.of("  /hc key <id> [player] [count]"));
         if(src.hasPermission("huskycrates.keyall"))
-            src.sendMessage(Text.of("  /crate keyAll <id> [count]"));
+            src.sendMessage(Text.of("  /hc keyAll <id> [count]"));
         if(src.hasPermission("huskycrates.vkey"))
-            src.sendMessage(Text.of("  /crate vKey <set/add/remove> <id> [player] [count]"));
+            src.sendMessage(Text.of("  /hc vKey <set/add/remove> <id> [player] [count]"));
         if(src.hasPermission("huskycrates.vkeyall"))
-            src.sendMessage(Text.of("  /crate vKeyAll <id> [count]"));
+            src.sendMessage(Text.of("  /hc vKeyAll <id> [count]"));
         if(src.hasPermission("huskycrates.keybal.self"))
-            src.sendMessage(Text.of("  /crate keybal",((src.hasPermission("huskycrates.keybal.others"))?" [player]":"")));
+            src.sendMessage(Text.of("  /hc keybal",((src.hasPermission("huskycrates.keybal.others"))?" [player]":"")));
         if(src.hasPermission("huskycrates.depositkey"))
-            src.sendMessage(Text.of("  /crate deposit"));
+            src.sendMessage(Text.of("  /hc deposit"));
         if(src.hasPermission("huskycrates.withdrawkey"))
-            src.sendMessage(Text.of("  /crate withdraw <type> [quantity]"));
+            src.sendMessage(Text.of("  /hc withdraw <type> [quantity]"));
         //HuskyCrates.instance.updatePhysicalCrates();
         return CommandResult.success();
     }

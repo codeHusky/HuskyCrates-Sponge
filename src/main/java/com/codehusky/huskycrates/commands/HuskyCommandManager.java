@@ -117,8 +117,8 @@ public class HuskyCommandManager {
             .child(wand, "wand")
             .child(deposit, "deposit","depositkey","ptov")
             .child(withdraw, "withdraw","withdrawkey","vtop")
-            .arguments(GenericArguments.optional(GenericArguments.remainingRawJoinedStrings(Text.of(""))))
-            .executor(new Crate(huskyCrates))
+            //.arguments(GenericArguments.optional(GenericArguments.remainingRawJoinedStrings(Text.of(""))))
+            .executor(new HC(huskyCrates))
             .build();
     CommandSpec huskySpec = CommandSpec.builder()
             .executor(new Husky(huskyCrates))

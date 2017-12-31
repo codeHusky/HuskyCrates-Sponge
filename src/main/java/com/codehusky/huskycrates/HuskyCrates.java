@@ -148,8 +148,8 @@ public class HuskyCrates {
 
         scheduler = Sponge.getScheduler();
         //genericCause = Cause.of(EventContext.);
-        Sponge.getCommandManager().register(this, huskyCommandManager.getCrateSpec(), "crate");
-        Sponge.getCommandManager().register(this, huskyCommandManager.getHuskySpec(), "husky","huskycrates","hc");
+        Sponge.getCommandManager().register(this, huskyCommandManager.getCrateSpec(), "hc","huskycrates");
+        Sponge.getCommandManager().register(this, huskyCommandManager.getHuskySpec(), "husky");
         logger.info("Crates has been started.");
     }
 
