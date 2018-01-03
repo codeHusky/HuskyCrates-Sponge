@@ -65,6 +65,7 @@ public class CrateUtilities {
             }
             config.save(configRoot);
         } catch (Exception e) {
+            HuskyCrates.initError();
             HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
             HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");
             HuskyCrates.instance.logger.error("!!!!! Config loading has failed! !!!!!");

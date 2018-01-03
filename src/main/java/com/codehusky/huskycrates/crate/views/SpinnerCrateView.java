@@ -61,6 +61,7 @@ public class SpinnerCrateView extends CrateView {
         try {
             clicks = itemIndexSelected() - (maxClicks % items.size());
         }catch (RandomItemSelectionFailureException e){
+            HuskyCrates.initError();
             System.out.println("--------------------------------");
             System.out.println("--------------------------------");
             System.out.println("ERROR WHEN INITING RANDOM ITEM FOR " + vc.displayName);

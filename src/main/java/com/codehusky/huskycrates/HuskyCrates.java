@@ -100,6 +100,25 @@ public class HuskyCrates {
     public LangData langData = new LangData();
     public Set<BlockType> validCrateBlocks = new HashSet<>();
     private boolean forceStop = false;
+
+    private boolean initError = false;
+
+    public static void initError(){
+        if(!HuskyCrates.instance.initError)
+            HuskyCrates.instance.logger.error("A CRITICAL ERROR HAS OCCURRED, PREVENTING THE START OF HUSKYCRATES! PLEASE REVIEW YOUR CONFIGURATION FOR ANY ERRORS AND READ THE ERRORS BELOW!");
+
+        HuskyCrates.instance.initError = true;
+    }
+
+    public static void resetInitError(){
+        HuskyCrates.instance.initError = false;
+    }
+
+    public static boolean hasInitErrored(){
+        return HuskyCrates.instance.initError;
+    }
+
+
     @Listener
     public void gameInit(GamePreInitializationEvent event){
         logger = LoggerFactory.getLogger(pC.getName());
@@ -365,6 +384,7 @@ public class HuskyCrates {
         }
     }
     public void reload(CommandSource cs) {
+        HuskyCrates.resetInitError();
         try{
             DBReader.dbInitCheck();
             DBReader.saveHuskyData();
@@ -409,6 +429,7 @@ public class HuskyCrates {
         checkVersion();
         for(Player plr: Sponge.getServer().getOnlinePlayers()){
             notifyOutOfDate(plr);
+            notifyInitError(plr);
         }
     }
     @Listener
@@ -733,9 +754,22 @@ public class HuskyCrates {
             plr.sendMessage(Text.of(TextColors.RED,"------------------------------------------"));
         }
     }
+    public void notifyInitError(Player plr){
+        if(plr.hasPermission("huskycrates.adminlog")){
+            if(initError){
+                plr.sendMessage(Text.of(TextColors.DARK_RED,"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+                plr.sendMessage(Text.of(TextColors.RED,"An initialization error has occurred within HuskyCrates!"));
+                plr.sendMessage(Text.of(TextColors.RED,"Crates will not function correctly until the configuration has been repaired."));
+                plr.sendMessage(Text.of(TextColors.RED,"There WILL be an error besides the init error warning, so please do not contact me and say there is not."));
+                plr.sendMessage(Text.of(TextColors.DARK_RED,"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"));
+            }
+        }
+    }
 
     @Listener
     public void playerJoin(ClientConnectionEvent.Join event){
-        notifyOutOfDate(event.getTargetEntity());
+        Player plr = event.getTargetEntity();
+        notifyOutOfDate(plr);
+        notifyInitError(plr);
     }
 }

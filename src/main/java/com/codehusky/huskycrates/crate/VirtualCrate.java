@@ -44,7 +44,7 @@ public class VirtualCrate {
     public ItemType crateBlockItemType;
     public int crateBlockDamage = 0;
     public String crateType;
-    private float maxProb = 100;
+    private float maxProb = 0;
     private HashMap<String,Object> options = new HashMap<>();
     public HashMap<String,Integer> pendingKeys = new HashMap<>();
     public HashMap<String, Integer> virtualBalances = new HashMap<>();
@@ -168,7 +168,6 @@ public class VirtualCrate {
         }
         HuskyCrates.instance.validCrateBlocks.add(crateBlockType);
         List<? extends CommentedConfigurationNode> items = node.getNode("items").getChildrenList();
-        ArrayList<Object[]> equality = new ArrayList<>();
         float currentProb = 0;
         itemSet = new ArrayList<>();
         commandSet = new HashMap<>();
@@ -176,9 +175,9 @@ public class VirtualCrate {
         for(CommentedConfigurationNode e : items){
             CrateReward rewardHolder = null;
 //            System.out.println(e.getNode("formatversion").getValue());
-            if(e.getNode("formatversion").isVirtual()){
-               HuskyCrates.instance.logger.error("Out of date item in " + id + "! Please update your config with HuskyCrates Config Updater!");
-               continue;
+            if(!e.getNode("formatversion").isVirtual()){
+                HuskyCrates.instance.logger.info("Removing legacy formatversion field from item.");
+                e.getNode("formatversion").setValue(null);
             }
             rewardHolder = CrateConfigParser.fromConfig(e,this);
             if(rewardHolder == null)
@@ -191,22 +190,9 @@ public class VirtualCrate {
 
 
         }
-        if(equality.size() > 0){
-            int remaining =(int) (100 - currentProb);
-            float equalProb = (float)remaining / (float)equality.size();
-            for(Object[] item : equality){
-                Object[] hj = {equalProb};
-                Object[] fin = ArrayUtils.addAll(hj,item);
-                currentProb += equalProb;
-                //System.out.println((float)fin[0]);
-                itemSet.add(fin);
-            }
-        }else{
-            maxProb = currentProb;
-        }
-        if(currentProb != maxProb){
-            HuskyCrates.instance.logger.error("If this error occurs, please contact Loki immediately. This should never happen in recent versions.");
-        }
+
+        maxProb = currentProb;
+
 
         try {
             CommentedConfigurationNode root = config.load();
@@ -214,6 +200,7 @@ public class VirtualCrate {
             if(!root.getNode("keys").isVirtual()) {
                 HuskyCrates.instance.logger.warn("Legacy key data detected. As long as you have placed crates, we'll convert.");
                 if (root.getNode("keys", id).hasListChildren()) {
+                    HuskyCrates.initError();
                     HuskyCrates.instance.logger.error("Please manually transfer your keys from the crate " + id + " to use the new format.");
                 } else {
                     for (Object key : root.getNode("keys", id).getChildrenMap().keySet()) {
@@ -231,6 +218,7 @@ public class VirtualCrate {
             }
 
         } catch (IOException  e) {
+            HuskyCrates.initError();
             HuskyCrates.instance.logger.error("Failed to load key UUIDs. Keys will not work!");
             e.printStackTrace();
         }
