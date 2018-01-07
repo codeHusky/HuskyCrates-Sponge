@@ -20,10 +20,7 @@ import com.codehusky.huskycrates.HuskyCrates;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by lokio on 1/2/2017.
@@ -64,7 +61,13 @@ public class PhysicalCrate {
             if (location.getExtent().getChunk(location.getChunkPosition()).get().isLoaded()) {
                 if (ent == null || !ent.isLoaded()) {
                     if(isEntity){
-                        Collection<Entity> potential = location.getExtent().getNearbyEntities(location.getPosition(),0.2);
+                        ArrayList<Entity> potential = new ArrayList<>();
+                        for(Entity entity : location.getExtent().getEntities()){
+                            if(entity.getLocation().getPosition().distance(location.getPosition()) <= 0.2){
+                                potential.add(entity);
+                            }
+                        }
+                        //Collection<Entity> potential = location.getExtent().getEntit(location.getPosition(),0.2);
                         if(potential.size() != 0){
                             ent = (Entity) potential.toArray()[0];
                             ent.offer(Keys.HAS_GRAVITY, false);
@@ -92,7 +95,7 @@ public class PhysicalCrate {
                             //e.printStackTrace();
                         }
                         ent.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(name));
-                        boolean worked = location.getExtent().spawnEntity(ent);
+                        boolean worked = location.getExtent().spawnEntity(ent,HuskyCrates.instance.genericCause);
                         if (!worked) {
                             ent = null;
                             return;
