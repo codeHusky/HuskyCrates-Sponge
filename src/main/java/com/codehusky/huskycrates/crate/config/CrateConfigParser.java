@@ -117,11 +117,31 @@ public class CrateConfigParser {
                 return ItemStack.of(ItemTypes.NONE,1);
             }
             ItemType type;
+            Integer dmg = null;
             try {
                 type = itemRoot.getNode("id").getValue(TypeToken.of(ItemType.class));
             }catch(Exception e){
-                HuskyCrates.instance.logger.error("INVALID ITEM ID: \"" + itemRoot.getNode("id").getString("NOT A STRING") + "\" || "+ itemRoot.getNode("name").getString("(no name)") + " (item #" + itemRoot.getKey()+  ") || " + itemRoot.getParent().getParent().getKey());
-                return ItemStack.of(ItemTypes.NONE,1);
+                String id = itemRoot.getNode("id").getString();
+                String[] parts = id.split(":");
+                try {
+                    if (parts.length == 3) {
+                        id = parts[0] + ":" + parts[1];
+                        dmg = Integer.parseInt(parts[2]);
+                    } else if (parts.length == 2) {
+                        id = parts[0];
+                        dmg = Integer.parseInt(parts[1]);
+                    }
+                }catch(Exception ee){
+                    HuskyCrates.instance.logger.error("INVALID ITEM ID: \"" + itemRoot.getNode("id").getString("NOT A STRING") + "\" || " + itemRoot.getNode("name").getString("(no name)") + " (item #" + itemRoot.getKey() + ") || " + itemRoot.getParent().getParent().getKey());
+                    return ItemStack.of(ItemTypes.NONE, 1);
+                }
+                Optional<ItemType> optType = Sponge.getRegistry().getType(ItemType.class,id);
+                if(optType.isPresent()) {
+                    type = optType.get();
+                }else {
+                    HuskyCrates.instance.logger.error("INVALID ITEM ID: \"" + itemRoot.getNode("id").getString("NOT A STRING") + "\" || " + itemRoot.getNode("name").getString("(no name)") + " (item #" + itemRoot.getKey() + ") || " + itemRoot.getParent().getParent().getKey());
+                    return ItemStack.of(ItemTypes.NONE, 1);
+                }
             }
             ItemStack item = ItemStack.builder()
                     .itemType(type)
@@ -168,6 +188,10 @@ public class CrateConfigParser {
                 //HuskyCrates.instance.logger.info("damage override called");
                 item = ItemStack.builder()
                         .fromContainer(item.toContainer().set(DataQuery.of("UnsafeDamage"),itemRoot.getNode("damage").getInt(0))) //OVERRIDE DAMAGE VAL! :)
+                        .build();
+            }else if(dmg != null){
+                item = ItemStack.builder()
+                        .fromContainer(item.toContainer().set(DataQuery.of("UnsafeDamage"),dmg)) //OVERRIDE DAMAGE VAL! :)
                         .build();
             }
 

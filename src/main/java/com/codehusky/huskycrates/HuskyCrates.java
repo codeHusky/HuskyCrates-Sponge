@@ -6,6 +6,7 @@ import com.codehusky.huskycrates.crate.PhysicalCrate;
 import com.codehusky.huskycrates.crate.VirtualCrate;
 import com.codehusky.huskycrates.crate.config.CrateReward;
 import com.codehusky.huskycrates.crate.db.DBReader;
+import com.codehusky.huskyui.HuskyUI;
 import com.codehusky.huskyui.StateContainer;
 import com.codehusky.huskyui.states.Page;
 import com.codehusky.huskyui.states.element.Element;
@@ -54,6 +55,7 @@ import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -61,9 +63,12 @@ import org.spongepowered.api.world.extent.Extent;
 import com.codehusky.huskycrates.lang.LangData;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -76,6 +81,8 @@ public class HuskyCrates {
     //@Inject
     public Logger logger;
 
+    @Inject
+    private Metrics metrics;
 
     @Inject
     public PluginContainer pC;
@@ -167,6 +174,7 @@ public class HuskyCrates {
         scheduler = Sponge.getScheduler();
         Sponge.getCommandManager().register(this, huskyCommandManager.getCrateSpec(), "hc","huskycrates");
         Sponge.getCommandManager().register(this, huskyCommandManager.getHuskySpec(), "husky");
+        metrics.addCustomChart(new Metrics.SimplePie("huskyui_version", () -> HuskyUI.PLUGIN_VERSION));
         genericCause = Cause.of(NamedCause.of("PluginContainer",pC));
         logger.info("Crates has been started.");
     }
@@ -659,7 +667,15 @@ public class HuskyCrates {
                 .add(Keys.DISPLAY_NAME, Text.of(TextColors.DARK_GRAY, "HuskyCrates")).build());
         for(Object[] e : vc.getItemSet()){
             CrateReward rew = (CrateReward)e[1];
-            rewards.addElement(new Element(rew.getDisplayItem()));
+            ItemStack item = rew.getDisplayItem().copy();
+            if(vc.showProbability) {
+                ArrayList<Text> lore = (ArrayList<Text>) item.getOrElse(Keys.ITEM_LORE, new ArrayList<>());
+                lore.add(Text.of());
+
+                lore.add(Text.of(TextColors.GRAY, TextStyles.ITALIC, "Win Probability: " + BigDecimal.valueOf((rew.getChance() / vc.getMaxProb()) * 100d).setScale(1, RoundingMode.HALF_UP).toString() + "%"));
+                item.offer(Keys.ITEM_LORE, lore);
+            }
+            rewards.addElement(new Element(item));
         }
         test.setInitialState(rewards.build("rewards"));
         test.launchFor(player);
