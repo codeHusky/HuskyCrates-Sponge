@@ -56,6 +56,7 @@ public class VirtualCrate {
     public boolean freeCrate = false;
     public boolean showRewardsOnLeft = false;
     public boolean scrambleRewards = false;
+    public boolean showProbability = true;
     public VirtualCrate(String id, ConfigurationLoader<CommentedConfigurationNode> config, CommentedConfigurationNode node){
         this.id = id;
         displayName = node.getNode("name").getString();
@@ -161,6 +162,9 @@ public class VirtualCrate {
             }
             if(!gops.getNode("showRewardsOnLeft").isVirtual()){
                 showRewardsOnLeft = gops.getNode("showRewardsOnLeft").getBoolean(false);
+            }
+            if(!gops.getNode("showProbability").isVirtual()){
+                showProbability = gops.getNode("showProbability").getBoolean(true);
             }
             if(!gops.getNode("scrambleRewards").isVirtual()){
                 scrambleRewards = gops.getNode("scrambleRewards").getBoolean(false);
