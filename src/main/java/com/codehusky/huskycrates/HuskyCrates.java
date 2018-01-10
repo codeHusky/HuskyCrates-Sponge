@@ -6,6 +6,7 @@ import com.codehusky.huskycrates.crate.PhysicalCrate;
 import com.codehusky.huskycrates.crate.VirtualCrate;
 import com.codehusky.huskycrates.crate.config.CrateReward;
 import com.codehusky.huskycrates.crate.db.DBReader;
+import com.codehusky.huskyui.HuskyUI;
 import com.codehusky.huskyui.StateContainer;
 import com.codehusky.huskyui.states.Page;
 import com.codehusky.huskyui.states.element.Element;
@@ -68,6 +69,7 @@ import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -174,6 +176,7 @@ public class HuskyCrates {
         //genericCause = Cause.of(EventContext.);
         Sponge.getCommandManager().register(this, huskyCommandManager.getCrateSpec(), "hc","huskycrates");
         Sponge.getCommandManager().register(this, huskyCommandManager.getHuskySpec(), "husky");
+        metrics.addCustomChart(new Metrics.SimplePie("huskyui_version", () -> HuskyUI.PLUGIN_VERSION));
         logger.info("Crates has been started.");
     }
 
