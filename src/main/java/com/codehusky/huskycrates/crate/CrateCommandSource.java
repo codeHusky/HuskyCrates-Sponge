@@ -5,7 +5,6 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
-import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Tristate;
@@ -44,16 +43,6 @@ public class CrateCommandSource implements CommandSource {
     }
 
     @Override
-    public SubjectReference asSubjectReference() {
-        return null;
-    }
-
-    @Override
-    public boolean isSubjectDataPersisted() {
-        return false;
-    }
-
-    @Override
     public SubjectData getSubjectData() {
         return null;
     }
@@ -63,18 +52,19 @@ public class CrateCommandSource implements CommandSource {
         return null;
     }
 
+
     @Override
     public Tristate getPermissionValue(Set<Context> set, String s) {
         return null;
     }
 
     @Override
-    public boolean isChildOf(Set<Context> set, SubjectReference subjectReference) {
+    public boolean isChildOf(Set<Context> contexts, Subject parent) {
         return false;
     }
 
     @Override
-    public List<SubjectReference> getParents(Set<Context> set) {
+    public List<Subject> getParents(Set<Context> set) {
         return null;
     }
 

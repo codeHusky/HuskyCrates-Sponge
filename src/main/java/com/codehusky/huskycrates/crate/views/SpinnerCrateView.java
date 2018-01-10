@@ -123,7 +123,7 @@ public class SpinnerCrateView extends CrateView {
             slotnum++;
         }
         if(!ourplr.isViewingInventory()){
-            ourplr.openInventory(disp);
+            ourplr.openInventory(disp,HuskyCrates.instance.genericCause);
         }
     }
     private ItemStack confettiBorder(){
@@ -160,7 +160,7 @@ public class SpinnerCrateView extends CrateView {
         } else if (waitCurrent == Math.round(updateMax) && done) {
             waitCurrent = 0;
             updateMax *= dampening;
-            ourplr.openInventory(disp);
+            ourplr.openInventory(disp,HuskyCrates.instance.genericCause);
             tickerState = 1;
             ourplr.playSound(SoundTypes.ENTITY_FIREWORK_LAUNCH, ourplr.getLocation().getPosition(), 1);
             updateMax = 100;            
@@ -170,7 +170,7 @@ public class SpinnerCrateView extends CrateView {
         {            
             if (waitCurrent == Math.round(updateMax)) {
                 updater.cancel();
-                ourplr.closeInventory();
+                ourplr.closeInventory(HuskyCrates.instance.genericCause);
                 handleReward(giveToPlayer);
                 ourplr.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, ourplr.getLocation().getPosition(), 1);
 
