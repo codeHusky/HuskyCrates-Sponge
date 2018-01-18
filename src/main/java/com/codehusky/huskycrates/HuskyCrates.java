@@ -702,7 +702,7 @@ public class HuskyCrates {
             Player plr = (Player) event.getCause().root();
             if(plr.getItemInHand(HandTypes.MAIN_HAND).isPresent() && plr.hasPermission("huskycrates.wand")) {
                 ItemStack hand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
-                if(hand.getItem() == ItemTypes.BLAZE_ROD) {
+                if(hand.getType() == ItemTypes.BLAZE_ROD) {
                     if(hand.toContainer().get(DataQuery.of("UnsafeData","crateID")).isPresent()) {
                         if(!crateUtilities.physicalCrates.containsKey(event.getTargetEntity().getLocation())){
                             //System.out.println(event.getTargetEntity().getLocation().getBlockPosition());
