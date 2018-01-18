@@ -11,6 +11,7 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import com.codehusky.huskycrates.HuskyCrates;
 
@@ -87,9 +88,12 @@ public class HC implements CommandExecutor {
                 }
             }
 */
+
         src.sendMessage(Text.of(TextColors.YELLOW,"HuskyCrates Commands"));
-        if(src.hasPermission("huskycrates.chest"))
-            src.sendMessage(Text.of("  /hc chest <id> [player]"));
+        if(src.hasPermission("huskycrates.reload"))
+            src.sendMessage(Text.of("  /hc <reload/r/rl>"));
+        if(src.hasPermission("huskycrates.chest") || src.hasPermission("huskycrates.chest")) //NOTE: FORMALLY DEPRECATE .chest PERMISSION
+            src.sendMessage(Text.of("  /hc block <id> [player]"));
         if(src.hasPermission("huskycrates.key"))
             src.sendMessage(Text.of("  /hc key <id> [player] [count]"));
         if(src.hasPermission("huskycrates.keyall"))
