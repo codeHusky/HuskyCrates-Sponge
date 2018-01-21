@@ -196,7 +196,7 @@ public class CrateUtilities {
             }
         }
         if (key.isPresent()) {
-            if (key.get().getType() == crate.vc.getKeyType()) {
+            if (key.get().getItem() == crate.vc.getKeyType()) {
                 if (key.get().toContainer().get(DataQuery.of("UnsafeData", "crateID")).isPresent()) {
                     if(key.get().toContainer().get(DataQuery.of("UnsafeData", "keyUUID")).isPresent()) {
                         String id = key.get().toContainer().get(DataQuery.of("UnsafeData", "crateID")).get().toString();

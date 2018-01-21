@@ -58,7 +58,7 @@ public class CrateConfigParser {
             if (dispItem.get(Keys.DISPLAY_NAME).isPresent()) {
                 name = TextSerializers.FORMATTING_CODE.serialize(dispItem.get(Keys.DISPLAY_NAME).get());
             } else {
-                name = dispItem.getType().getName();
+                name = dispItem.getItem().getName();
             }
         }else{
             //System.out.println("Real");
