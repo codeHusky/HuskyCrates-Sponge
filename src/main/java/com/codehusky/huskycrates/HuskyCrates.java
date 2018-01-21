@@ -106,6 +106,7 @@ public class HuskyCrates {
     public LangData langData = new LangData();
     public Set<BlockType> validCrateBlocks = new HashSet<>();
     private boolean forceStop = false;
+    private ArrayList<String> forceStopIDs = new ArrayList<>();
 
     private boolean initError = false;
 
@@ -130,8 +131,10 @@ public class HuskyCrates {
         logger = LoggerFactory.getLogger(pC.getName());
         instance = this;
         huskyAPI = new HuskyAPI();
+        forceStopIDs.clear();
         for(PluginContainer pc: Sponge.getPluginManager().getPlugins()){
             if(pc.getId().equalsIgnoreCase("inventorytweaks")||pc.getId().equalsIgnoreCase("inventorysorter")||pc.getId().equalsIgnoreCase("mousetweaks")){
+                forceStopIDs.add(pc.getName() + "(" + pc.getId() + ")");
                 logger.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 logger.error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 logger.error(pc.getName() + " is loaded! This plugin or mod is on a blacklist for HuskyCrates, and as a result, HuskyCrates is not starting. ");
@@ -165,7 +168,6 @@ public class HuskyCrates {
     public void gameStarted(GameStartedServerEvent event){
 
         if(forceStop) {
-            logger.error("Since a blacklisted mod is loaded, HuskyCrates will not start. Please check higher in your logs for the reasoning.");
             return;
         }
 
@@ -181,6 +183,14 @@ public class HuskyCrates {
 
     public OutOfDateData oodd = new OutOfDateData();
     public void checkVersion() {
+        if(forceStop) {
+            logger.error("The following blacklisted mods have loaded, preventing HuskyCrates from starting:");
+            for(String data : forceStopIDs){
+                logger.error("  - " + data);
+            }
+            logger.error("All of these mods can be safely removed on your server, as they are not required.");
+            return;
+        }
         Sponge.getScheduler().createTaskBuilder().async().execute(new Consumer<Task>() {
             @Override
             public void accept(Task task) {
@@ -390,24 +400,35 @@ public class HuskyCrates {
             }
         }
     }
+    public void warnBlacklistMod(CommandSource source){
+        source.sendMessage(Text.of(TextColors.RED,"This server has mods installed preventing ", TextColors.GOLD,"HuskyCrates",TextColors.RED," from starting."));
+        source.sendMessage(Text.of(TextColors.RED,TextStyles.BOLD,"Offending Mods"));
+        for(String data : forceStopIDs){
+            source.sendMessage(Text.of(TextColors.WHITE,"  - " + data));
+        }
+        source.sendMessage(Text.of(TextColors.RED,"Please remove these mods from your server as they cause exploits with ",TextColors.DARK_RED,"various other Sponge plugins",TextColors.RED," as well."));
+
+    }
     public void reload(CommandSource cs) {
+        if(forceStop) {
+            warnBlacklistMod(cs);
+            return;
+        }
+
+        if(cs.hasPermission("huskycrates.adminlog"))
+            cs.sendMessage(Text.of(TextColors.RED,"Please ", TextStyles.BOLD,TextColors.RED,"check your console for errors",TextStyles.RESET,TextColors.RED," before reporting issues! <3"));
+
         HuskyCrates.resetInitError();
         try{
             DBReader.dbInitCheck();
             DBReader.saveHuskyData();
         }catch (SQLException e){
             e.printStackTrace();
+            cs.sendMessage(Text.of(TextColors.RED,"A critical error occurred while saving your data. Please check the logs for more information."));
         }
         langData = null;
-        if(forceStop) {
-            if(cs != null){
-                cs.sendMessage(Text.of(TextColors.GOLD,"HuskyCrates",TextColors.WHITE,":",TextColors.RED," HuskyCrates is currently force stopped. Check the console for more information."));
-            }
-            return;
-        }
-        if(cs != null){
-            cs.sendMessage(Text.of(TextColors.GOLD,"HuskyCrates",TextColors.WHITE,":",TextColors.YELLOW," Please check console to verify that any config modifications you've done are valid."));
-        }
+
+
         removeArmorstands();
         langData = new LangData();
         CommentedConfigurationNode root = null;
@@ -701,7 +722,7 @@ public class HuskyCrates {
             Player plr = (Player) event.getCause().root();
             if(plr.getItemInHand(HandTypes.MAIN_HAND).isPresent() && plr.hasPermission("huskycrates.wand")) {
                 ItemStack hand = plr.getItemInHand(HandTypes.MAIN_HAND).get();
-                if(hand.getItem() == ItemTypes.BLAZE_ROD) {
+                if(hand.getType() == ItemTypes.BLAZE_ROD) {
                     if(hand.toContainer().get(DataQuery.of("UnsafeData","crateID")).isPresent()) {
                         if(!crateUtilities.physicalCrates.containsKey(event.getTargetEntity().getLocation())){
                             //System.out.println(event.getTargetEntity().getLocation().getBlockPosition());
@@ -786,5 +807,8 @@ public class HuskyCrates {
         Player plr = event.getTargetEntity();
         notifyOutOfDate(plr);
         notifyInitError(plr);
+        if(plr.hasPermission("huskycrates.adminlog")){
+            warnBlacklistMod(plr);
+        }
     }
 }

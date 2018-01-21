@@ -105,7 +105,11 @@ public class HuskyCommandManager {
             )
             .executor(new WithdrawKey())
             .build();
-
+    CommandSpec reload = CommandSpec.builder()
+            .description(Text.of("Reloads HuskyCrates."))
+            .permission("huskycrates.reload")
+            .executor(new Reload(huskyCrates))
+            .build();
     CommandSpec crateSpec = CommandSpec.builder()
             .description(Text.of("Main crates command"))
             .child(key, "key")
@@ -117,16 +121,12 @@ public class HuskyCommandManager {
             .child(wand, "wand")
             .child(deposit, "deposit","depositkey","ptov")
             .child(withdraw, "withdraw","withdrawkey","vtop")
+            .child(reload, "reload", "r", "rl")
             //.arguments(GenericArguments.optional(GenericArguments.remainingRawJoinedStrings(Text.of(""))))
             .executor(new HC(huskyCrates))
             .build();
     CommandSpec huskySpec = CommandSpec.builder()
             .executor(new Husky(huskyCrates))
-            .child(CommandSpec.builder()
-                    .description(Text.of("Reloads HuskyCrates."))
-                    .permission("huskycrates.reload")
-                    .executor(new Reload(huskyCrates))
-                    .build(), "reload")
             .build();
 
 }

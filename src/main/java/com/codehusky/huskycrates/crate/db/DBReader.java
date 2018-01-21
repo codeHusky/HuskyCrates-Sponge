@@ -188,8 +188,10 @@ public class DBReader {
         HashMap<UUID,Integer> worldsInserted = new HashMap<>();
 
 
-
-        for(Location<World> location : HuskyCrates.instance.crateUtilities.physicalCrates.keySet()){
+        ArrayList<Location<World>> locationSurvey = new ArrayList<>();
+        locationSurvey.addAll(HuskyCrates.instance.crateUtilities.physicalCrates.keySet());
+        locationSurvey.addAll(HuskyCrates.instance.crateUtilities.brokenCrates);
+        for(Location<World> location : locationSurvey){
             if(!worldsInserted.keySet().contains(location.getExtent().getUniqueId())){
                 PreparedStatement statement = dbConnection.prepareStatement("SELECT * FROM WORLDINFO WHERE name = ? OR uuid = ?");
                 statement.setString(1,location.getExtent().getName());
@@ -201,8 +203,8 @@ public class DBReader {
                 } else {
                     dbConnection.prepareStatement("INSERT INTO WORLDINFO(uuid,name) VALUES('" + location.getExtent().getUniqueId().toString() + "','" + location.getExtent().getName() + "')").executeUpdate();
                     PreparedStatement fetchPrim = dbConnection.prepareStatement("SELECT * FROM WORLDINFO WHERE name = ? OR uuid = ?");
-                    statement.setString(1,location.getExtent().getName());
-                    statement.setString(2,location.getExtent().getUniqueId().toString());
+                    fetchPrim.setString(1,location.getExtent().getName());
+                    fetchPrim.setString(2,location.getExtent().getUniqueId().toString());
                     ResultSet primResults = fetchPrim.executeQuery();
                     primResults.next();
                     worldsInserted.put(location.getExtent().getUniqueId(),primResults.getInt(1));
