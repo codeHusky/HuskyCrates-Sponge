@@ -808,7 +808,7 @@ public class HuskyCrates {
         Player plr = event.getTargetEntity();
         notifyOutOfDate(plr);
         notifyInitError(plr);
-        if(plr.hasPermission("huskycrates.adminlog")){
+        if(plr.hasPermission("huskycrates.adminlog") && forceStop){
             warnBlacklistMod(plr);
         }
     }

@@ -32,8 +32,8 @@ public class DBReader {
     private static DataSource dbSource = null;
     private static void connectDB() throws SQLException {
         if(dbConnection != null) {
-            if (!dbConnection.isClosed()) {
-                dbConnection.close();
+            if (dbConnection.isClosed()) {
+                dbSource = null;
             }
         }
         if(dbSource == null) {
