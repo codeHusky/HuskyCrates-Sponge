@@ -28,6 +28,7 @@ import java.util.UUID;
  * Created by lokio on 7/15/2017.
  */
 public class DBReader {
+
     private static Connection dbConnection = null;
     private static DataSource dbSource = null;
     private static void connectDB() throws SQLException {
@@ -173,7 +174,6 @@ public class DBReader {
             KEYBALANCES (userUUID CHARACTER, crateID CHARACTER, amount INTEGER)
             WORLDINFO (ID INTEGER NOT NULL AUTO_INCREMENT,uuid CHARACTER, name CHARACTER,  PRIMARY KEY(ID))
          */
-        dbConnection.close();
     }
 
     public static void saveHuskyData() throws SQLException {
@@ -304,7 +304,6 @@ public class DBReader {
             }
         }
 
-
-        dbConnection.close();
+        
     }
 }
