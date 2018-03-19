@@ -153,12 +153,6 @@ public class CrateConfigParser {
             if(!itemRoot.getNode("name").isVirtual()){
                 item.offer(Keys.DISPLAY_NAME, TextSerializers.FORMATTING_CODE.deserialize(itemRoot.getNode("name").getString()));
             }
-            if(!itemRoot.getNode("variant").isVirtual()) {
-                //if(Sponge.getRegistry().getType(TreeType.class,itemRoot.getNode("variant").getString()).isPresent()) {
-                //System.out.println(item.offer(Keys.TREE_TYPE,getTreeType(itemRoot.getNode("variant").getString("oak"))));
-                //System.out.println(itemRoot.getNode("variant").getValue());
-                //}
-            }
             if(!itemRoot.getNode("lore").isVirtual()) {
                 ArrayList<Text> lore = new ArrayList<>();
                 for (String ll : itemRoot.getNode("lore").getList(TypeToken.of(String.class))) {

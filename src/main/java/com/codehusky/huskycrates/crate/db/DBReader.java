@@ -32,15 +32,14 @@ public class DBReader {
     private static Connection dbConnection = null;
     private static DataSource dbSource = null;
     private static void connectDB() throws SQLException {
-        if(dbConnection != null) {
-            if (dbConnection.isClosed()) {
-                dbSource = null;
-            }
-        }
         if(dbSource == null) {
             dbSource = Sponge.getServiceManager().provide(SqlService.class).get().getDataSource("jdbc:h2:" + HuskyCrates.instance.configDir.toString() + File.separator + "data");
         }
         dbConnection = dbSource.getConnection();
+    }
+
+    private static void closeDB() throws SQLException {
+        dbConnection.close();
     }
 
     public static void dbInitCheck() throws SQLException {
@@ -304,6 +303,6 @@ public class DBReader {
             }
         }
 
-        
+
     }
 }
