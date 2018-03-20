@@ -1,7 +1,6 @@
 package com.codehusky.huskycrates.crate;
 
 import com.codehusky.huskycrates.exceptions.ConfigParseError;
-import com.google.common.collect.BiMap;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -103,11 +102,10 @@ public class Item {
         if(this.nbt != null){
             DataContainer container = stack.toContainer();
             if(container.get(DataQuery.of("UnsafeData")).isPresent()) {
-                BiMap real = ((BiMap) container.getMap(DataQuery.of("UnsafeData")).get());
+                LinkedHashMap<Object,Object> real = ((LinkedHashMap) container.getMap(DataQuery.of("UnsafeData")).get());
                 this.nbt.putAll(real);
-            }else{
-                container.set(DataQuery.of("UnsafeData"),this.nbt);
             }
+            container.set(DataQuery.of("UnsafeData"),this.nbt);
             stack = ItemStack.builder()
                     .fromContainer(
                             container
