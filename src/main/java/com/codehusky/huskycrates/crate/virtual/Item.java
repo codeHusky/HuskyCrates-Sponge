@@ -1,4 +1,4 @@
-package com.codehusky.huskycrates.crate;
+package com.codehusky.huskycrates.crate.virtual;
 
 import com.codehusky.huskycrates.exceptions.ConfigParseError;
 import com.google.common.reflect.TypeToken;
@@ -34,7 +34,7 @@ public class Item {
     private List<Enchantment> enchantments;
     private LinkedHashMap nbt;
 
-    private Item(String name, ItemType itemType, List<String> lore, int count, int damage, int durability, List<Enchantment> enchantments, LinkedHashMap nbt){
+    public Item(String name, ItemType itemType, List<String> lore, Integer count, Integer damage, Integer durability, List<Enchantment> enchantments, LinkedHashMap nbt){
         this.name = name;
         this.itemType = itemType;
         this.lore = lore;
@@ -66,7 +66,7 @@ public class Item {
                 this.lore = node.getNode("lore").getList(TypeToken.of(String.class));
             } catch (ObjectMappingException e) {
                 e.printStackTrace();
-                throw new ConfigParseError("Invalid lore data specified! Reason is printed above.",node.getNode("lore").getPath());
+                throw new ConfigParseError("Invalid lore virtual specified! Reason is printed above.",node.getNode("lore").getPath());
             }
         }
 
@@ -121,4 +121,35 @@ public class Item {
         return stack;
     }
 
+    public Integer getCount() {
+        return count;
+    }
+
+    public Integer getDamage() {
+        return damage;
+    }
+
+    public Integer getDurability() {
+        return durability;
+    }
+
+    public ItemType getItemType() {
+        return itemType;
+    }
+
+    public LinkedHashMap getNBT() {
+        return nbt;
+    }
+
+    public List<Enchantment> getEnchantments() {
+        return enchantments;
+    }
+
+    public List<String> getLore() {
+        return lore;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

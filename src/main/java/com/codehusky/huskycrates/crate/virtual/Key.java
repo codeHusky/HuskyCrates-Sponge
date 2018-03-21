@@ -1,4 +1,4 @@
-package com.codehusky.huskycrates.crate;
+package com.codehusky.huskycrates.crate.virtual;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.data.DataQuery;
@@ -21,6 +21,16 @@ public class Key {
         }
     }
 
+    public Key(String id){
+        this.id = id;
+        this.isVirtual = true;
+    }
+
+    public Key(String id, Item displayItem){
+        this.id = id;
+        this.displayItem = displayItem;
+    }
+
     public String getId() {
         return id;
     }
@@ -36,6 +46,15 @@ public class Key {
                                 .toContainer()
                                 .set(DataQuery.of("UnsafeData","HCKEYID"),this.id)
                 ).build();
+    }
+
+    public static String extractKeyId(ItemStack stack){
+        return stack.toContainer().get(DataQuery.of("UnsafeData", "HCKEYID")).get().toString();
+    }
+
+    public boolean testKey(ItemStack stack){
+        return this.id.equals(extractKeyId(stack)) &&
+                stack.getType().equals(displayItem.getItemType());
     }
 
 

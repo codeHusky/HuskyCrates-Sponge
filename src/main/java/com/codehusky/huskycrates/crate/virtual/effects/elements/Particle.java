@@ -1,4 +1,4 @@
-package com.codehusky.huskycrates.crate.effects.elements;
+package com.codehusky.huskycrates.crate.virtual.effects.elements;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.effect.particle.ParticleEffect;

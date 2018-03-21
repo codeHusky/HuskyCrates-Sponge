@@ -1,7 +1,7 @@
 package com.codehusky.huskycrates;
 
-import com.codehusky.huskycrates.crate.Crate;
-import com.codehusky.huskycrates.crate.Key;
+import com.codehusky.huskycrates.crate.virtual.Crate;
+import com.codehusky.huskycrates.crate.virtual.Key;
 import com.google.inject.Inject;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -49,10 +49,13 @@ public class HuskyCrates {
 
     public static HuskyCrates instance;
 
+    public static Registry registry;
+
     public boolean inErrorState = false;
 
     @Listener
     public void gameInit(GamePreInitializationEvent event){
+        registry = new Registry();
         logger = LoggerFactory.getLogger(pC.getName());
         instance = this;
 

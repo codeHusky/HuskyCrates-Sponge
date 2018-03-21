@@ -1,4 +1,4 @@
-package com.codehusky.huskycrates.crate;
+package com.codehusky.huskycrates.crate.virtual;
 
 import java.util.List;
 
