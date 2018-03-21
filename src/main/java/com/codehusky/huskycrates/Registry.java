@@ -2,7 +2,7 @@ package com.codehusky.huskycrates;
 
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
-import com.codehusky.huskycrates.exceptions.DoubleRegistrationError;
+import com.codehusky.huskycrates.exception.DoubleRegistrationError;
 
 import java.util.HashMap;
 

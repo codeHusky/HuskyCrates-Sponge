@@ -1,4 +1,4 @@
-package com.codehusky.huskycrates.exceptions;
+package com.codehusky.huskycrates.exception;
 
 public class RewardDeliveryError extends RuntimeException {
     private String message;

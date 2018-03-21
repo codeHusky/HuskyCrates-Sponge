@@ -1,5 +1,6 @@
 package com.codehusky.huskycrates;
 
+import com.codehusky.huskycrates.command.CommandRegister;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
 import com.google.inject.Inject;
@@ -89,7 +90,7 @@ public class HuskyCrates {
                 inErrorState = true;
                 e.printStackTrace();
                 logger.error("Failed to register crates and keys. Please review the errors printed above.");
-                //todo: handle exceptions based on type
+                //todo: handle exception based on type
             }
         }else{
             logger.error("Config initialization experienced an error. Please report this to the developer for help.");
@@ -119,6 +120,7 @@ public class HuskyCrates {
 
     @Listener
     public void gameStarted(GameStartedServerEvent event){
+        CommandRegister.register(this);
         if(inErrorState) {
             logger.error("Crates has started with errors. Please review the issue above.");
         }else {

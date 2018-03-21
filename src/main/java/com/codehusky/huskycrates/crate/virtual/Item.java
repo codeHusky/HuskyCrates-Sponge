@@ -1,6 +1,6 @@
 package com.codehusky.huskycrates.crate.virtual;
 
-import com.codehusky.huskycrates.exceptions.ConfigParseError;
+import com.codehusky.huskycrates.exception.ConfigParseError;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -86,6 +86,11 @@ public class Item {
 
     public ItemStack toItemStack(){
         ItemStack stack = ItemStack.of(this.itemType, this.count);
+
+        if(this.name != null){
+            stack.offer(Keys.DISPLAY_NAME,TextSerializers.FORMATTING_CODE.deserialize(this.name));
+        }
+
         if(this.durability != null){
             stack.offer(Keys.ITEM_DURABILITY,this.durability);
         }

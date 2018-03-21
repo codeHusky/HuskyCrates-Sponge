@@ -5,8 +5,8 @@ import com.codehusky.huskycrates.crate.virtual.effects.ActionEffects;
 import com.codehusky.huskycrates.crate.virtual.effects.IdleEffects;
 import com.codehusky.huskycrates.crate.virtual.views.SpinnerView;
 import com.codehusky.huskycrates.crate.virtual.views.ViewConfig;
-import com.codehusky.huskycrates.exceptions.ConfigParseError;
-import com.codehusky.huskycrates.exceptions.SlotSelectionError;
+import com.codehusky.huskycrates.exception.ConfigParseError;
+import com.codehusky.huskycrates.exception.SlotSelectionError;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemTypes;
@@ -151,5 +151,17 @@ public class Crate {
 
     public ViewConfig getViewConfig() {
         return viewConfig;
+    }
+
+    public List<Slot> getSlots() {
+        return slots;
+    }
+
+    public int getSlotCount() {
+        return slots.size();
+    }
+
+    public Slot getSlot(int slot){
+        return slots.get(slot);
     }
 }

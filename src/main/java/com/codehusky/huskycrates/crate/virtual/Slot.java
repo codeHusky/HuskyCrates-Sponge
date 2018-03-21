@@ -1,9 +1,9 @@
 package com.codehusky.huskycrates.crate.virtual;
 
 import com.codehusky.huskycrates.HuskyCrates;
-import com.codehusky.huskycrates.exceptions.ConfigError;
-import com.codehusky.huskycrates.exceptions.ConfigParseError;
-import com.codehusky.huskycrates.exceptions.RewardDeliveryError;
+import com.codehusky.huskycrates.exception.ConfigError;
+import com.codehusky.huskycrates.exception.ConfigParseError;
+import com.codehusky.huskycrates.exception.RewardDeliveryError;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
