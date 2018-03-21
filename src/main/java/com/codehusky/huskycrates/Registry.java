@@ -42,4 +42,8 @@ public class Registry {
         if(getKey(key.getId()) != null) throw new DoubleRegistrationError("Key with id " + key.getId() + " already is registered");
         keys.put(key.getId(),key);
     }
+    public void clearRegistry(){
+        crates.clear();
+        keys.clear();
+    }
 }

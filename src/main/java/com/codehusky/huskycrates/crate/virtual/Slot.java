@@ -110,9 +110,9 @@ public class Slot {
             }
 
             if(this.rewardType == RewardType.USERCOMMAND || this.rewardType == RewardType.SERVERCOMMAND || this.rewardType == RewardType.SERVERMESSAGE || this.rewardType == RewardType.USERMESSAGE){
-                rewardString = node.getNode("virtual").getString();
+                rewardString = node.getNode("data").getString();
                 if(rewardString == null){
-                    throw new ConfigParseError("No virtual specified for reward.",node.getNode("virtual").getPath());
+                    throw new ConfigParseError("No data specified for reward.",node.getNode("data").getPath());
                 }
             }else if(this.rewardType == RewardType.ITEM){
                 rewardItem = new Item(node.getNode("item"));

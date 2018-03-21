@@ -13,6 +13,7 @@ import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Dependency;
@@ -64,6 +65,10 @@ public class HuskyCrates {
         keyConfigPath = configDir.resolve("keys.conf");
         crateConfig = HoconConfigurationLoader.builder().setPath(crateConfigPath).build();
         keyConfig = HoconConfigurationLoader.builder().setPath(keyConfigPath).build();
+        loadConfig();
+    }
+
+    public void loadConfig() {
 
         CommentedConfigurationNode crates;
         CommentedConfigurationNode keys;
@@ -122,9 +127,21 @@ public class HuskyCrates {
     public void gameStarted(GameStartedServerEvent event){
         CommandRegister.register(this);
         if(inErrorState) {
-            logger.error("Crates has started with errors. Please review the issue above.");
+            logger.error("Crates has started with errors. Please review the issue(s) above.");
         }else {
-            logger.info("Crates has been started.");
+            logger.info("Crates has started successfully.");
+        }
+    }
+
+    @Listener
+    public void gameReloaded(GameReloadEvent event){
+        inErrorState = false;
+        registry.clearRegistry();
+        loadConfig();
+        if(inErrorState) {
+            logger.error("Crates has reloaded with errors. Please review the issue(s) above.");
+        }else {
+            logger.info("Crates has reloaded successfully.");
         }
     }
 
