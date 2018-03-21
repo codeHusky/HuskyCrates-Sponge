@@ -24,7 +24,7 @@ import java.io.PrintWriter;
 import java.nio.file.Path;
 
 
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "2.0.0", description = "A Crate Plugin for Sponge!",dependencies = {@Dependency(id="huskyui",version = "0.5.1")})
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "2.0.0", description = "A Crate Plugin for Sponge!",dependencies = {@Dependency(id="huskyui",version = "0.5.2")})
 public class HuskyCrates {
     //@Inject
     public Logger logger;

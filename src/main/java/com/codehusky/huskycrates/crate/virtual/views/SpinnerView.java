@@ -1,12 +1,14 @@
 package com.codehusky.huskycrates.crate.virtual.views;
 
 import com.codehusky.huskycrates.crate.virtual.Crate;
+import com.codehusky.huskycrates.crate.virtual.Item;
 import com.codehusky.huskyui.StateContainer;
 import com.codehusky.huskyui.states.Page;
 import com.codehusky.huskyui.states.element.Element;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -29,8 +31,9 @@ public class SpinnerView implements Consumer<Page> {
                 .setUpdater(this)
                 .setInventoryDimension(InventoryDimension.of(9,3));
         Element borderElement = new Element(crate.getViewConfig().getBorderItem().toItemStack());
+        Element selectorItem = new Element(((SpinnerView.Config)crate.getViewConfig()).getSelectorItem().toItemStack());
         for(int i = 0; i < 9*3; i++){
-            builder.putElement(i,borderElement);
+            builder.putElement(i,(i == 4 | i == 22)? selectorItem : borderElement);
         }
         Page page = builder.build("meme");
         StateContainer sc = new StateContainer();
@@ -48,9 +51,9 @@ public class SpinnerView implements Consumer<Page> {
         page.getObserver().playSound(SoundTypes.UI_BUTTON_CLICK,page.getObserver().getLocation().getPosition(),0.5);
         int num = 0;
         for (Inventory slot : page.getPageView().slots()) {
-            if(num >= 9 && num <= 17){
+            if(num >= 10 && num <= 16){
                 slot.set(
-                        crate.getSlot( ( spinnerOffset + (num - 9) ) % crate.getSlotCount() )
+                        crate.getSlot( ( spinnerOffset + (num - 10) ) % crate.getSlotCount() )
                                 .getDisplayItem()
                                 .toItemStack()
                 );
@@ -62,8 +65,18 @@ public class SpinnerView implements Consumer<Page> {
     }
 
     public static class Config extends ViewConfig {
+        private Item selectorItem;
         public Config(ConfigurationNode node){
             super(node);
+            if(!node.getNode("selectorItem").isVirtual()) {
+                this.selectorItem = new Item(node.getNode("selectorItem"));
+            }else{
+                this.selectorItem = new Item("&6HuskyCrates", ItemTypes.REDSTONE_TORCH,null,1,null,null,null,null);
+            }
+        }
+
+        public Item getSelectorItem() {
+            return selectorItem;
         }
     }
 }
