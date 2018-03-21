@@ -34,7 +34,12 @@ public class SpinnerView implements Consumer<Page> {
                 .setTitle(TextSerializers.FORMATTING_CODE.deserialize(crate.getName()))
                 .setUpdatable(true)
                 .setUpdater(this)
-                .setInterrupt(() -> crate.getSlot(selectedSlot).rewardPlayer(player))
+                .setInterrupt(() -> {
+                    if(!rewardGiven) {
+                        crate.getSlot(selectedSlot).rewardPlayer(player);
+                        player.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, player.getLocation().getPosition(), 0.5);
+                    }
+                })
                 .setInventoryDimension(InventoryDimension.of(9,3));
 
         Element borderElement = new Element(config.getBorderItem().toItemStack());
@@ -54,34 +59,60 @@ public class SpinnerView implements Consumer<Page> {
     int currentTicks = 0;
     double currentTickDelay = 1;
     int variance = 0;
+    boolean rewardGiven = false;
+
+    boolean hasWon = false;
+    long tickWinBegin = 0;
+
+    private boolean winCondition() {
+        return spinnerOffset + variance >= config.getTicksToSelection();
+    }
+
     @Override
     public void accept(Page page) {
-        if(spinnerOffset + variance >= config.getTicksToSelection()){
-            crate.getSlot(selectedSlot).rewardPlayer(player);
-            page.getObserver().closeInventory();
-            return;
+        if(winCondition() && !hasWon){
+            hasWon = true;
+            tickWinBegin = page.getTicks();
         }
-
-        int num = 0;
-        for (Inventory slot : page.getPageView().slots()) {
-            if(num >= 10 && num <= 16){
-                slot.set(
-        //(spinner offset + (a buffer to prevent neg numbers + (sel slot + 1 offset) - 3 for centering) + (slotnum rel to center) % slot count
-                    crate.getSlot( ( (spinnerOffset + (crate.getSlotCount()*3) + (selectedSlot+1) - 3) + (num - 10) ) % crate.getSlotCount() )
-                            .getDisplayItem()
-                            .toItemStack()
-                );
+        if(!hasWon) {
+            int num = 0;
+            for (Inventory slot : page.getPageView().slots()) {
+                if (num >= 10 && num <= 16) {
+                    slot.set(
+                            //(spinner offset + (a buffer to prevent neg numbers + (sel slot + 1 offset) - 3 for centering) + (slotnum rel to center) % slot count
+                            crate.getSlot(((spinnerOffset + (crate.getSlotCount() * 3) + (selectedSlot + 1) - 3) + (num - 10)) % crate.getSlotCount())
+                                    .getDisplayItem()
+                                    .toItemStack()
+                    );
+                }
+                num++;
             }
-            num++;
-        }
 
-        if(currentTicks >= currentTickDelay) {
-            currentTicks = 0;
-            currentTickDelay *= config.getTickDelayMultiplier();
-            page.getObserver().playSound(SoundTypes.UI_BUTTON_CLICK,page.getObserver().getLocation().getPosition(),0.5);
-            spinnerOffset++;
+            if (currentTicks >= currentTickDelay) {
+                currentTicks = 0;
+                currentTickDelay *= config.getTickDelayMultiplier();
+                spinnerOffset++;
+                page.getObserver().playSound(
+                        (winCondition())?
+                                SoundTypes.ENTITY_FIREWORK_LAUNCH:
+                                SoundTypes.UI_BUTTON_CLICK, page.getObserver().getLocation().getPosition(), 0.5);
+            }
+            currentTicks++;
+        }else{
+            int num = 0;
+            for (Inventory slot : page.getPageView().slots()) {
+                if (num != 13) {
+                    slot.set(config.getBorderItem().toItemStack());
+                }
+                num++;
+            }
+            if(page.getTicks() > tickWinBegin + 20*3){
+                crate.getSlot(selectedSlot).rewardPlayer(player);
+                page.getObserver().playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, page.getObserver().getLocation().getPosition(), 0.5);
+                rewardGiven = true;
+                page.getObserver().closeInventory();
+            }
         }
-        currentTicks++;
     }
 
     public static class Config extends ViewConfig {
