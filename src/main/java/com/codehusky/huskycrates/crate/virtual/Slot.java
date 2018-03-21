@@ -3,7 +3,6 @@ package com.codehusky.huskycrates.crate.virtual;
 import com.codehusky.huskycrates.exceptions.ConfigParseError;
 import com.codehusky.huskycrates.exceptions.RewardDeliveryError;
 import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
@@ -18,6 +17,8 @@ public class Slot {
 
     private List<Reward> rewards;
 
+    private Integer chance;
+
     private Boolean pickRandom; // if winning results in a mystery selection from rewards.
 
     private Integer pickSize; // default 1
@@ -30,6 +31,12 @@ public class Slot {
         for(ConfigurationNode rNode : node.getNode("rewards").getChildrenList()){
             this.rewards.add(new Reward(rNode));
         }
+
+        if(node.getNode("chance").isVirtual()){
+            throw new ConfigParseError("Chance not specified in reward.",node.getNode("chance").getPath());
+        }
+        this.chance = node.getNode("chance").getInt();
+
 
         this.pickRandom = node.getNode("pickRandom").getBoolean(false);
 
@@ -69,6 +76,18 @@ public class Slot {
         return true;
     }
 
+    public Integer getChance() {
+        return chance;
+    }
+
+    public Item getDisplayItem() {
+        return displayItem;
+    }
+
+    public List<Reward> getRewards() {
+        return rewards;
+    }
+
     class Reward {
         private RewardType rewardType;
 
@@ -76,7 +95,7 @@ public class Slot {
 
         private Item rewardItem;
 
-        private Reward(CommentedConfigurationNode node){
+        private Reward(ConfigurationNode node){
             try {
                 this.rewardType = RewardType.valueOf(node.getNode("type").getString("").toUpperCase());
             }catch(IllegalArgumentException e){

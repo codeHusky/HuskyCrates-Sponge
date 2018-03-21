@@ -75,14 +75,19 @@ public class HuskyCrates {
 
                 for(CommentedConfigurationNode node : keys.getChildrenList()){
                     Key thisKey = new Key(node);
+                    registry.registerKey(thisKey);
+
                 }
 
                 for(CommentedConfigurationNode node : crates.getChildrenList()){
                     Crate thisCrate = new Crate(node);
+                    registry.registerCrate(thisCrate);
                 }
 
             }catch(Exception e){
                 inErrorState = true;
+                e.printStackTrace();
+                logger.error("Failed to register crates and keys. Please review the errors printed above.");
                 //todo: handle exceptions based on type
             }
         }else{
@@ -93,7 +98,11 @@ public class HuskyCrates {
     private boolean checkOrInitalizeConfig(Path path){
         if(!path.toFile().exists()) {
             try {
-                path.toFile().createNewFile();
+                boolean success = path.toFile().createNewFile();
+                if(!success){
+                    logger.error("Failed to create new config at " + path.toAbsolutePath().toString());
+                    return false;
+                }
                 PrintWriter pw = new PrintWriter(path.toFile());
                 pw.println("# To configure HuskyCrates, please reference the documentation or use HuskyConfigurator!\n# For more information: https://discord.gg/FSETtcx");
                 pw.close();
