@@ -14,7 +14,7 @@ public class ConfigError extends RuntimeException {
         return message;
     }
 
-    String readablePath(Object[] path){
+    public static String readablePath(Object[] path){
         String readablePath = "";
         for(int i = 0; i < path.length; i++){
             readablePath += path[i];

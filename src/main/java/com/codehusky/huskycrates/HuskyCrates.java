@@ -60,6 +60,7 @@ public class HuskyCrates {
         instance = this;
 
         crateConfigPath = configDir.resolve("crates.conf");
+        keyConfigPath = configDir.resolve("keys.conf");
         crateConfig = HoconConfigurationLoader.builder().setPath(crateConfigPath).build();
         keyConfig = HoconConfigurationLoader.builder().setPath(keyConfigPath).build();
 
@@ -73,13 +74,13 @@ public class HuskyCrates {
 
                 // k both work. wowowwoowow
 
-                for(CommentedConfigurationNode node : keys.getChildrenList()){
+                for(CommentedConfigurationNode node : keys.getChildrenMap().values()){
                     Key thisKey = new Key(node);
                     registry.registerKey(thisKey);
 
                 }
 
-                for(CommentedConfigurationNode node : crates.getChildrenList()){
+                for(CommentedConfigurationNode node : crates.getChildrenMap().values()){
                     Crate thisCrate = new Crate(node);
                     registry.registerCrate(thisCrate);
                 }

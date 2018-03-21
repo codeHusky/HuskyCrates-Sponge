@@ -10,8 +10,8 @@ import java.util.HashMap;
  * This class is intended to contain Crate and Keys, Crate locations w/ virtual,
  */
 public class Registry {
-    private HashMap<String, Key> keys;
-    private HashMap<String, Crate> crates;
+    private HashMap<String, Key> keys = new HashMap<>();
+    private HashMap<String, Crate> crates = new HashMap<>();
 
     public Key getKey(String id){
         //handling local keys.

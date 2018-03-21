@@ -1,5 +1,7 @@
 package com.codehusky.huskycrates.crate.virtual;
 
+import com.codehusky.huskycrates.HuskyCrates;
+import com.codehusky.huskycrates.exceptions.ConfigError;
 import com.codehusky.huskycrates.exceptions.ConfigParseError;
 import com.codehusky.huskycrates.exceptions.RewardDeliveryError;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -15,7 +17,7 @@ import java.util.Random;
 public class Slot {
     private Item displayItem;
 
-    private List<Reward> rewards;
+    private List<Reward> rewards = new ArrayList<>();
 
     private Integer chance;
 
@@ -28,8 +30,13 @@ public class Slot {
     public Slot(ConfigurationNode node){
         this.displayItem = new Item(node.getNode("displayItem"));
 
+
         for(ConfigurationNode rNode : node.getNode("rewards").getChildrenList()){
             this.rewards.add(new Reward(rNode));
+        }
+
+        if(this.rewards.size() == 0){
+            HuskyCrates.instance.logger.warn("Slot has no rewards @ " + ConfigError.readablePath(node.getNode("rewards").getPath()));
         }
 
         if(node.getNode("chance").isVirtual()){

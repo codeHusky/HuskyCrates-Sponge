@@ -66,7 +66,7 @@ public class Crate {
         }
 
         try {
-            this.viewType = ViewType.valueOf(node.getNode("viewType").getString());
+            this.viewType = ViewType.valueOf(node.getNode("viewType").getString().toUpperCase());
             switch(this.viewType){
                 case SPINNER:
                     viewConfig = new SpinnerView.Config(node.getNode("viewConfig"));
@@ -96,7 +96,7 @@ public class Crate {
         }
 
         if(this.useLocalKey){
-            if(node.getNode("localKey").isVirtual()){
+            if(!node.getNode("localKey").isVirtual()){
                 this.localKey = new Key("LOCALKEY_" + this.id, new Item(node.getNode("localKey")));
             }else{
                 this.localKey = new Key("LOCALKEY_" + this.id, new Item("&8" + this.name + " Key", ItemTypes.NETHER_STAR, null, 1, null, null, null, null));
