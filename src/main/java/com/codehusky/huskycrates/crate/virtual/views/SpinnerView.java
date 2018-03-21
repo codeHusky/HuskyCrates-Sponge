@@ -6,11 +6,17 @@ import com.codehusky.huskyui.StateContainer;
 import com.codehusky.huskyui.states.Page;
 import com.codehusky.huskyui.states.element.Element;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.property.InventoryDimension;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.Random;
@@ -68,6 +74,16 @@ public class SpinnerView implements Consumer<Page> {
         return spinnerOffset + variance >= config.getTicksToSelection();
     }
 
+    private ItemStack getConfetti() {
+        DyeColor[] colors = {DyeColors.BLUE,DyeColors.CYAN,DyeColors.LIGHT_BLUE,DyeColors.LIME,DyeColors.MAGENTA,DyeColors.ORANGE,DyeColors.PINK,DyeColors.PURPLE,DyeColors.RED, DyeColors.YELLOW};
+        ItemStack g =ItemStack.builder()
+                .itemType(ItemTypes.STAINED_GLASS_PANE)
+                .add(Keys.DYE_COLOR,colors[(int)Math.floor(Math.random() * colors.length)])
+                .build();
+        g.offer(Keys.DISPLAY_NAME, Text.of(TextStyles.RESET,"You win!"));
+        return g;
+    }
+
     @Override
     public void accept(Page page) {
         if(winCondition() && !hasWon){
@@ -99,12 +115,14 @@ public class SpinnerView implements Consumer<Page> {
             }
             currentTicks++;
         }else{
-            int num = 0;
-            for (Inventory slot : page.getPageView().slots()) {
-                if (num != 13) {
-                    slot.set(config.getBorderItem().toItemStack());
+            if(page.getTicks() % 5 == 0) {
+                int num = 0;
+                for (Inventory slot : page.getPageView().slots()) {
+                    if (num != 13) {
+                        slot.set(getConfetti());
+                    }
+                    num++;
                 }
-                num++;
             }
             if(page.getTicks() > tickWinBegin + 20*3){
                 crate.getSlot(selectedSlot).rewardPlayer(player);
@@ -129,7 +147,7 @@ public class SpinnerView implements Consumer<Page> {
             }
 
             this.ticksToSelection = node.getNode("ticksToSelection").getInt(30);
-            this.tickDelayMultiplier = node.getNode("tickDelayMultiplier").getDouble(1.2);
+            this.tickDelayMultiplier = node.getNode("tickDelayMultiplier").getDouble(1.08);
             this.ticksToSelectionVariance = node.getNode("ticksToSelectionVariance").getInt(0);
         }
 
