@@ -87,7 +87,7 @@ public class HuskyCrates {
                 location.getExtent().spawnParticles(
                         ParticleEffect.builder()
                                 .type(ParticleTypes.REDSTONE_DUST)
-                                .quantity(2)
+                                .quantity(1)
                                 .velocity(Vector3d.ZERO)
                                 .build(),location.getPosition().clone().toDouble().add(0.5,1.5,0.5));
             }
