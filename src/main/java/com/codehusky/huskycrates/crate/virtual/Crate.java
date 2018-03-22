@@ -1,8 +1,7 @@
 package com.codehusky.huskycrates.crate.virtual;
 
 import com.codehusky.huskycrates.HuskyCrates;
-import com.codehusky.huskycrates.crate.virtual.effects.ActionEffects;
-import com.codehusky.huskycrates.crate.virtual.effects.IdleEffects;
+import com.codehusky.huskycrates.crate.virtual.effects.Effect;
 import com.codehusky.huskycrates.crate.virtual.views.SpinnerView;
 import com.codehusky.huskycrates.crate.virtual.views.ViewConfig;
 import com.codehusky.huskycrates.exception.ConfigParseError;
@@ -24,8 +23,10 @@ public class Crate {
 
     private Hologram hologram;
 
-    private IdleEffects idleEffects;
-    private ActionEffects actionEffects;
+    private Effect idleEffect;
+    private Effect rejectEffect;
+    private Effect winEffect;
+    private Effect openEffect;
 
     private List<Slot> slots;
 
@@ -105,6 +106,20 @@ public class Crate {
         }else if(aKeyNode.isVirtual()){
             throw new ConfigParseError("Crate has no accepted keys!",node.getPath());
         }
+
+        ConfigurationNode eNode = node.getNode("effects");
+        if(!eNode.getNode("idle").isVirtual()){
+            idleEffect = new Effect(eNode.getNode("idle"));
+        }
+        if(!eNode.getNode("reject").isVirtual()){
+            rejectEffect = new Effect(eNode.getNode("reject"));
+        }
+        if(!eNode.getNode("win").isVirtual()){
+            winEffect = new Effect(eNode.getNode("win"));
+        }
+        if(!eNode.getNode("open").isVirtual()){
+            openEffect = new Effect(eNode.getNode("open"));
+        }
     }
 
     public String getId() {
@@ -164,6 +179,22 @@ public class Crate {
 
     public Slot getSlot(int slot){
         return slots.get(slot);
+    }
+
+    public Effect getIdleEffect() {
+        return idleEffect;
+    }
+
+    public Effect getOpenEffect() {
+        return openEffect;
+    }
+
+    public Effect getRejectEffect() {
+        return rejectEffect;
+    }
+
+    public Effect getWinEffect() {
+        return winEffect;
     }
 
     public void launchView(Player player){

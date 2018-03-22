@@ -2,6 +2,7 @@ package com.codehusky.huskycrates;
 
 import com.codehusky.huskycrates.command.CommandRegister;
 import com.codehusky.huskycrates.crate.CrateListeners;
+import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
 import com.flowpowered.math.vector.Vector3d;
@@ -24,12 +25,14 @@ import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 
 @Plugin(id="huskycrates", name = "HuskyCrates", version = "2.0.0", description = "A Crate Plugin for Sponge!",dependencies = {@Dependency(id="huskyui",version = "0.5.2")})
@@ -82,14 +85,21 @@ public class HuskyCrates {
 
         Sponge.getEventManager().registerListeners(this,crateListeners);
 
-        Sponge.getScheduler().createTaskBuilder().execute(() -> {
-            for(Location<World> location: registry.getPhysicalCrates().keySet()){
-                location.getExtent().spawnParticles(
-                        ParticleEffect.builder()
-                                .type(ParticleTypes.REDSTONE_DUST)
-                                .quantity(1)
-                                .velocity(Vector3d.ZERO)
-                                .build(),location.getPosition().clone().toDouble().add(0.5,1.5,0.5));
+        Sponge.getScheduler().createTaskBuilder().execute(new Consumer<Task>() {
+            @Override
+            public void accept(Task task) {
+                for(Location<World> location: registry.getPhysicalCrates().keySet()){
+                    location.getExtent().spawnParticles(
+                            ParticleEffect.builder()
+                                    .type(ParticleTypes.REDSTONE_DUST)
+                                    .quantity(1)
+                                    .velocity(Vector3d.ZERO)
+                                    .build(),location.getPosition().clone().toDouble().add(0.5,1.5,0.5));
+                    PhysicalCrate pcrate = registry.getPhysicalCrate(location);
+                    if(pcrate.getIdleEffect() != null){
+                        pcrate.getIdleEffect().tick();
+                    }
+                }
             }
         }).intervalTicks(1).submit(this);
     }
