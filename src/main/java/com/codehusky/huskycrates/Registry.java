@@ -49,6 +49,10 @@ public class Registry {
         return physicalCrates.get(location);
     }
 
+    public HashMap<Location<World>, PhysicalCrate> getPhysicalCrates() {
+        return physicalCrates;
+    }
+
     public boolean isSecureKey(String crateID, UUID uuid){
         return keysInCirculation.containsKey(uuid) && keysInCirculation.get(uuid).getKey().equals(crateID) && keysInCirculation.get(uuid).getValue() > 0;
     }

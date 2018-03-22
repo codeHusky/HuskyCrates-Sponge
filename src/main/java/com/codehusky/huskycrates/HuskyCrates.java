@@ -4,6 +4,7 @@ import com.codehusky.huskycrates.command.CommandRegister;
 import com.codehusky.huskycrates.crate.CrateListeners;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
+import com.flowpowered.math.vector.Vector3d;
 import com.google.inject.Inject;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -13,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.config.DefaultConfig;
+import org.spongepowered.api.effect.particle.ParticleEffect;
+import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.game.GameReloadEvent;
@@ -21,6 +24,8 @@ import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -76,6 +81,17 @@ public class HuskyCrates {
         crateListeners = new CrateListeners();
 
         Sponge.getEventManager().registerListeners(this,crateListeners);
+
+        Sponge.getScheduler().createTaskBuilder().execute(() -> {
+            for(Location<World> location: registry.getPhysicalCrates().keySet()){
+                location.getExtent().spawnParticles(
+                        ParticleEffect.builder()
+                                .type(ParticleTypes.REDSTONE_DUST)
+                                .quantity(2)
+                                .velocity(Vector3d.ZERO)
+                                .build(),location.getPosition().clone().toDouble().add(0.5,1.5,0.5));
+            }
+        }).intervalTicks(1).submit(this);
     }
 
     public void loadConfig() {

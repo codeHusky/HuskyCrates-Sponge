@@ -28,6 +28,7 @@ public class CrateListeners {
 
     @Listener
     public void openCrateBlock(InteractBlockEvent.Secondary.MainHand event, @Root Player player){
+        //TODO: Move a lot of this logic to a common method so that we don't repeat code.
         if(event.getTargetBlock().getLocation().isPresent()) {
             if(HuskyCrates.registry.isPhysicalCrate(event.getTargetBlock().getLocation().get())){
                 event.setCancelled(true);
