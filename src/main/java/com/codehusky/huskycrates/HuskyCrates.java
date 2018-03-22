@@ -29,6 +29,8 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
@@ -68,6 +70,9 @@ public class HuskyCrates {
     private CrateListeners crateListeners;
 
     public static boolean KEY_SECURITY = true;
+
+    private static ScriptEngineManager mgr = new ScriptEngineManager();
+    public static ScriptEngine jsengine = mgr.getEngineByName("JavaScript");
 
     @Listener
     public void gameInit(GamePreInitializationEvent event){
