@@ -1,7 +1,6 @@
 package com.codehusky.huskycrates.command;
 
 import com.codehusky.huskycrates.HuskyCrates;
-import com.codehusky.huskycrates.crate.virtual.views.SpinnerView;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -19,7 +18,8 @@ import java.util.Optional;
 public class Debug implements CommandCallable{
     @Override
     public CommandResult process(CommandSource source, String arguments) throws CommandException {
-        new SpinnerView(HuskyCrates.registry.getCrate(arguments),(Player) source);
+        Player player = (Player) source;
+        player.getInventory().offer(HuskyCrates.registry.getCrate("testCrate").getLocalKey().getKeyItemStack());
         return CommandResult.success();
     }
 

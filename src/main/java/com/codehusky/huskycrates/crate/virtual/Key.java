@@ -1,8 +1,13 @@
 package com.codehusky.huskycrates.crate.virtual;
 
+import com.codehusky.huskycrates.HuskyCrates;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.item.inventory.ItemStack;
+
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Keys are objects that contain an identifier (for the key) and the display item for such key, if that applies.
@@ -40,21 +45,51 @@ public class Key {
     }
 
     public ItemStack getKeyItemStack() {
+        return this.getKeyItemStack(1);
+    }
+    public ItemStack getKeyItemStack(int amount) {
+        DataContainer container = displayItem.toItemStack()
+                .toContainer()
+                .set(DataQuery.of("UnsafeData","HCKEYID"),this.id);
+        if(HuskyCrates.KEY_SECURITY){
+            container = container.set(DataQuery.of("UnsafeData","HCKEYUUID"),HuskyCrates.registry.generateSecureKey(id,amount).toString());
+        }
         return ItemStack.builder()
-                .fromContainer(
-                        displayItem.toItemStack()
-                                .toContainer()
-                                .set(DataQuery.of("UnsafeData","HCKEYID"),this.id)
-                ).build();
+                .fromContainer(container).build();
     }
 
     public static String extractKeyId(ItemStack stack){
-        return stack.toContainer().get(DataQuery.of("UnsafeData", "HCKEYID")).get().toString();
+        try {
+            return stack.toContainer().get(DataQuery.of("UnsafeData", "HCKEYID")).get().toString();
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    public static UUID extractKeyUUID(ItemStack stack){
+        if(HuskyCrates.KEY_SECURITY) {
+            Optional<Object> potentialUUID = stack.toContainer().get(DataQuery.of("UnsafeData", "HCKEYUUID"));
+            if(potentialUUID.isPresent()) {
+                try {
+                    return UUID.fromString(potentialUUID.get().toString());
+                }catch (Exception e){
+                    System.out.println(potentialUUID.get());
+                    return null;
+                }
+            }
+        }
+        return null;
     }
 
     public boolean testKey(ItemStack stack){
+        UUID keyUUID = extractKeyUUID(stack);
         return this.id.equals(extractKeyId(stack)) &&
-                stack.getType().equals(displayItem.getItemType());
+                stack.getType().equals(displayItem.getItemType()) &&
+                (!HuskyCrates.KEY_SECURITY ||
+                        HuskyCrates.KEY_SECURITY &&
+                                keyUUID != null &&
+                                HuskyCrates.registry.isSecureKey(id,keyUUID)
+                );
     }
 
 

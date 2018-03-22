@@ -59,6 +59,8 @@ public class HuskyCrates {
 
     private CrateListeners crateListeners;
 
+    public static boolean KEY_SECURITY = true;
+
     @Listener
     public void gameInit(GamePreInitializationEvent event){
         registry = new Registry();
