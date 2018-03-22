@@ -9,6 +9,7 @@ import com.codehusky.huskycrates.exception.ConfigParseError;
 import com.codehusky.huskycrates.exception.SlotSelectionError;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 
@@ -163,5 +164,15 @@ public class Crate {
 
     public Slot getSlot(int slot){
         return slots.get(slot);
+    }
+
+    public void launchView(Player player){
+        switch(viewType){
+            case SPINNER:
+                new SpinnerView(this,player);
+                break;
+            default:
+                break;
+        }
     }
 }

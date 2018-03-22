@@ -1,6 +1,7 @@
 package com.codehusky.huskycrates;
 
 import com.codehusky.huskycrates.command.CommandRegister;
+import com.codehusky.huskycrates.crate.CrateListeners;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
 import com.google.inject.Inject;
@@ -9,6 +10,7 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
@@ -55,6 +57,8 @@ public class HuskyCrates {
 
     public boolean inErrorState = false;
 
+    private CrateListeners crateListeners;
+
     @Listener
     public void gameInit(GamePreInitializationEvent event){
         registry = new Registry();
@@ -66,6 +70,10 @@ public class HuskyCrates {
         crateConfig = HoconConfigurationLoader.builder().setPath(crateConfigPath).build();
         keyConfig = HoconConfigurationLoader.builder().setPath(keyConfigPath).build();
         loadConfig();
+
+        crateListeners = new CrateListeners();
+
+        Sponge.getEventManager().registerListeners(this,crateListeners);
     }
 
     public void loadConfig() {
