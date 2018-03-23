@@ -217,7 +217,7 @@ public class Registry {
                 }else{
                     HuskyCrates.instance.logger.warn("CrateLocation #" + id + " provides an invalid world UUID or invalid crate ID. Removing from table.");
                     Statement removal = connection.createStatement();
-                    removal.executeQuery("SELECT  * FROM CRATELOCATIONS WHERE ID=" + id);
+                    removal.executeQuery("SELECT  * FROM CRATELOCATIONS WHERE ID='" + id + "'");
                     removal.executeUpdate("DELETE FROM CRATELOCATIONS");
                     removal.close();
                 }
@@ -230,13 +230,13 @@ public class Registry {
                 UUID keyUUID = UUID.fromString(crateKeyUUIDs.getString("keyUUID"));
                 String crateID = crateKeyUUIDs.getString("crateID");
                 int amount = crateKeyUUIDs.getInt("amount");
-                if(this.isCrate(crateID)){
+                if(this.isCrate(crateID) || this.isKey(crateID)){
                     this.keysInCirculation.put(keyUUID,new Pair<>(crateID,amount));
                 }else{
                     HuskyCrates.instance.logger.warn("ValidKeys " + keyUUID + " provides an invalid crate ID. Removing from table.");
                     Statement removal = connection.createStatement();
-                    removal.executeQuery("SELECT  * FROM CRATELOCATIONS WHERE KEYUUID=" + keyUUID.toString());
-                    removal.executeUpdate("DELETE FROM CRATELOCATIONS");
+                    removal.executeQuery("SELECT  * FROM VALIDKEYS WHERE KEYUUID='" + keyUUID.toString() + "'");
+                    removal.executeUpdate("DELETE FROM VALIDKEYS");
                     removal.close();
                 }
             }
@@ -259,7 +259,7 @@ public class Registry {
                 }else{
                     HuskyCrates.instance.logger.warn("KeyBalances for UUID " + userUUID + " provides an invalid crate ID. Removing from table.");
                     Statement removal = connection.createStatement();
-                    removal.executeQuery("SELECT  * FROM KEYBALANCES WHERE USERUUID=" + userUUID.toString());
+                    removal.executeQuery("SELECT  * FROM KEYBALANCES WHERE USERUUID='" + userUUID.toString() + "'");
                     removal.executeUpdate("DELETE FROM KEYBALANCES");
                     removal.close();
                 }

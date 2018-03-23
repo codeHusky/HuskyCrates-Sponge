@@ -79,7 +79,7 @@ public class CrateListeners {
 
                 //TODO: Change logic to be non-placeholder
                 if(transaction.getFinal().getState().getType() == BlockTypes.CHEST){
-                    HuskyCrates.registry.registerPhysicalCrate(new PhysicalCrate(location,"testCrate"));
+                    HuskyCrates.registry.registerPhysicalCrate(new PhysicalCrate(location,"animexample1"));
                 }
             }
 
