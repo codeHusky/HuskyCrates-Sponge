@@ -86,4 +86,22 @@ public class CrateListeners {
         }
 
     }
+
+    @Listener
+    public void crateBlockDestroyed(ChangeBlockEvent event){
+        if(event instanceof ChangeBlockEvent.Place || event instanceof ChangeBlockEvent.Post) return;
+
+        for(Transaction<BlockSnapshot> trans : event.getTransactions()){
+            BlockSnapshot original = trans.getOriginal();
+            BlockSnapshot after = trans.getFinal();
+
+            if(original.getLocation().isPresent()){
+                if(HuskyCrates.registry.isPhysicalCrate(original.getLocation().get())){
+                    if(!original.getState().getType().equals(after.getState().getType())){
+                        HuskyCrates.registry.unregisterPhysicalCrate(original.getLocation().get());
+                    }
+                }
+            }
+        }
+    }
 }

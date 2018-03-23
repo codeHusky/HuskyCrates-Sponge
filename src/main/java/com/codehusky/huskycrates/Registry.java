@@ -108,6 +108,11 @@ public class Registry {
         dirtyPhysicalCrates.add(physicalCrate.getLocation());
     }
 
+    public void unregisterPhysicalCrate(Location<World> location){
+        physicalCrates.remove(location);
+        dirtyPhysicalCrates.add(location);
+    }
+
     /**
      * methods for use in database management
      * @return

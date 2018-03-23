@@ -5,7 +5,6 @@ import com.codehusky.huskycrates.crate.CrateListeners;
 import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
-import com.flowpowered.math.vector.Vector3d;
 import com.google.inject.Inject;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -15,8 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.config.DefaultConfig;
-import org.spongepowered.api.effect.particle.ParticleEffect;
-import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.game.GameReloadEvent;
@@ -94,12 +91,6 @@ public class HuskyCrates {
             @Override
             public void accept(Task task) {
                 for(Location<World> location: registry.getPhysicalCrates().keySet()){
-                    location.getExtent().spawnParticles(
-                            ParticleEffect.builder()
-                                    .type(ParticleTypes.REDSTONE_DUST)
-                                    .quantity(1)
-                                    .velocity(Vector3d.ZERO)
-                                    .build(),location.getPosition().clone().toDouble().add(0.5,1.5,0.5));
                     PhysicalCrate pcrate = registry.getPhysicalCrate(location);
                     if(pcrate.getIdleEffect() != null){
                         pcrate.getIdleEffect().tick();

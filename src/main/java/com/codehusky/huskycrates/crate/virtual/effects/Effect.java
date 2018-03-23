@@ -27,7 +27,6 @@ public class Effect {
         this.resetOnTimeout = node.getNode("resetOnTimeout").getBoolean(false);
         this.clientSide = node.getNode("clientSide").getBoolean(false);
         for(ConfigurationNode particleNode : node.getNode("particles").getChildrenList()){
-
             particles.add(new Particle(particleNode));
         }
     }
