@@ -264,6 +264,7 @@ public class Registry {
                     removal.close();
                 }
             }
+            connection.close();
             HuskyCrates.instance.logger.info("End Database Load.");
         }catch (SQLException e){
             e.printStackTrace();
@@ -372,7 +373,7 @@ public class Registry {
                 }
             }
             dirtyKeysInCirculation.clear();
-
+            connection.close();
             //TODO: last used
             HuskyCrates.instance.logger.info("End Dirty Data Push.");
         }catch (SQLException e){
