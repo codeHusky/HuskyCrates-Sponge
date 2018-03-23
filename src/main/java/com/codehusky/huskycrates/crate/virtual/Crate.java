@@ -8,9 +8,13 @@ import com.codehusky.huskycrates.exception.ConfigParseError;
 import com.codehusky.huskycrates.exception.SlotSelectionError;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +43,7 @@ public class Crate {
     private Boolean useLocalKey;
     private Key localKey;
 
-    private HashMap<String, Integer> acceptedKeys;
+    private HashMap<String, Integer> acceptedKeys = new HashMap<>();
 
     private ViewType viewType;
 
@@ -89,9 +93,13 @@ public class Crate {
         ConfigurationNode aKeyNode = node.getNode("acceptedKeys");
         if(!aKeyNode.isVirtual()) {
             if (aKeyNode.hasListChildren()) {
-
+                for(ConfigurationNode keynode : aKeyNode.getChildrenList()){
+                    acceptedKeys.put(keynode.getString(),1);
+                }
             } else if (aKeyNode.hasMapChildren()) {
-
+                for(Object key : aKeyNode.getChildrenMap().keySet()){
+                    acceptedKeys.put(key.toString(),aKeyNode.getNode(key).getInt(1));
+                }
             } else {
                 throw new ConfigParseError("Invalid key format specified. Odd.",aKeyNode.getPath());
             }
@@ -155,6 +163,24 @@ public class Crate {
 
     public Key getLocalKey(){
         return localKey;
+    }
+
+    public ItemStack getCratePlacementBlock() {
+        ItemStack stack = ItemStack.builder()
+                .itemType(ItemTypes.CHEST)
+                .add(Keys.DISPLAY_NAME, Text.of(TextSerializers.FORMATTING_CODE.deserialize(name)," crate placer"))
+                .build();
+        return ItemStack.builder()
+                .fromContainer(stack.toContainer().set(DataQuery.of("UnsafeData","HCCRATEID"),this.id))
+                .build();
+    }
+
+    public static String extractCrateID(ItemStack stack){
+        try {
+            return stack.toContainer().get(DataQuery.of("UnsafeData", "HCCRATEID")).get().toString();
+        }catch (Exception e){
+            return null;
+        }
     }
 
     public String getName() {

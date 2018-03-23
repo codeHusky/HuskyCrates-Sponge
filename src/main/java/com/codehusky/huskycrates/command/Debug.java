@@ -1,50 +1,35 @@
 package com.codehusky.huskycrates.command;
 
 import com.codehusky.huskycrates.HuskyCrates;
-import org.spongepowered.api.command.CommandCallable;
+import com.codehusky.huskycrates.crate.virtual.Crate;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.args.CommandContext;
+import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+public class Debug implements CommandExecutor{
 
-public class Debug implements CommandCallable{
     @Override
-    public CommandResult process(CommandSource source, String arguments) throws CommandException {
-        Player player = (Player) source;
-        player.getInventory().offer(HuskyCrates.registry.getCrate("testCrate").getLocalKey().getKeyItemStack());
+    public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+        if(!(src instanceof Player)) return CommandResult.success();
+        Player player = (Player)src;
+
+        String crateid = args.getOne(Text.of("crateid")).get().toString();
+        String type = args.getOne(Text.of("type")).get().toString();
+
+        Crate crate = HuskyCrates.registry.getCrate(crateid);
+
+        switch(type.toLowerCase()){
+            case "key":
+                player.getInventory().offer(crate.getLocalKey().getKeyItemStack());
+                break;
+            case "block":
+                player.getInventory().offer(crate.getCratePlacementBlock());
+                break;
+        }
         return CommandResult.success();
-    }
-
-    @Override
-    public List<String> getSuggestions(CommandSource source, String arguments, @Nullable Location<World> targetPosition) throws CommandException {
-        return new ArrayList<>();
-    }
-
-    @Override
-    public boolean testPermission(CommandSource source) {
-        return true;
-    }
-
-    @Override
-    public Optional<Text> getShortDescription(CommandSource source) {
-        return Optional.of(Text.of("Debug command"));
-    }
-
-    @Override
-    public Optional<Text> getHelp(CommandSource source) {
-        return Optional.of(Text.of("Help ya'll"));
-    }
-
-    @Override
-    public Text getUsage(CommandSource source) {
-        return Text.of("/hc");
     }
 }

@@ -2,10 +2,10 @@ package com.codehusky.huskycrates.crate;
 
 import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
+import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
 import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.effect.particle.ParticleEffect;
@@ -37,11 +37,12 @@ public class CrateListeners {
                     String keyID = Key.extractKeyId(pItemInHand.get());
                     if(keyID != null && HuskyCrates.registry.isKey(keyID)) {
                         if(HuskyCrates.registry.getKey(keyID).testKey(pItemInHand.get())) {
-                            player.playSound(SoundTypes.BLOCK_WOOD_BUTTON_CLICK_OFF,player.getPosition(),1.0);
-                            HuskyCrates.registry.getPhysicalCrate(event.getTargetBlock().getLocation().get())
-                                    .getCrate()
-                                    .launchView(player);
-                            return;
+                            PhysicalCrate physicalCrate = HuskyCrates.registry.getPhysicalCrate(event.getTargetBlock().getLocation().get());
+                            if(physicalCrate.getCrate().testKey(pItemInHand.get())) {
+                                player.playSound(SoundTypes.BLOCK_WOOD_BUTTON_CLICK_OFF, player.getPosition(), 1.0);
+                                physicalCrate.getCrate().launchView(player);
+                                return;
+                            }
                         }
                     }
                 }
@@ -70,19 +71,22 @@ public class CrateListeners {
 
     @Listener
     public void placeCrate(ChangeBlockEvent.Place event, @Root Player player){
+        if(player.getItemInHand(HandTypes.MAIN_HAND).isPresent()) {
+            for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
+                Optional<Location<World>> pLocation = transaction.getFinal().getLocation();
 
-        for(Transaction<BlockSnapshot> transaction : event.getTransactions()){
-            Optional<Location<World>> pLocation = transaction.getFinal().getLocation();
-
-            if(pLocation.isPresent()){
-                Location<World> location = pLocation.get();
-
-                //TODO: Change logic to be non-placeholder
-                if(transaction.getFinal().getState().getType() == BlockTypes.CHEST){
-                    HuskyCrates.registry.registerPhysicalCrate(new PhysicalCrate(location,"animexample1"));
+                if (pLocation.isPresent()) {
+                    Location<World> location = pLocation.get();
+                    String pID = Crate.extractCrateID(player.getItemInHand(HandTypes.MAIN_HAND).get());
+                    if(pID != null && HuskyCrates.registry.isCrate(pID)) {
+                        if(!player.getItemInHand(HandTypes.MAIN_HAND).get().getType().getBlock().isPresent()) return;
+                        if (player.getItemInHand(HandTypes.MAIN_HAND).get().getType().getBlock().get().equals(transaction.getFinal().getState().getType())) {
+                            HuskyCrates.registry.registerPhysicalCrate(new PhysicalCrate(location, pID));
+                        }
+                    }
                 }
-            }
 
+            }
         }
 
     }

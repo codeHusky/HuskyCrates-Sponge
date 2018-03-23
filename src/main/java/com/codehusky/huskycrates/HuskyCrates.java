@@ -170,7 +170,14 @@ public class HuskyCrates {
             logger.error("Crates has started with errors. Please review the issue(s) above.");
         }else {
             logger.info("Crates has started successfully.");
+
         }
+        logger.warn("You are currently running a pre-release build!");
+        logger.warn("This is an unstable version of HuskyCrates and, as such,");
+        logger.warn("  it has not been tested thoroughly and will have bugs!");
+        logger.warn("Report all issues to codeHusky on the support discord!");
+        logger.warn("For help configuring, please consult the SRC or the discord.");
+        logger.warn("Thanks! - codeHusky");
     }
 
     @Listener
