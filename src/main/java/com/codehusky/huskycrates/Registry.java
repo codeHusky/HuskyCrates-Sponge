@@ -130,6 +130,11 @@ public class Registry {
         return dirtyPhysicalCrates.remove(location);
     }
 
+    public void cleanAll() {
+        dirtyPhysicalCrates.clear();
+        dirtyVirtualKeys.clear();
+        dirtyKeysInCirculation.clear();
+    }
 
     public void clearRegistry(){
         clearConfigRegistry();
@@ -265,6 +270,7 @@ public class Registry {
                 }
             }
             connection.close();
+            cleanAll();
             HuskyCrates.instance.logger.info("End Database Load.");
         }catch (SQLException e){
             e.printStackTrace();
@@ -276,6 +282,10 @@ public class Registry {
     }
 
     public void pushDirty() {
+        if(dirtyKeysInCirculation.isEmpty() &&
+                dirtyVirtualKeys.isEmpty() &&
+                dirtyPhysicalCrates.isEmpty()) return;
+
         Connection connection = getConnection();
         if(connection == null) {
             HuskyCrates.instance.logger.error("SQL DIRTY PUSH FAILURE");
