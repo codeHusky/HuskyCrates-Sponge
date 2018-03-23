@@ -19,6 +19,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.game.GameReloadEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Dependency;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -31,6 +32,7 @@ import javax.script.ScriptEngineManager;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 
@@ -98,6 +100,11 @@ public class HuskyCrates {
                 }
             }
         }).intervalTicks(1).submit(this);
+
+        Sponge.getScheduler().createTaskBuilder()
+                .execute(registry::pushDirty)
+                .interval(1, TimeUnit.MINUTES)
+                .submit(this);
     }
 
     public void loadConfig() {
@@ -157,6 +164,7 @@ public class HuskyCrates {
 
     @Listener
     public void gameStarted(GameStartedServerEvent event){
+        HuskyCrates.registry.loadFromDatabase();
         CommandRegister.register(this);
         if(inErrorState) {
             logger.error("Crates has started with errors. Please review the issue(s) above.");
@@ -168,13 +176,21 @@ public class HuskyCrates {
     @Listener
     public void gameReloaded(GameReloadEvent event){
         inErrorState = false;
+        registry.pushDirty();
         registry.clearRegistry();
         loadConfig();
+        registry.loadFromDatabase();
         if(inErrorState) {
             logger.error("Crates has reloaded with errors. Please review the issue(s) above.");
         }else {
             logger.info("Crates has reloaded successfully.");
         }
+    }
+
+    @Listener
+    public void gameShutdown(GameStoppingServerEvent event){
+        registry.pushDirty();
+        logger.info("HuskyCrates has shut down.");
     }
 
 }
