@@ -1,6 +1,7 @@
 package com.codehusky.huskycrates.crate.virtual;
 
 import com.codehusky.huskycrates.HuskyCrates;
+import com.codehusky.huskycrates.crate.virtual.effects.Effect;
 import com.codehusky.huskycrates.exception.ConfigError;
 import com.codehusky.huskycrates.exception.ConfigParseError;
 import com.codehusky.huskycrates.exception.RewardDeliveryError;
@@ -9,6 +10,8 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +61,7 @@ public class Slot {
         }
     }
 
-    public boolean rewardPlayer(Player player){
+    public boolean rewardPlayer(Player player, Location<World> physicalLocation){
         List<Reward> theseRewards = new ArrayList<>(rewards);
         if(this.pickRandom){
             ArrayList<Reward> availRewards = new ArrayList<>(rewards);
@@ -74,7 +77,7 @@ public class Slot {
         }
         try {
             for (Reward reward : theseRewards) {
-                reward.actOnReward(player);
+                reward.actOnReward(player,physicalLocation);
             }
         }catch(RewardDeliveryError e){
             e.printStackTrace();
@@ -102,6 +105,9 @@ public class Slot {
 
         private Item rewardItem;
 
+        private Effect effect;
+        private boolean effectOnPlayer = false;
+
         private Reward(ConfigurationNode node){
             try {
                 this.rewardType = RewardType.valueOf(node.getNode("type").getString("").toUpperCase());
@@ -116,10 +122,13 @@ public class Slot {
                 }
             }else if(this.rewardType == RewardType.ITEM){
                 rewardItem = new Item(node.getNode("item"));
+            }else if(this.rewardType == RewardType.EFFECT){
+                effect = new Effect(node.getNode("effect"));
+                effectOnPlayer = node.getNode("effectOnPlayer").getBoolean(false);
             }
         }
 
-        public void actOnReward(Player player) {
+        public void actOnReward(Player player, Location<World> physicalLocation) {
             if(rewardType == RewardType.ITEM){
 
                 InventoryTransactionResult result = player.getInventory().offer(rewardItem.toItemStack());
@@ -139,6 +148,8 @@ public class Slot {
             }else if(rewardType == RewardType.USERCOMMAND){
                 Sponge.getCommandManager().process(player,rewardString);
 
+            }else if(rewardType == RewardType.EFFECT){
+                HuskyCrates.registry.runEffect(effect,(effectOnPlayer)? player.getLocation() : physicalLocation );
             } else {
                 throw new RewardDeliveryError("Failed to deliver reward to " + player.getName() + " due to invalid reward type. If you see this, contact the developer immediately.");
             }
@@ -156,6 +167,8 @@ public class Slot {
         USERMESSAGE,
         SERVERMESSAGE,
 
-        ITEM
+        ITEM,
+
+        EFFECT
     }
 }

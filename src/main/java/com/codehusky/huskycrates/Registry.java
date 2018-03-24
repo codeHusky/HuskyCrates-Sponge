@@ -1,8 +1,10 @@
 package com.codehusky.huskycrates;
 
+import com.codehusky.huskycrates.crate.physical.EffectInstance;
 import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
+import com.codehusky.huskycrates.crate.virtual.effects.Effect;
 import com.codehusky.huskycrates.exception.DoubleRegistrationError;
 import javafx.util.Pair;
 import org.spongepowered.api.Sponge;
@@ -13,6 +15,7 @@ import org.spongepowered.api.world.World;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
@@ -33,6 +36,8 @@ public class Registry {
     private HashMap<Location<World>, PhysicalCrate> physicalCrates = new HashMap<>();
 
     private HashSet<Location<World>> dirtyPhysicalCrates = new HashSet<>();
+
+    private ArrayList<EffectInstance> effects = new ArrayList<>();
 
     public Key getKey(String id){
         //handling local keys.
@@ -71,6 +76,18 @@ public class Registry {
         keysInCirculation.put(uuid,new Pair<>(crateID,amount));
         dirtyKeysInCirculation.add(uuid);
         return uuid;
+    }
+
+    public void runEffect(Effect effect, Location<World> location){
+        effects.add(new EffectInstance(effect,location));
+    }
+
+    public ArrayList<EffectInstance> getEffects() {
+        return effects;
+    }
+
+    public void removeEffect(EffectInstance instance){
+        effects.remove(instance);
     }
 
     public boolean isKey(String id){

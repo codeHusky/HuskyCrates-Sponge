@@ -1,5 +1,6 @@
 package com.codehusky.huskycrates.crate.virtual.views;
 
+import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Item;
 import com.codehusky.huskyui.StateContainer;
@@ -18,18 +19,22 @@ import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 import java.util.Random;
 import java.util.function.Consumer;
 
 public class SpinnerView implements Consumer<Page> {
+    private Location<World> physicalLocation;
     private Crate crate;
     private int selectedSlot;
     private Player player;
     private Config config;
 
-    public SpinnerView(Crate crate, Player player){
-        this.crate = crate;
+    public SpinnerView(PhysicalCrate pcrate, Player player){
+        this.crate = pcrate.getCrate();
+        this.physicalLocation = pcrate.getLocation();
         this.config = (Config) crate.getViewConfig();
         this.variance = (int)Math.round(new Random().nextDouble() * config.getTicksToSelectionVariance());
         this.selectedSlot = crate.selectSlot();
@@ -42,7 +47,7 @@ public class SpinnerView implements Consumer<Page> {
                 .setUpdater(this)
                 .setInterrupt(() -> {
                     if(!rewardGiven) {
-                        crate.getSlot(selectedSlot).rewardPlayer(player);
+                        crate.getSlot(selectedSlot).rewardPlayer(player,this.physicalLocation);
                         player.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, player.getLocation().getPosition(), 0.5);
                     }
                 })
@@ -125,7 +130,7 @@ public class SpinnerView implements Consumer<Page> {
                 }
             }
             if(page.getTicks() > tickWinBegin + 20*3){
-                crate.getSlot(selectedSlot).rewardPlayer(player);
+                crate.getSlot(selectedSlot).rewardPlayer(player,this.physicalLocation);
                 page.getObserver().playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, page.getObserver().getLocation().getPosition(), 0.5);
                 rewardGiven = true;
                 page.getObserver().closeInventory();
