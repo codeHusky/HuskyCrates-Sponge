@@ -21,6 +21,7 @@ public class Slot {
     private Item displayItem;
 
     private List<Reward> rewards = new ArrayList<>();
+    private List<List<Reward>> rewardGroups = new ArrayList<>();
 
     private Integer chance;
 
@@ -35,7 +36,15 @@ public class Slot {
 
 
         for(ConfigurationNode rNode : node.getNode("rewards").getChildrenList()){
-            this.rewards.add(new Reward(rNode));
+            if(rNode.hasListChildren()){
+                ArrayList<Reward> rewardGroup = new ArrayList<>();
+                for(ConfigurationNode rgNode : rNode.getChildrenList()){
+                    rewardGroup.add(new Reward(rgNode));
+                }
+                this.rewardGroups.add(rewardGroup);
+            }else {
+                this.rewards.add(new Reward(rNode));
+            }
         }
 
         if(this.rewards.size() == 0){
@@ -62,13 +71,15 @@ public class Slot {
     }
 
     public boolean rewardPlayer(Player player, Location<World> physicalLocation){
-        List<Reward> theseRewards = new ArrayList<>(rewards);
+        List<Object> theseRewards = new ArrayList<>(rewards);
+        theseRewards.addAll(rewardGroups);
         if(this.pickRandom){
-            ArrayList<Reward> availRewards = new ArrayList<>(rewards);
-            ArrayList<Reward> selectedRewards = new ArrayList<>();
+            ArrayList<Object> availRewards = new ArrayList<>(rewards);
+            availRewards.addAll(rewardGroups);
+            ArrayList<Object> selectedRewards = new ArrayList<>();
 
             for(int i = 0; i < this.pickSize; i++){
-                Reward selected = availRewards.get(new Random().nextInt(availRewards.size()));
+                Object selected = availRewards.get(new Random().nextInt(availRewards.size()));
                 selectedRewards.add(selected);
 
                 if(this.pickUnique) availRewards.remove(selected);
@@ -76,8 +87,14 @@ public class Slot {
             theseRewards = selectedRewards;
         }
         try {
-            for (Reward reward : theseRewards) {
-                reward.actOnReward(player,physicalLocation);
+            for (Object reward : theseRewards) {
+                if(reward instanceof Reward) {
+                    ((Reward)reward).actOnReward(player, physicalLocation);
+                }else if(reward instanceof List){
+                    for(Reward rr : (List<Reward>)reward){
+                        rr.actOnReward(player,physicalLocation);
+                    }
+                }
             }
         }catch(RewardDeliveryError e){
             e.printStackTrace();

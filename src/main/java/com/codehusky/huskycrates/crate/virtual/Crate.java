@@ -1,6 +1,7 @@
 package com.codehusky.huskycrates.crate.virtual;
 
 import com.codehusky.huskycrates.HuskyCrates;
+import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.effects.Effect;
 import com.codehusky.huskycrates.crate.virtual.views.SpinnerView;
 import com.codehusky.huskycrates.crate.virtual.views.ViewConfig;
@@ -223,10 +224,10 @@ public class Crate {
         return winEffect;
     }
 
-    public void launchView(Player player){
+    public void launchView(PhysicalCrate pcrate, Player player){
         switch(viewType){
             case SPINNER:
-                new SpinnerView(this,player);
+                new SpinnerView(pcrate,player);
                 break;
             default:
                 break;

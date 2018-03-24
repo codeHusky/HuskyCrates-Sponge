@@ -40,7 +40,7 @@ public class CrateListeners {
                             PhysicalCrate physicalCrate = HuskyCrates.registry.getPhysicalCrate(event.getTargetBlock().getLocation().get());
                             if(physicalCrate.getCrate().testKey(pItemInHand.get())) {
                                 player.playSound(SoundTypes.BLOCK_WOOD_BUTTON_CLICK_OFF, player.getPosition(), 1.0);
-                                physicalCrate.getCrate().launchView(player);
+                                physicalCrate.getCrate().launchView(physicalCrate,player);
                                 return;
                             }
                         }
