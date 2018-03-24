@@ -102,6 +102,8 @@ public class CrateListeners {
             if(original.getLocation().isPresent()){
                 if(HuskyCrates.registry.isPhysicalCrate(original.getLocation().get())){
                     if(!original.getState().getType().equals(after.getState().getType())){
+                        PhysicalCrate pc = HuskyCrates.registry.getPhysicalCrate(original.getLocation().get());
+                        pc.cleanup();
                         HuskyCrates.registry.unregisterPhysicalCrate(original.getLocation().get());
                     }
                 }

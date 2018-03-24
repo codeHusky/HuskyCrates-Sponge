@@ -18,6 +18,8 @@ public class PhysicalCrate {
     private EffectInstance winEffect;
     private EffectInstance openEffect;
 
+    private HologramInstance hologramInstance;
+
     public PhysicalCrate(Location<World> location, String representedCrateID, boolean isEntity){
         this.location = location;
         if(HuskyCrates.registry.isCrate(representedCrateID)) {
@@ -40,6 +42,9 @@ public class PhysicalCrate {
 
         if(crate.getOpenEffect() != null)
             openEffect = new EffectInstance(crate.getOpenEffect(),location);
+
+        if(crate.getHologram() != null)
+            hologramInstance = new HologramInstance(crate.getHologram(),location,isEntity);
     }
 
     public EffectInstance getIdleEffect() {
@@ -60,5 +65,11 @@ public class PhysicalCrate {
 
     public boolean isEntity() {
         return isEntity;
+    }
+
+    public void cleanup(){
+        if(hologramInstance != null){
+            hologramInstance.cleanup();
+        }
     }
 }

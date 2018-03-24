@@ -129,6 +129,10 @@ public class Crate {
         if(!eNode.getNode("open").isVirtual()){
             openEffect = new Effect(eNode.getNode("open"));
         }
+
+        if(!node.getNode("hologram").isVirtual()){
+            hologram = new Hologram(node.getNode("hologram"));
+        }
     }
 
     public String getId() {
@@ -222,6 +226,10 @@ public class Crate {
 
     public Effect getWinEffect() {
         return winEffect;
+    }
+
+    public Hologram getHologram() {
+        return hologram;
     }
 
     public void launchView(PhysicalCrate pcrate, Player player){
