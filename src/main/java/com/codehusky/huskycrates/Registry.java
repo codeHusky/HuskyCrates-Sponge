@@ -33,6 +33,9 @@ public class Registry {
     private HashMap<UUID, Pair<String,Integer>> keysInCirculation = new HashMap<>();
     private HashSet<UUID> dirtyKeysInCirculation = new HashSet<>();
 
+    private HashMap<UUID, HashMap<String, Long>> lastCrateUse = new HashMap<>();
+    private HashMap<UUID, HashSet<String>> dirtyLastCrateUse = new HashMap<>();
+
     private HashMap<Location<World>, PhysicalCrate> physicalCrates = new HashMap<>();
 
     private HashSet<Location<World>> dirtyPhysicalCrates = new HashSet<>();
@@ -135,6 +138,28 @@ public class Registry {
         dirtyPhysicalCrates.add(location);
     }
 
+    public Long getLastUse(String crateID, UUID playerUUID){
+       if(lastCrateUse.containsKey(playerUUID)){
+           if(lastCrateUse.get(playerUUID).containsKey(crateID)){
+               return lastCrateUse.get(playerUUID).get(crateID);
+           }
+       }
+       return null;
+    }
+
+    public void updateLastUse(String crateID, UUID playerUUID){
+        HashMap<String, Long> userData = new HashMap<>();
+        if(lastCrateUse.containsKey(playerUUID)){
+            userData = lastCrateUse.get(playerUUID);
+        }
+        userData.put(crateID,System.currentTimeMillis());
+        lastCrateUse.put(playerUUID,userData);
+        HashSet<String> modified = dirtyLastCrateUse.get(playerUUID);
+        if(modified == null) modified = new HashSet<>();
+        modified.add(crateID);
+        dirtyLastCrateUse.put(playerUUID,modified);
+    }
+
     /**
      * methods for use in database management
      * @return
@@ -151,11 +176,16 @@ public class Registry {
         dirtyPhysicalCrates.clear();
         dirtyVirtualKeys.clear();
         dirtyKeysInCirculation.clear();
+        dirtyLastCrateUse.clear();
     }
 
     public void clearRegistry(){
         clearConfigRegistry();
         clearDBRegistry();
+        effects.forEach(effect -> {
+            effect.resetEffect();
+        });
+        effects.clear();
     }
 
     public void clearConfigRegistry() {
@@ -172,6 +202,9 @@ public class Registry {
 
         virtualKeys.clear();
         dirtyVirtualKeys.clear();
+
+        lastCrateUse.clear();
+        dirtyLastCrateUse.clear();
     }
 
     private Connection getConnection() {
@@ -283,6 +316,35 @@ public class Registry {
                     Statement removal = connection.createStatement();
                     removal.executeQuery("SELECT  * FROM KEYBALANCES WHERE USERUUID='" + userUUID.toString() + "'");
                     removal.executeUpdate("DELETE FROM KEYBALANCES");
+                    removal.close();
+                }
+            }
+
+            ResultSet lastUses = connection.prepareStatement("SELECT * FROM LASTUSED").executeQuery();
+            //HuskyCrates.instance.logger.info("wasNull: " + keyBalances.wasNull());
+            //HuskyCrates.instance.logger.info("isClosed: " + keyBalances.isClosed());
+            /*
+                    TABLE LASTUSED (userUUID CHARACTER, crateID CHARACTER, lastUsed BIGINT)
+                     */
+            while(lastUses.next()){
+                //HuskyCrates.instance.logger.info("keyBalances thing!");
+                UUID userUUID = UUID.fromString(lastUses.getString("userUUID"));
+                String crateID = lastUses.getString("crateID");
+                long lastUsed = lastUses.getLong("lastUsed");
+                if(this.isCrate(crateID)){
+                    HashMap<String,Long> plu;
+                    if(lastCrateUse.containsKey(userUUID)){
+                        plu = lastCrateUse.get(userUUID);
+                    }else {
+                        plu = new HashMap<>();
+                    }
+                    plu.put(crateID,lastUsed);
+                    lastCrateUse.put(userUUID,plu);
+                }else{
+                    HuskyCrates.instance.logger.warn("KeyBalances for UUID " + userUUID + " provides an invalid crate ID. Removing from table.");
+                    Statement removal = connection.createStatement();
+                    removal.executeQuery("SELECT  * FROM LASTUSED WHERE userUUID='" + userUUID.toString() + "' AND crateID='" + crateID + "'");
+                    removal.executeUpdate("DELETE FROM LASTUSED");
                     removal.close();
                 }
             }
@@ -400,8 +462,35 @@ public class Registry {
                 }
             }
             dirtyKeysInCirculation.clear();
+
+            for(UUID playerUUID : dirtyLastCrateUse.keySet()){
+                for(String crateID : dirtyLastCrateUse.get(playerUUID)){
+                    /*
+                    TABLE LASTUSED (userUUID CHARACTER, crateID CHARACTER, lastUsed BIGINT)
+                     */
+                    PreparedStatement statement = connection.prepareStatement("SELECT * FROM LASTUSED  WHERE userUUID = ? AND crateID = ?");
+                    statement.setString(1,playerUUID.toString());
+                    statement.setString(2,crateID);
+                    ResultSet results = statement.executeQuery();
+                    boolean exists = results.next();
+                    if(exists){
+                        PreparedStatement uState = connection.prepareStatement("UPDATE LASTUSED  SET lastUsed = ? WHERE userUUID = ? AND crateID = ?");
+                        uState.setLong(1,lastCrateUse.get(playerUUID).get(crateID));
+                        uState.setString(2,playerUUID.toString());
+                        uState.setString(3,crateID);
+                        uState.executeUpdate();
+                    }else {
+                        PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO LASTUSED(userUUID,crateID,lastUsed) VALUES(?,?,?)");
+                        insertStatement.setString(1,playerUUID.toString());
+                        insertStatement.setString(2,crateID);
+                        insertStatement.setLong(3,lastCrateUse.get(playerUUID).get(crateID));
+
+                        insertStatement.executeUpdate();
+                    }
+                }
+            }
+
             connection.close();
-            //TODO: last used
             HuskyCrates.instance.logger.info("End Dirty Data Push.");
         }catch (SQLException e){
             e.printStackTrace();

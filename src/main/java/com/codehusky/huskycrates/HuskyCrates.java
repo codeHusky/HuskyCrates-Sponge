@@ -2,6 +2,7 @@ package com.codehusky.huskycrates;
 
 import com.codehusky.huskycrates.command.CommandRegister;
 import com.codehusky.huskycrates.crate.CrateListeners;
+import com.codehusky.huskycrates.crate.physical.EffectInstance;
 import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
@@ -32,6 +33,7 @@ import javax.script.ScriptEngineManager;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -97,6 +99,17 @@ public class HuskyCrates {
                     if(pcrate.getIdleEffect() != null){
                         pcrate.getIdleEffect().tick();
                     }
+                }
+                ArrayList<EffectInstance> nuke = new ArrayList<>();
+                for(EffectInstance inst : registry.getEffects()){
+                    inst.tick();
+                    if(inst.getEffect().isFinished()){
+                        nuke.add(inst);
+                    }
+                }
+                for(EffectInstance inst : nuke){
+                    inst.resetEffect();
+                    registry.removeEffect(inst);
                 }
             }
         }).intervalTicks(1).submit(this);

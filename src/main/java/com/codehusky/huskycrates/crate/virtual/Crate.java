@@ -3,24 +3,26 @@ package com.codehusky.huskycrates.crate.virtual;
 import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.effects.Effect;
+import com.codehusky.huskycrates.crate.virtual.effects.elements.Particle;
 import com.codehusky.huskycrates.crate.virtual.views.SpinnerView;
 import com.codehusky.huskycrates.crate.virtual.views.ViewConfig;
 import com.codehusky.huskycrates.exception.ConfigParseError;
 import com.codehusky.huskycrates.exception.SlotSelectionError;
+import com.flowpowered.math.vector.Vector3d;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.effect.particle.ParticleEffect;
+import org.spongepowered.api.effect.particle.ParticleTypes;
+import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Crate {
     private String id;
@@ -38,6 +40,10 @@ public class Crate {
     private int slotChanceMax = 0;
 
     private Boolean scrambleSlots;
+
+    private Boolean free;
+
+    private long cooldownSeconds;
 
     private BlockType defaultBlock;
 
@@ -86,6 +92,9 @@ public class Crate {
             throw new ConfigParseError("Invalid view type!", node.getNode("viewType").getPath());
         }
 
+        this.free = node.getNode("free").getBoolean(false);
+
+        this.cooldownSeconds = node.getNode("cooldownSeconds").getLong(0);
 
         this.scrambleSlots = node.getNode("scrambleSlots").getBoolean(false);
 
@@ -119,15 +128,26 @@ public class Crate {
         ConfigurationNode eNode = node.getNode("effects");
         if(!eNode.getNode("idle").isVirtual()){
             idleEffect = new Effect(eNode.getNode("idle"));
+            if(idleEffect.isDisabled()) idleEffect = null;
         }
         if(!eNode.getNode("reject").isVirtual()){
             rejectEffect = new Effect(eNode.getNode("reject"));
+            if(rejectEffect.isDisabled()) rejectEffect = null;
+        }else{
+            /*
+            player.spawnParticles(,
+                event.getTargetBlock().getPosition().clone().toDouble().add(0.5,1.3,0.5));
+
+             */
+            rejectEffect = new Effect(false,1,false,false,true, new ArrayList<>(Collections.singletonList(new Particle(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(20).offset(new Vector3d(0.1, 0.3, 0.1)).build(), new Vector3d(0.5, 1.3, 0.5)))));
         }
         if(!eNode.getNode("win").isVirtual()){
             winEffect = new Effect(eNode.getNode("win"));
+            if(winEffect.isDisabled()) winEffect = null;
         }
         if(!eNode.getNode("open").isVirtual()){
             openEffect = new Effect(eNode.getNode("open"));
+            if(openEffect.isDisabled()) openEffect = null;
         }
 
         if(!node.getNode("hologram").isVirtual()){
@@ -152,6 +172,7 @@ public class Crate {
     }
 
     public boolean testKey(ItemStack stack){
+        if(free) return true;
         if(useLocalKey){
             if(localKey.testKey(stack)) return true;
         }
@@ -169,6 +190,8 @@ public class Crate {
     public Key getLocalKey(){
         return localKey;
     }
+
+
 
     public ItemStack getCratePlacementBlock() {
         ItemStack stack = ItemStack.builder()
@@ -232,7 +255,22 @@ public class Crate {
         return hologram;
     }
 
+    public Boolean isFree() {
+        return free;
+    }
+
+    public long getCooldownSeconds() {
+        return cooldownSeconds;
+    }
+
+    public boolean isTimedOut(UUID playerUUID) {
+        Long time = HuskyCrates.registry.getLastUse(id,playerUUID);
+        return time != null && (time + (cooldownSeconds*1000)) - System.currentTimeMillis() >= 0;
+    }
+
     public void launchView(PhysicalCrate pcrate, Player player){
+        HuskyCrates.registry.updateLastUse(id,player.getUniqueId());
+        player.playSound(SoundTypes.BLOCK_WOOD_BUTTON_CLICK_OFF, player.getPosition(), 1.0);
         switch(viewType){
             case SPINNER:
                 new SpinnerView(pcrate,player);

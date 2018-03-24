@@ -4,12 +4,9 @@ import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
-import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandTypes;
-import org.spongepowered.api.effect.particle.ParticleEffect;
-import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -31,25 +28,36 @@ public class CrateListeners {
         //TODO: Move a lot of this logic to a common method so that we don't repeat code.
         if(event.getTargetBlock().getLocation().isPresent()) {
             if(HuskyCrates.registry.isPhysicalCrate(event.getTargetBlock().getLocation().get())){
+                PhysicalCrate physicalCrate = HuskyCrates.registry.getPhysicalCrate(event.getTargetBlock().getLocation().get());
                 event.setCancelled(true);
-                Optional<ItemStack> pItemInHand = player.getItemInHand(HandTypes.MAIN_HAND);
-                if(pItemInHand.isPresent()) {
-                    String keyID = Key.extractKeyId(pItemInHand.get());
-                    if(keyID != null && HuskyCrates.registry.isKey(keyID)) {
-                        if(HuskyCrates.registry.getKey(keyID).testKey(pItemInHand.get())) {
-                            PhysicalCrate physicalCrate = HuskyCrates.registry.getPhysicalCrate(event.getTargetBlock().getLocation().get());
-                            if(physicalCrate.getCrate().testKey(pItemInHand.get())) {
-                                player.playSound(SoundTypes.BLOCK_WOOD_BUTTON_CLICK_OFF, player.getPosition(), 1.0);
-                                physicalCrate.getCrate().launchView(physicalCrate,player);
-                                return;
+                if(physicalCrate.getCrate().isFree()){
+                    if(!physicalCrate.getCrate().isTimedOut(player.getUniqueId())) {
+                        physicalCrate.getCrate().launchView(physicalCrate, player);
+                    }else{
+                        player.sendMessage(Text.of("You are currently timed out of this crate."));
+                    }
+                }else if(!physicalCrate.getCrate().isTimedOut(player.getUniqueId())){
+                    Optional<ItemStack> pItemInHand = player.getItemInHand(HandTypes.MAIN_HAND);
+                    if (pItemInHand.isPresent()) {
+                        String keyID = Key.extractKeyId(pItemInHand.get());
+                        if (keyID != null && HuskyCrates.registry.isKey(keyID)) {
+                            if (HuskyCrates.registry.getKey(keyID).testKey(pItemInHand.get())) {
+
+                                if (physicalCrate.getCrate().testKey(pItemInHand.get())) {
+                                    physicalCrate.getCrate().launchView(physicalCrate, player);
+                                    return;
+                                }
                             }
                         }
                     }
+                    player.playSound(SoundTypes.ENTITY_CREEPER_DEATH, player.getPosition(), 1.0);
+                    if (physicalCrate.getCrate().getRejectEffect() != null) {
+                        HuskyCrates.registry.runEffect(physicalCrate.getCrate().getRejectEffect(), physicalCrate.getLocation());
+                    }
+                    player.sendMessage(Text.of("You need a key to open this crate. ;)"));
+                }else{
+                    player.sendMessage(Text.of("You are currently timed out of this crate."));
                 }
-                player.playSound(SoundTypes.ENTITY_CREEPER_DEATH,player.getPosition(),1.0);
-                player.spawnParticles(ParticleEffect.builder().type(ParticleTypes.SMOKE).quantity(20).offset(new Vector3d(0.1,0.3,0.1)).build(),
-                        event.getTargetBlock().getPosition().clone().toDouble().add(0.5,1.3,0.5));
-                player.sendMessage(Text.of("You need a key to open this crate. ;)"));
             }
         }
     }
@@ -61,7 +69,7 @@ public class CrateListeners {
 
     @Listener
     public void openCrateEntity(InteractEntityEvent.Secondary.MainHand event, @Root Player player){
-        System.out.println(event.getTargetEntity());
+        //System.out.println(event.getTargetEntity());
     }
 
     @Listener

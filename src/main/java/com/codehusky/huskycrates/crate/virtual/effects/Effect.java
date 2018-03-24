@@ -3,6 +3,7 @@ package com.codehusky.huskycrates.crate.virtual.effects;
 import com.codehusky.huskycrates.crate.virtual.effects.elements.Particle;
 import com.codehusky.huskycrates.crate.virtual.effects.elements.Sound;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -31,15 +32,33 @@ public class Effect {
         }
     }
 
-    public long tick(long ticks, Location<World> location){
+    public Effect(boolean disabled, long duration, boolean loop, boolean resetOnTimeout, boolean clientSide, ArrayList<Particle> particles){
+        this.disabled = disabled;
+        this.duration = duration;
+        this.loop = loop;
+        this.resetOnTimeout = resetOnTimeout;
+        this.clientSide = clientSide;
+        this.particles = particles;
+    }
+
+    public Effect clone() {
+        return new Effect(this.disabled,this.duration,this.loop,this.resetOnTimeout,this.clientSide,(ArrayList<Particle>)this.particles.clone());
+    }
+
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    public long tick(long ticks, Location<World> location, Player player){
         if(this.disabled || this.finished) return ticks;
 
 
+
         for(Particle particle : particles){
-            particle.run(ticks,location);
+            particle.run(ticks,location,player);
         }
 
-        if(duration > 0 && (resetOnTimeout || !loop) && ticks >= duration){
+        if(ticks >= (duration-1) && (resetOnTimeout || !loop)){
             if(!loop){
                 finished = true;
             }else{
@@ -49,6 +68,10 @@ public class Effect {
             ticks += 1;
         }
         return ticks;
+    }
+
+    public long tick(long ticks, Location<World> location){
+        return this.tick(ticks,location,null);
     }
 
     public void reset(){
