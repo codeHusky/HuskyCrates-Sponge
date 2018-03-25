@@ -15,7 +15,6 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -34,7 +33,7 @@ public class CrateListeners {
                     if(!physicalCrate.getCrate().isTimedOut(player.getUniqueId())) {
                         physicalCrate.getCrate().launchView(physicalCrate, player);
                     }else{
-                        player.sendMessage(Text.of("You are currently timed out of this crate."));
+                        player.sendMessage(physicalCrate.getCrate().getMessages().format(Crate.Messages.Type.RejectionCooldown,player));
                     }
                 }else if(!physicalCrate.getCrate().isTimedOut(player.getUniqueId())){
                     Optional<ItemStack> pItemInHand = player.getItemInHand(HandTypes.MAIN_HAND);
@@ -54,9 +53,9 @@ public class CrateListeners {
                     if (physicalCrate.getCrate().getRejectEffect() != null) {
                         HuskyCrates.registry.runEffect(physicalCrate.getCrate().getRejectEffect(), physicalCrate.getLocation());
                     }
-                    player.sendMessage(Text.of("You need a key to open this crate. ;)"));
+                    player.sendMessage(physicalCrate.getCrate().getMessages().format(Crate.Messages.Type.RejectionNeedKey,player));
                 }else{
-                    player.sendMessage(Text.of("You are currently timed out of this crate."));
+                    player.sendMessage(physicalCrate.getCrate().getMessages().format(Crate.Messages.Type.RejectionCooldown,player));
                 }
             }
         }

@@ -7,6 +7,8 @@ import com.codehusky.huskycrates.crate.virtual.effects.elements.Particle;
 import com.codehusky.huskycrates.crate.virtual.views.SpinnerView;
 import com.codehusky.huskycrates.crate.virtual.views.ViewConfig;
 import com.codehusky.huskycrates.exception.ConfigParseError;
+import com.codehusky.huskycrates.exception.InvalidMessageTypeError;
+import com.codehusky.huskycrates.exception.NoMessageContextError;
 import com.codehusky.huskycrates.exception.SlotSelectionError;
 import com.flowpowered.math.vector.Vector3d;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -23,6 +25,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 public class Crate {
@@ -61,6 +64,8 @@ public class Crate {
         SPINNER
     }
 
+    private Messages messages;
+
     public Crate(ConfigurationNode node){
         slots = new ArrayList<>();
         this.id = node.getKey().toString();
@@ -77,6 +82,13 @@ public class Crate {
             if(slots.size() == 0){
                 throw new ConfigParseError("Crates must have associated slots!", node.getNode("slots").getPath());
             }
+        }
+
+        if(node.getNode("messages").isVirtual()){
+            messages = HuskyCrates.crateMessages.clone();
+            messages.setCrateID(this.id);
+        }else{
+            messages = new Messages(node.getNode("messages"),this.id, HuskyCrates.crateMessages);
         }
 
         try {
@@ -105,11 +117,19 @@ public class Crate {
         if(!aKeyNode.isVirtual()) {
             if (aKeyNode.hasListChildren()) {
                 for(ConfigurationNode keynode : aKeyNode.getChildrenList()){
-                    acceptedKeys.put(keynode.getString(),1);
+                    if(HuskyCrates.registry.isKey(keynode.getString())) {
+                        acceptedKeys.put(keynode.getString(), 1);
+                    }else{
+                        throw new ConfigParseError("Invalid key id: " + keynode.getString(),keynode.getPath());
+                    }
                 }
             } else if (aKeyNode.hasMapChildren()) {
                 for(Object key : aKeyNode.getChildrenMap().keySet()){
-                    acceptedKeys.put(key.toString(),aKeyNode.getNode(key).getInt(1));
+                    if(HuskyCrates.registry.isKey(key.toString())) {
+                        acceptedKeys.put(key.toString(), aKeyNode.getNode(key).getInt(1));
+                    }else{
+                        throw new ConfigParseError("Invalid key id: " + key.toString(),aKeyNode.getNode(key).getPath());
+                    }
                 }
             } else {
                 throw new ConfigParseError("Invalid key format specified. Odd.",aKeyNode.getPath());
@@ -260,12 +280,28 @@ public class Crate {
         return hologram;
     }
 
+    public HashMap<String, Integer> getAcceptedKeys() {
+        return acceptedKeys;
+    }
+
     public Boolean isFree() {
         return free;
     }
 
     public long getCooldownSeconds() {
         return cooldownSeconds;
+    }
+
+    public Messages getMessages() {
+        return messages;
+    }
+
+    public long getCooldownSeconds(Player player){
+        Long time = HuskyCrates.registry.getLastUse(this.id, player.getUniqueId());
+        if( time == null ){
+            return 0L;
+        }
+        return Math.round((time + (cooldownSeconds*1000)) - System.currentTimeMillis()) / 1000;
     }
 
     public boolean isTimedOut(UUID playerUUID) {
@@ -282,6 +318,107 @@ public class Crate {
                 break;
             default:
                 break;
+        }
+    }
+
+    public static class Messages {
+        private String rejectionNeedKey;
+        private String rejectionCooldown;
+        private String crateID;
+
+        public enum Type {
+            RejectionNeedKey,
+            RejectionCooldown,
+        }
+
+        public String getRejectionCooldown() {
+            return rejectionCooldown;
+        }
+
+        public String getRejectionNeedKey() {
+            return rejectionNeedKey;
+        }
+
+        public Messages(ConfigurationNode node, @Nullable String crateID, @Nullable Messages defaultMessages){
+            this.rejectionNeedKey = node.getNode("rejectionNeedKey")
+                    .getString((defaultMessages != null)?defaultMessages.getRejectionNeedKey():"&cYou need a {key.0.name} to use this crate.");
+            this.rejectionCooldown = node.getNode("rejectionCooldown")
+                    .getString((defaultMessages != null)?defaultMessages.getRejectionCooldown():"&aCalm down! &7You need to wait {cooldown.remaining} second{cooldown.remaining.plural} before you can use another {crate.name}&r&7!");
+
+            this.crateID = crateID;
+        }
+
+        public Messages(ConfigurationNode node,@Nullable String crateID){
+            this(node, crateID, null);
+        }
+
+        public Messages(String rnk, String rc, String crateID){
+            this.rejectionCooldown = rc;
+            this.rejectionNeedKey = rnk;
+            this.crateID = crateID;
+        }
+
+        public Messages clone() {
+            return new Messages(this.rejectionNeedKey,this.rejectionCooldown,this.crateID);
+        }
+
+        public void setCrateID(String crateID) {
+            this.crateID = crateID;
+        }
+
+        public Text format(Type messageType, Player player){
+            if(!HuskyCrates.registry.isCrate(crateID)){
+                throw new NoMessageContextError("Invalid crate id: " + crateID);
+            }
+            return format(messageType, HuskyCrates.registry.getCrate(crateID), player);
+        }
+
+        public Text format(Type messageType, Crate crate, Player player){
+            String newMessage;
+            switch(messageType){
+                case RejectionNeedKey:
+                    newMessage = rejectionNeedKey;
+                    break;
+                case RejectionCooldown:
+                    newMessage = rejectionCooldown;
+                    break;
+                default:
+                    throw new InvalidMessageTypeError("Invalid message type used!");
+            }
+
+            newMessage = newMessage
+                    .replace("{crate.name}", crate.getName())
+                    .replace("{crate.id}", crate.getId());
+
+            List<Key> keys = (crate.hasLocalKey())? Collections.singletonList(crate.getLocalKey()) : new ArrayList<>();
+            for(String keyID : crate.getAcceptedKeys().keySet()) {
+                keys.add(HuskyCrates.registry.getKey(keyID));
+            }
+
+            int num = 0;
+            for(Key key : keys) {
+                Integer amountRequired = (crate.hasLocalKey() && num == 0)?1:crate.getAcceptedKeys().get(key.getId());
+                newMessage = newMessage
+                        .replace("{key." + num + ".id}",key.getId())
+                        .replace("{key." + num + ".name}",key.getName())
+                        .replace("{key." + num + ".amountRequired}",amountRequired.toString())
+                        .replace("{key." + num + ".amountRequired.plural}",(amountRequired != 0)?"s":"")
+                        .replace("{key." + key.getId() + ".id}",key.getId())
+                        .replace("{key." + key.getId() + ".name}",key.getName())
+                        .replace("{key." + key.getId() + ".amountRequired}",amountRequired.toString())
+                        .replace("{key." + key.getId() + ".amountRequired.plural}",(amountRequired != 0)?"s":"");
+                num++;
+            }
+
+            newMessage = newMessage
+                    .replace("{cooldown.remaining}","" + crate.getCooldownSeconds(player))
+                    .replace("{cooldown.remaining.plural}",(crate.getCooldownSeconds(player) != 1)?"s":"")
+                    .replace("{cooldown.total}", "" + crate.getCooldownSeconds())
+                    .replace("{cooldown.total.plural}",(crate.getCooldownSeconds() != 1)?"s":"");
+
+
+
+            return TextSerializers.FORMATTING_CODE.deserialize(newMessage);
         }
     }
 }

@@ -44,6 +44,9 @@ public class Key {
     }
 
     public String getName() {
+        if(name == null){
+            return item.getName();
+        }
         return name;
     }
 

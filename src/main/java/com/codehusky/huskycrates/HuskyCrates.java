@@ -1,6 +1,7 @@
 package com.codehusky.huskycrates;
 
 import com.codehusky.huskycrates.command.CommandRegister;
+import com.codehusky.huskycrates.command.KeyCommand;
 import com.codehusky.huskycrates.crate.CrateListeners;
 import com.codehusky.huskycrates.crate.physical.EffectInstance;
 import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
@@ -72,6 +73,9 @@ public class HuskyCrates {
 
     public static boolean KEY_SECURITY = true;
 
+    public static KeyCommand.Messages keyCommandMessages;
+    public static Crate.Messages crateMessages;
+
     private static ScriptEngineManager mgr = new ScriptEngineManager();
     public static ScriptEngine jsengine = mgr.getEngineByName("JavaScript");
 
@@ -125,10 +129,22 @@ public class HuskyCrates {
         CommentedConfigurationNode crates;
         CommentedConfigurationNode keys;
 
+        CommentedConfigurationNode mainConfig;
+
         if(checkOrInitalizeConfig(crateConfigPath) && checkOrInitalizeConfig(keyConfigPath)){
             try {
+                mainConfig = config.load();
                 crates = crateConfig.load();
                 keys = keyConfig.load();
+
+                if(mainConfig.getNode("secureKeys").isVirtual()){
+                    mainConfig.getNode("secureKeys").setValue(HuskyCrates.KEY_SECURITY);
+                }else{
+                    HuskyCrates.KEY_SECURITY = mainConfig.getNode("secureKeys").getBoolean(true);
+                }
+
+                keyCommandMessages = new KeyCommand.Messages(mainConfig.getNode("messages","keyCommand"));
+                crateMessages = new Crate.Messages(mainConfig.getNode("messages","crate"),null);
 
                 // k both work. wowowwoowow
 
@@ -142,6 +158,8 @@ public class HuskyCrates {
                     Crate thisCrate = new Crate(node);
                     registry.registerCrate(thisCrate);
                 }
+
+                config.save(mainConfig);
 
             }catch(Exception e){
                 inErrorState = true;

@@ -3,6 +3,7 @@ package com.codehusky.huskycrates.command;
 import com.codehusky.huskycrates.Util;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
+import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -12,17 +13,18 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.Optional;
+
+import static com.codehusky.huskycrates.HuskyCrates.keyCommandMessages;
 
 public class KeyCommand implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
         Optional<Crate> crate = args.getOne(Text.of("crate"));
         Optional<Key> key = args.getOne(Text.of("key"));
-        Optional<Integer> amount = args.getOne(Text.of("amount"));
+        Optional<Integer> pamount = args.getOne(Text.of("amount"));
 
         Optional<Player> player = args.getOne(Text.of("player"));
         Optional<String> all = args.getOne(Text.of("all"));
@@ -37,46 +39,130 @@ public class KeyCommand implements CommandExecutor {
             workingWith = key.get();
         }
         if(workingWith == null){
-            src.sendMessage(Text.of("The supplied crate did not have a local key."));
+            src.sendMessage(keyCommandMessages.getCrateNoLocalKey());
             return CommandResult.success();
         }
 
         if(workingWith.isVirtual()){
-            src.sendMessage(Text.of("The resolved key is virtual only. Please supply a key that can be a physical item."));
+            src.sendMessage(keyCommandMessages.getCrateKeyVirtual());
             return CommandResult.success();
         }
-
+        int amount = pamount.orElse(1);
+        String crateName = (crate.isPresent())?crate.get().getName():key.get().getName();
         if(all.isPresent()){
             int deliveredTo = 0;
             for(Player p : Sponge.getServer().getOnlinePlayers()){
-                InventoryTransactionResult result = Util.getHotbarFirst(p.getInventory()).offer(workingWith.getKeyItemStack(amount.orElse(1)));
+                InventoryTransactionResult result = Util.getHotbarFirst(p.getInventory()).offer(workingWith.getKeyItemStack(amount));
                 if(result.getType() != InventoryTransactionResult.Type.SUCCESS){
-                    p.sendMessage(Text.of("You received " + amount.orElse(1) + " ", TextSerializers.FORMATTING_CODE.deserialize((crate.isPresent())?crate.get().getName():key.get().getName()) ,  "!"));
-                    src.sendMessage(Text.of(TextColors.RED,p.getName() + " failed to receive their key(s)!"));
+                    src.sendMessage(keyCommandMessages.getKeyDeliveryFail(p.getName(),amount));
                 }else{
+                    p.sendMessage(keyCommandMessages.getReceivedKey(workingWith.getName(),amount));
                     deliveredTo++;
                 }
             }
-            src.sendMessage(Text.of(deliveredTo + " players were given " + amount.orElse(1) + " key(s)."));
+            src.sendMessage(Text.of(deliveredTo + " players were given " + amount + " key(s)."));
         }else if(player.isPresent()){
-            InventoryTransactionResult result = Util.getHotbarFirst(player.get().getInventory()).offer(workingWith.getKeyItemStack(amount.orElse(1)));
+            InventoryTransactionResult result = Util.getHotbarFirst(player.get().getInventory()).offer(workingWith.getKeyItemStack(amount));
             if(result.getType() != InventoryTransactionResult.Type.SUCCESS){
-                src.sendMessage(Text.of(TextColors.RED,player.get().getName() + " failed to receive their key(s)!"));
+                src.sendMessage(keyCommandMessages.getKeyDeliveryFail(player.get().getName(),amount));
             }else{
-                player.get().sendMessage(Text.of("You received " + amount.orElse(1) + " ", TextSerializers.FORMATTING_CODE.deserialize((crate.isPresent())?crate.get().getName():key.get().getName()) ,  "!"));
-                src.sendMessage(Text.of(player.get().getName() + " was given " + amount.orElse(1) + " key(s)."));
+                player.get().sendMessage(keyCommandMessages.getReceivedKey(workingWith.getName(),amount));
+                src.sendMessage(keyCommandMessages.getKeyDeliverySuccess(player.get().getName(),amount));
             }
         }else if(src instanceof Player) {
             Player psrc = (Player) src;
-            InventoryTransactionResult result = Util.getHotbarFirst(psrc.getInventory()).offer(workingWith.getKeyItemStack(amount.orElse(1)));
+            InventoryTransactionResult result = Util.getHotbarFirst(psrc.getInventory()).offer(workingWith.getKeyItemStack(amount));
             if(result.getType() != InventoryTransactionResult.Type.SUCCESS){
-                src.sendMessage(Text.of(TextColors.RED,"Failed to give you keys!"));
+                src.sendMessage(keyCommandMessages.getSelfKeyDeliveryFail());
             }else{
-                src.sendMessage(Text.of("You were given " + amount.orElse(1) + " key(s)."));
+                src.sendMessage(keyCommandMessages.getSelfKeyDeliverySuccess(amount));
             }
         }else{
-            src.sendMessage(Text.of("No valid player(s) could be found to deliver keys to."));
+            src.sendMessage(keyCommandMessages.getNoPlayersFound());
         }
         return CommandResult.success();
+    }
+
+    public static class Messages {
+        private String crateNoLocalKey;
+        private String crateKeyVirtual;
+        private String receivedKey;
+        private String keyDeliveryFail;
+        private String massKeyDeliverySuccess;
+        private String keyDeliverySuccess;
+        private String selfKeyDeliveryFail;
+        private String selfKeyDeliverySuccess;
+        private String noPlayersFound;
+        public Messages(ConfigurationNode node){
+            this.crateNoLocalKey = node.getNode("crateNoLocalKey")
+                    .getString("&cThe supplied crate did not have a local key.");
+            this.crateKeyVirtual = node.getNode("crateKeyVirtual")
+                    .getString("&cThe resolved key is virtual only. Please supply a key that can be a physical item.");
+            this.receivedKey = node.getNode("receivedKey")
+                    .getString("&aYou received {amount} {key}{amount.plural}&r!");
+            this.keyDeliveryFail = node.getNode("keyDeliveryFail")
+                    .getString("&c{player} failed to receive their {amount} key{amount.plural}!");
+            this.massKeyDeliverySuccess = node.getNode("massKeyDeliverySuccess")
+                    .getString("&a{playerAmount} player{playerAmount.plural} received {amount} key{amount.plural}.");
+            this.keyDeliverySuccess = node.getNode("keyDeliverySuccess")
+                    .getString("&a{player} received {amount} key{amount.plural}.");
+            this.selfKeyDeliveryFail = node.getNode("selfKeyDeliveryFail")
+                    .getString("&cFailed to give you keys!");
+            this.selfKeyDeliverySuccess = node.getNode("selfKeyDeliverySuccess")
+                    .getString("&aYou were given {amount} key{amount.plural}.");
+            this.noPlayersFound = node.getNode("noPlayersFound")
+                    .getString("No valid players could be found to deliver keys to.");
+        }
+
+        public Text getCrateKeyVirtual() {
+            return TextSerializers.FORMATTING_CODE.deserialize(crateKeyVirtual);
+        }
+
+        public Text getCrateNoLocalKey() {
+            return TextSerializers.FORMATTING_CODE.deserialize(crateNoLocalKey);
+        }
+
+        public Text getKeyDeliveryFail(String playerName, Integer amount) {
+            return TextSerializers.FORMATTING_CODE.deserialize(keyDeliveryFail
+                    .replace("{player}",playerName)
+                    .replace("{amount}",amount.toString())
+                    .replace("{amount.plural}",(amount != 1)?"s":""));
+        }
+
+        public Text getKeyDeliverySuccess(String playerName, Integer amount) {
+            return TextSerializers.FORMATTING_CODE.deserialize(keyDeliverySuccess
+                    .replace("{player}",playerName)
+                    .replace("{amount}",amount.toString())
+                    .replace("{amount.plural}",(amount != 1)?"s":""));
+        }
+
+        public Text getMassKeyDeliverySuccess(Integer playerAmount, Integer amount) {
+            return TextSerializers.FORMATTING_CODE.deserialize(massKeyDeliverySuccess
+                    .replace("{playerAmount}",playerAmount.toString())
+                    .replace("{playerAmount.plural}",(playerAmount != 1)?"s":"")
+                    .replace("{amount}",amount.toString())
+                    .replace("{amount.plural}",(amount != 1)?"s":""));
+        }
+
+        public Text getNoPlayersFound() {
+            return TextSerializers.FORMATTING_CODE.deserialize(noPlayersFound);
+        }
+
+        public Text getReceivedKey(String keyName, Integer amount) {
+            return TextSerializers.FORMATTING_CODE.deserialize(receivedKey
+                    .replace("{key}",keyName)
+                    .replace("{amount}",amount.toString())
+                    .replace("{amount.plural}",(amount != 1)?"s":""));
+        }
+
+        public Text getSelfKeyDeliveryFail() {
+            return TextSerializers.FORMATTING_CODE.deserialize(selfKeyDeliveryFail);
+        }
+
+        public Text getSelfKeyDeliverySuccess(Integer amount) {
+            return TextSerializers.FORMATTING_CODE.deserialize(selfKeyDeliverySuccess
+                    .replace("{amount}",amount.toString())
+                    .replace("{amount.plural}",(amount != 1)?"s":""));
+        }
     }
 }
