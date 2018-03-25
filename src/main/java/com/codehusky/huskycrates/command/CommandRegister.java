@@ -21,13 +21,16 @@ public class CommandRegister {
                         .arguments(new CrateArgument(Text.of("crate")),
                                 GenericArguments.optionalWeak(GenericArguments.catalogedElement(Text.of("block"),BlockType.class)),
                                 GenericArguments.optional(GenericArguments.player(Text.of("player"))))
+                        .permission("huskycrates.block.base")
                         .build(),"b","blk","block")
                 .child(CommandSpec.builder()
                         .executor(new KeyCommand())
                         .arguments(GenericArguments.optionalWeak(GenericArguments.literal(Text.of("virtual"),"v")),GenericArguments.firstParsing(new CrateArgument(Text.of("crate")),new KeyArgument(Text.of("key"))),GenericArguments.optionalWeak(GenericArguments.integer(Text.of("amount"))),GenericArguments.optional(GenericArguments.firstParsing(GenericArguments.player(Text.of("player")),GenericArguments.literal(Text.of("all"),"@a"))))
+                        .permission("huskycrates.key.base")
                         .build(),"k","key")
                 .child(CommandSpec.builder()
                         .executor(new ReloadCommand())
+                        .permission("huskycrates.reload")
                         .build(),"rl","r","reload")
                 .child(CommandSpec.builder()
                         .executor(new MainCommand())

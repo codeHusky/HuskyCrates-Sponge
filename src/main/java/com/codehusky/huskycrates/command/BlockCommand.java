@@ -29,6 +29,10 @@ public class BlockCommand implements CommandExecutor {
         if(src instanceof Player)
             playerToGive = (Player) src;
 
+        if(otherPlayer.isPresent() && !src.hasPermission("huskycrates.block.others")){
+            src.sendMessage(Text.of(TextColors.RED,"You do not have permission to give others crate placement blocks."));
+            return CommandResult.success();
+        }
         if(otherPlayer.isPresent())
             playerToGive = otherPlayer.get();
 

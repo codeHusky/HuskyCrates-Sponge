@@ -14,6 +14,7 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.Optional;
@@ -32,6 +33,11 @@ public class KeyCommand implements CommandExecutor {
         Optional<String> all = args.getOne(Text.of("all"));
 
         Key workingWith = null;
+
+        if(isVirtual && !src.hasPermission("huskycrates.key.virtual")){
+            src.sendMessage(Text.of(TextColors.RED,"You do not have permission to give out virtual keys."));
+            return CommandResult.success();
+        }
 
         if(crate.isPresent()){
             if(crate.get().hasLocalKey()){
@@ -53,6 +59,10 @@ public class KeyCommand implements CommandExecutor {
         String keyName = (crate.isPresent())?crate.get().getName():key.get().getName();
 
         if(all.isPresent()){/** Deliver keys to all players **/
+            if(!src.hasPermission("huskycrates.key.all")){
+                src.sendMessage(Text.of(TextColors.RED,"You do not have permission to give everyone keys."));
+                return CommandResult.success();
+            }
             int deliveredTo = 0;
             for(Player p : Sponge.getServer().getOnlinePlayers()){
                 InventoryTransactionResult result = null;
@@ -72,6 +82,10 @@ public class KeyCommand implements CommandExecutor {
             src.sendMessage(keyCommandMessages.getMassKeyDeliverySuccess(deliveredTo,amount));
 
         }else if(player.isPresent()){ /** Deliver keys to a player **/
+            if(!src.hasPermission("huskycrates.key.others")){
+                src.sendMessage(Text.of(TextColors.RED,"You do not have permission to give others keys."));
+                return CommandResult.success();
+            }
             InventoryTransactionResult result = null;
 
             if(!isVirtual)
@@ -87,6 +101,10 @@ public class KeyCommand implements CommandExecutor {
             }
 
         }else if(src instanceof Player) { /** Deliver keys to self **/
+            if(!src.hasPermission("huskycrates.key.self")){
+                src.sendMessage(Text.of(TextColors.RED,"You do not have permission to give yourself keys."));
+                return CommandResult.success();
+            }
             Player psrc = (Player) src;
             InventoryTransactionResult result = null;
 

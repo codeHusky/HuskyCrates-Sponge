@@ -100,14 +100,8 @@ public class Key {
 
     public boolean testKey(ItemStack stack){
         if(isVirtual) return false;
-        UUID keyUUID = extractKeyUUID(stack);
         return this.id.equals(extractKeyId(stack)) &&
-                stack.getType().equals(item.getItemType()) &&
-                (!HuskyCrates.KEY_SECURITY ||
-                        HuskyCrates.KEY_SECURITY &&
-                                keyUUID != null &&
-                                HuskyCrates.registry.isSecureKey(id,keyUUID)
-                );
+                stack.getType().equals(item.getItemType());
     }
 
 
