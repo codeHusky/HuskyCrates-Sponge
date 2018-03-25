@@ -18,6 +18,7 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Items are basically just ItemStacks, except they haven't been constructed yet. These
@@ -69,13 +70,21 @@ public class Item {
                 throw new ConfigParseError("Invalid lore virtual specified! Reason is printed above.",node.getNode("lore").getPath());
             }
         }
-
+        this.enchantments = new ArrayList<>();
         if(!node.getNode("enchantments").isVirtual()){
             node.getNode("enchantments").getChildrenMap().forEach((enchantID, level) -> {
-                if(!Sponge.getRegistry().getType(EnchantmentType.class,enchantID.toString()).isPresent()){
+                Optional<EnchantmentType> enchantType = Sponge.getRegistry().getType(EnchantmentType.class,enchantID.toString());
+                if(!enchantType.isPresent()){
                     throw new ConfigParseError("Invalid Enchantment specified!",node.getNode("enchantments",enchantID).getPath());
                 }
-                this.enchantments.add(Enchantment.of(Sponge.getRegistry().getType(EnchantmentType.class,enchantID.toString()).get(),level.getInt(0)));
+                if(!(level.getValue() instanceof Integer)){
+                    throw new ConfigParseError("Invalid Type for Enchantment Level!",node.getNode("enchantments",enchantID).getPath());
+                }
+
+                this.enchantments.add(Enchantment.builder()
+                        .type(enchantType.get())
+                        .level((Integer)level.getValue())
+                        .build());
             });
         }
 
