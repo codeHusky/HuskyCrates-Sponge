@@ -193,8 +193,7 @@ public class HuskyCrates {
         logger.warn("Thanks! - codeHusky");
     }
 
-    @Listener
-    public void gameReloaded(GameReloadEvent event){
+    public void reload() {
         inErrorState = false;
         registry.pushDirty();
         registry.clearRegistry();
@@ -205,6 +204,11 @@ public class HuskyCrates {
         }else {
             logger.info("Crates has reloaded successfully.");
         }
+    }
+
+    @Listener
+    public void gameReloaded(GameReloadEvent event){
+        reload();
     }
 
     @Listener
