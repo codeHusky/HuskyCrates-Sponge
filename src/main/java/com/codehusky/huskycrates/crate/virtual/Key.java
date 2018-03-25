@@ -17,14 +17,14 @@ public class Key {
     private String id;
     private String name;
     private Boolean isVirtual;
-    private Item displayItem;
+    private Item item;
 
     public Key(ConfigurationNode node){
         this.id = node.getKey().toString();
         this.name = node.getNode("name").getString(id);
         this.isVirtual = node.getNode("isVirtual").getBoolean(false);
         if(!this.isVirtual){
-            this.displayItem = new Item(node.getNode("displayItem"));
+            this.item = new Item(node.getNode("item"));
         }
     }
 
@@ -33,9 +33,10 @@ public class Key {
         this.isVirtual = true;
     }
 
-    public Key(String id, Item displayItem){
+    public Key(String id, Item item){
         this.id = id;
-        this.displayItem = displayItem;
+        this.item = item;
+        this.isVirtual = false;
     }
 
     public String getId() {
@@ -46,15 +47,20 @@ public class Key {
         return name;
     }
 
-    public Item getDisplayItem() {
-        return displayItem;
+    public Boolean isVirtual() {
+        return isVirtual;
+    }
+
+    public Item getItem() {
+        return item;
     }
 
     public ItemStack getKeyItemStack() {
         return this.getKeyItemStack(1);
     }
     public ItemStack getKeyItemStack(int amount) {
-        DataContainer container = displayItem.toItemStack()
+        if(isVirtual) return null;
+        DataContainer container = item.toItemStack()
                 .toContainer()
                 .set(DataQuery.of("UnsafeData","HCKEYID"),this.id);
         if(HuskyCrates.KEY_SECURITY){
@@ -90,9 +96,10 @@ public class Key {
     }
 
     public boolean testKey(ItemStack stack){
+        if(isVirtual) return false;
         UUID keyUUID = extractKeyUUID(stack);
         return this.id.equals(extractKeyId(stack)) &&
-                stack.getType().equals(displayItem.getItemType()) &&
+                stack.getType().equals(item.getItemType()) &&
                 (!HuskyCrates.KEY_SECURITY ||
                         HuskyCrates.KEY_SECURITY &&
                                 keyUUID != null &&

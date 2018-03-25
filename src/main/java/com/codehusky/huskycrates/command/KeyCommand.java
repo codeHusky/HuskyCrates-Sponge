@@ -46,7 +46,7 @@ public class KeyCommand implements CommandExecutor {
             for(Player p : Sponge.getServer().getOnlinePlayers()){
                 InventoryTransactionResult result = Util.getHotbarFirst(p.getInventory()).offer(workingWith.getKeyItemStack(amount.orElse(1)));
                 if(result.getType() != InventoryTransactionResult.Type.SUCCESS){
-                    p.sendMessage(Text.of("You received " + amount.orElse(1) + " ", TextSerializers.FORMATTING_CODE.deserialize((crate.isPresent())?crate.get().getName():key.get().getName()) ,  " keys!"));
+                    p.sendMessage(Text.of("You received " + amount.orElse(1) + " ", TextSerializers.FORMATTING_CODE.deserialize((crate.isPresent())?crate.get().getName():key.get().getName()) ,  "!"));
                     src.sendMessage(Text.of(TextColors.RED,p.getName() + " failed to receive their key(s)!"));
                 }else{
                     deliveredTo++;
@@ -58,7 +58,7 @@ public class KeyCommand implements CommandExecutor {
             if(result.getType() != InventoryTransactionResult.Type.SUCCESS){
                 src.sendMessage(Text.of(TextColors.RED,player.get().getName() + " failed to receive their key(s)!"));
             }else{
-                player.get().sendMessage(Text.of("You received " + amount.orElse(1) + " ", TextSerializers.FORMATTING_CODE.deserialize((crate.isPresent())?crate.get().getName():key.get().getName()) ,  " keys!"));
+                player.get().sendMessage(Text.of("You received " + amount.orElse(1) + " ", TextSerializers.FORMATTING_CODE.deserialize((crate.isPresent())?crate.get().getName():key.get().getName()) ,  "!"));
                 src.sendMessage(Text.of(player.get().getName() + " was given " + amount.orElse(1) + " key(s)."));
             }
         }else if(src instanceof Player) {

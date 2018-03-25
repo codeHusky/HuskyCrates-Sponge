@@ -198,7 +198,9 @@ public class HuskyCrates {
         registry.pushDirty();
         registry.clearRegistry();
         loadConfig();
-        registry.loadFromDatabase();
+        if(!inErrorState) {
+            registry.loadFromDatabase();
+        }
         if(inErrorState) {
             logger.error("Crates has reloaded with errors. Please review the issue(s) above.");
         }else {
