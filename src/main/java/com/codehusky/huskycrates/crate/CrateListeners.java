@@ -48,6 +48,9 @@ public class CrateListeners {
                                 }
                             }
                         }
+                    }else if(physicalCrate.getCrate().testVirtualKey(player.getUniqueId())){
+                        physicalCrate.getCrate().launchView(physicalCrate, player);
+                        return;
                     }
                     player.playSound(SoundTypes.ENTITY_CREEPER_DEATH, player.getPosition(), 1.0);
                     if (physicalCrate.getCrate().getRejectEffect() != null) {

@@ -204,6 +204,15 @@ public class Crate {
         return false;
     }
 
+    public boolean testVirtualKey(UUID playerUUID){
+        for(String keyID : acceptedKeys.keySet()){
+            if(HuskyCrates.registry.getVirtualKeyBalance(playerUUID,keyID) >= acceptedKeys.get(keyID)){
+                return true;
+            }
+        }
+        return useLocalKey && HuskyCrates.registry.getVirtualKeyBalance(playerUUID,getLocalKey().getId()) >= 1;
+    }
+
     public boolean hasLocalKey(){
         return useLocalKey;
     }
@@ -301,7 +310,7 @@ public class Crate {
         if( time == null ){
             return 0L;
         }
-        return Math.round((time + (cooldownSeconds*1000)) - System.currentTimeMillis()) / 1000;
+        return 1 + (long) Math.ceil(((time + (cooldownSeconds*1000)) - System.currentTimeMillis()) / 1000);
     }
 
     public boolean isTimedOut(UUID playerUUID) {

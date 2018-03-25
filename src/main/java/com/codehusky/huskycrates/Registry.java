@@ -164,6 +164,47 @@ public class Registry {
        return null;
     }
 
+    public boolean addVirtualKeys(UUID playerUUID, String keyID, Integer amount){
+        if(isCrate(keyID)){
+            HashMap<String, Integer> balances = virtualKeys.getOrDefault(playerUUID,new HashMap<>());
+            balances.put(keyID,(balances.containsKey(keyID))?amount + balances.get(keyID):amount);
+            virtualKeys.put(playerUUID,balances);
+
+            HashSet<String> ud = dirtyVirtualKeys.getOrDefault(playerUUID,new HashSet<>());
+            ud.add(keyID);
+            dirtyVirtualKeys.put(playerUUID,ud);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean removeVirtualKeys(UUID playerUUID, String keyID, Integer amount){
+        return addVirtualKeys(playerUUID,keyID,-amount);
+    }
+
+    public boolean setVirtualKeys(UUID playerUUID, String keyID, Integer amount){
+        if(isCrate(keyID)){
+            HashMap<String, Integer> balances = virtualKeys.getOrDefault(playerUUID,new HashMap<>());
+            balances.put(keyID,amount);
+            virtualKeys.put(playerUUID,balances);
+
+            HashSet<String> ud = dirtyVirtualKeys.getOrDefault(playerUUID,new HashSet<>());
+            ud.add(keyID);
+            dirtyVirtualKeys.put(playerUUID,ud);
+            return true;
+        }
+        return false;
+    }
+
+    public Integer getVirtualKeyBalance(UUID playerUUID, String keyID){
+        if(virtualKeys.containsKey(playerUUID)){
+            if(virtualKeys.get(playerUUID).containsKey(keyID)){
+                return virtualKeys.get(playerUUID).get(keyID);
+            }
+        }
+        return 0;
+    }
+
     public void updateLastUse(String crateID, UUID playerUUID){
         HashMap<String, Long> userData = new HashMap<>();
         if(lastCrateUse.containsKey(playerUUID)){
@@ -245,7 +286,7 @@ public class Registry {
                 connection.prepareStatement("CREATE TABLE VALIDKEYS (keyUUID CHARACTER, crateID CHARACTER, amount INTEGER )").executeUpdate();
             }
             if(!kB){
-                connection.prepareStatement("CREATE TABLE KEYBALANCES (userUUID CHARACTER, crateID CHARACTER, amount INTEGER)").executeUpdate();
+                connection.prepareStatement("CREATE TABLE KEYBALANCES (userUUID CHARACTER, keyID CHARACTER, amount INTEGER)").executeUpdate();
             }
             if(!cD){
                 connection.prepareStatement("CREATE TABLE LASTUSED (userUUID CHARACTER, crateID CHARACTER, lastUsed BIGINT)").executeUpdate();
@@ -434,25 +475,25 @@ public class Registry {
             dirtyPhysicalCrates.clear();
 
             for(UUID playerUUID: dirtyVirtualKeys.keySet()){
-                for(String crateID : dirtyVirtualKeys.get(playerUUID)){
+                for(String keyID : dirtyVirtualKeys.get(playerUUID)){
                     //create or update
-                    PreparedStatement statement = connection.prepareStatement("SELECT * FROM KEYBALANCES WHERE userUUID = ? AND crateID = ?");
+                    PreparedStatement statement = connection.prepareStatement("SELECT * FROM KEYBALANCES WHERE userUUID = ? AND keyID = ?");
                     statement.setString(1,playerUUID.toString());
-                    statement.setString(2,crateID);
+                    statement.setString(2,keyID);
                     ResultSet results = statement.executeQuery();
                     boolean exists = results.next();
                     if(!exists){
-                        PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO KEYBALANCES(userUUID,crateID,amount) VALUES(?,?,?)");
+                        PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO KEYBALANCES(userUUID,keyID,amount) VALUES(?,?,?)");
                         insertStatement.setString(1,playerUUID.toString());
-                        insertStatement.setString(2,crateID);
-                        insertStatement.setInt(3,virtualKeys.get(playerUUID).get(crateID));
+                        insertStatement.setString(2,keyID);
+                        insertStatement.setInt(3,virtualKeys.get(playerUUID).get(keyID));
 
                         insertStatement.executeUpdate();
                     }else{
-                        PreparedStatement uState = connection.prepareStatement("UPDATE KEYBALANCES SET amount = ? WHERE userUUID = ? AND crateID = ?");
-                        uState.setInt(1,virtualKeys.get(playerUUID).get(crateID));
+                        PreparedStatement uState = connection.prepareStatement("UPDATE KEYBALANCES SET amount = ? WHERE userUUID = ? AND keyID = ?");
+                        uState.setInt(1,virtualKeys.get(playerUUID).get(keyID));
                         uState.setString(2,playerUUID.toString());
-                        uState.setString(3,crateID);
+                        uState.setString(3,keyID);
                         uState.executeUpdate();
                     }
                 }

@@ -1,5 +1,6 @@
 package com.codehusky.huskycrates;
 
+import com.codehusky.huskycrates.command.BlockCommand;
 import com.codehusky.huskycrates.command.CommandRegister;
 import com.codehusky.huskycrates.command.KeyCommand;
 import com.codehusky.huskycrates.crate.CrateListeners;
@@ -74,6 +75,7 @@ public class HuskyCrates {
     public static boolean KEY_SECURITY = true;
 
     public static KeyCommand.Messages keyCommandMessages;
+    public static BlockCommand.Messages blockCommandMessages;
     public static Crate.Messages crateMessages;
 
     private static ScriptEngineManager mgr = new ScriptEngineManager();
@@ -144,6 +146,8 @@ public class HuskyCrates {
                 }
 
                 keyCommandMessages = new KeyCommand.Messages(mainConfig.getNode("messages","keyCommand"));
+                blockCommandMessages = new BlockCommand.Messages(mainConfig.getNode("messages","blockCommand"));
+
                 crateMessages = new Crate.Messages(mainConfig.getNode("messages","crate"),null);
 
                 // k both work. wowowwoowow
