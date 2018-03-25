@@ -41,6 +41,11 @@ public class KeyCommand implements CommandExecutor {
             return CommandResult.success();
         }
 
+        if(workingWith.isVirtual()){
+            src.sendMessage(Text.of("The resolved key is virtual only. Please supply a key that can be a physical item."));
+            return CommandResult.success();
+        }
+
         if(all.isPresent()){
             int deliveredTo = 0;
             for(Player p : Sponge.getServer().getOnlinePlayers()){
