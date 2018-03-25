@@ -17,6 +17,7 @@ import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
@@ -193,14 +194,18 @@ public class Crate {
 
 
 
-    public ItemStack getCratePlacementBlock() {
+    public ItemStack getCratePlacementBlock(ItemType itemType) {
         ItemStack stack = ItemStack.builder()
-                .itemType(ItemTypes.CHEST)
+                .itemType(itemType)
                 .add(Keys.DISPLAY_NAME, Text.of(TextSerializers.FORMATTING_CODE.deserialize(name)," crate placer"))
                 .build();
         return ItemStack.builder()
                 .fromContainer(stack.toContainer().set(DataQuery.of("UnsafeData","HCCRATEID"),this.id))
                 .build();
+    }
+
+    public ItemStack getCratePlacementBlock() {
+        return this.getCratePlacementBlock(ItemTypes.CHEST);
     }
 
     public static String extractCrateID(ItemStack stack){
