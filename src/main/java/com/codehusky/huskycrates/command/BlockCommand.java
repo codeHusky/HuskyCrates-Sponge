@@ -1,5 +1,6 @@
 package com.codehusky.huskycrates.command;
 
+import com.codehusky.huskycrates.Util;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.command.CommandException;
@@ -45,7 +46,7 @@ public class BlockCommand implements CommandExecutor {
         }else{
             stack = crate.getCratePlacementBlock();
         }
-        playerToGive.getInventory().offer(stack);
+        Util.getHotbarFirst(playerToGive.getInventory()).offer(stack);
         return CommandResult.success();
     }
 }

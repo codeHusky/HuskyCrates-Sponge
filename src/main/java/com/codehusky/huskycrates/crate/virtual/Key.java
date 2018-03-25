@@ -15,11 +15,13 @@ import java.util.UUID;
  */
 public class Key {
     private String id;
+    private String name;
     private Boolean isVirtual;
     private Item displayItem;
 
     public Key(ConfigurationNode node){
         this.id = node.getKey().toString();
+        this.name = node.getNode("name").getString(id);
         this.isVirtual = node.getNode("isVirtual").getBoolean(false);
         if(!this.isVirtual){
             this.displayItem = new Item(node.getNode("displayItem"));
@@ -40,6 +42,10 @@ public class Key {
         return id;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public Item getDisplayItem() {
         return displayItem;
     }
@@ -55,7 +61,9 @@ public class Key {
             container = container.set(DataQuery.of("UnsafeData","HCKEYUUID"),HuskyCrates.registry.generateSecureKey(id,amount).toString());
         }
         return ItemStack.builder()
-                .fromContainer(container).build();
+                .fromContainer(container)
+                .quantity(amount)
+                .build();
     }
 
     public static String extractKeyId(ItemStack stack){

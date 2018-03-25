@@ -1,6 +1,7 @@
 package com.codehusky.huskycrates.crate.virtual;
 
 import com.codehusky.huskycrates.HuskyCrates;
+import com.codehusky.huskycrates.Util;
 import com.codehusky.huskycrates.crate.virtual.effects.Effect;
 import com.codehusky.huskycrates.exception.ConfigError;
 import com.codehusky.huskycrates.exception.ConfigParseError;
@@ -148,7 +149,7 @@ public class Slot {
         public void actOnReward(Player player, Location<World> physicalLocation) {
             if(rewardType == RewardType.ITEM){
 
-                InventoryTransactionResult result = player.getInventory().offer(rewardItem.toItemStack());
+                InventoryTransactionResult result = Util.getHotbarFirst(player.getInventory()).offer(rewardItem.toItemStack());
                 if(result.getType() != InventoryTransactionResult.Type.SUCCESS){
                     throw new RewardDeliveryError("Failed to deliver item to " + player.getName() + " from reward.");
                 }

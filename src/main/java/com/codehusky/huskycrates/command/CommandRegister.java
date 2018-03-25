@@ -24,7 +24,7 @@ public class CommandRegister {
                         .build(),"b","blk","block")
                 .child(CommandSpec.builder()
                         .executor(new KeyCommand())
-                        .arguments()
+                        .arguments(GenericArguments.firstParsing(new CrateArgument(Text.of("crate")),new KeyArgument(Text.of("key"))),GenericArguments.optionalWeak(GenericArguments.integer(Text.of("amount"))),GenericArguments.optional(GenericArguments.firstParsing(GenericArguments.player(Text.of("player")),GenericArguments.literal(Text.of("all"),"@a"))))
                         .build(),"k","key")
                 .child(CommandSpec.builder()
                         .executor(new VirtualKeyCommand())
@@ -64,6 +64,43 @@ public class CommandRegister {
                 }else{
                     List<String> poss = new ArrayList<>();
                     for(String crateID : HuskyCrates.registry.getCrates().keySet()){
+                        if(crateID.indexOf(args.peek()) == 0){
+                            poss.add(crateID);
+                        }
+                    }
+                    args.next();
+                    return poss;
+                }
+            } catch (ArgumentParseException e) {
+                e.printStackTrace();
+            }
+            return Collections.emptyList();
+        }
+    }
+
+    public static class KeyArgument extends CommandElement {
+
+        public KeyArgument(@Nullable Text key) {
+            super(key);
+        }
+
+        @Nullable
+        @Override
+        protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
+            if(HuskyCrates.registry.isKey(args.peek())){
+                return HuskyCrates.registry.getKey(args.next());
+            }
+            throw args.createError(Text.of("\"" +args.next() + "\" is not a valid key."));
+        }
+
+        @Override
+        public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
+            try {
+                if(HuskyCrates.registry.isKey(args.peek())){
+                    return Collections.singletonList(args.next());
+                }else{
+                    List<String> poss = new ArrayList<>();
+                    for(String crateID : HuskyCrates.registry.getKeys().keySet()){
                         if(crateID.indexOf(args.peek()) == 0){
                             poss.add(crateID);
                         }

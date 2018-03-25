@@ -109,6 +109,22 @@ public class Registry {
         return physicalCrates.containsKey(location);
     }
 
+    public HashMap<String, Key> getAllKeys() {
+        HashMap<String, Key> lkeys = getKeys();
+        lkeys.putAll(getLocalKeys());
+        return lkeys;
+    }
+
+    public HashMap<String, Key> getLocalKeys() {
+        HashMap<String, Key> lkeys = new HashMap<>();
+        for(Crate crate : crates.values()){
+            if(crate.hasLocalKey()){
+                lkeys.put(crate.getLocalKey().getId(),crate.getLocalKey());
+            }
+        }
+        return lkeys;
+    }
+
     public HashMap<String, Key> getKeys() {
         return keys;
     }
