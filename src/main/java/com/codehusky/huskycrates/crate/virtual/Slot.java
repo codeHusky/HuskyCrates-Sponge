@@ -40,11 +40,11 @@ public class Slot {
             if(rNode.hasListChildren()){
                 ArrayList<Reward> rewardGroup = new ArrayList<>();
                 for(ConfigurationNode rgNode : rNode.getChildrenList()){
-                    rewardGroup.add(new Reward(rgNode));
+                    rewardGroup.add(new Reward(rgNode,node.getNode("displayItem")));
                 }
                 this.rewardGroups.add(rewardGroup);
             }else {
-                this.rewards.add(new Reward(rNode));
+                this.rewards.add(new Reward(rNode,node.getNode("displayItem")));
             }
         }
 
@@ -126,7 +126,7 @@ public class Slot {
         private Effect effect;
         private boolean effectOnPlayer = false;
 
-        private Reward(ConfigurationNode node){
+        private Reward(ConfigurationNode node, ConfigurationNode displayItemNode){
             try {
                 this.rewardType = RewardType.valueOf(node.getNode("type").getString("").toUpperCase());
             }catch(IllegalArgumentException e){
@@ -139,7 +139,11 @@ public class Slot {
                     throw new ConfigParseError("No data specified for reward.",node.getNode("data").getPath());
                 }
             }else if(this.rewardType == RewardType.ITEM){
-                rewardItem = new Item(node.getNode("item"));
+                if(node.getNode("item").isVirtual()){
+                    rewardItem = new Item(displayItemNode);
+                }else {
+                    rewardItem = new Item(node.getNode("item"));
+                }
             }else if(this.rewardType == RewardType.EFFECT){
                 effect = new Effect(node.getNode("effect"));
                 effectOnPlayer = node.getNode("effectOnPlayer").getBoolean(false);
