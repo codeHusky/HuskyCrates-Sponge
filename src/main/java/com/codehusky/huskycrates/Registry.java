@@ -1,6 +1,7 @@
 package com.codehusky.huskycrates;
 
 import com.codehusky.huskycrates.crate.physical.EffectInstance;
+import com.codehusky.huskycrates.crate.physical.HologramInstance;
 import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
@@ -210,6 +211,9 @@ public class Registry {
     }
 
     public void clearDBRegistry() {
+        physicalCrates.forEach((location, physicalCrate) -> {
+            physicalCrate.cleanup();
+        });
         physicalCrates.clear();
         dirtyPhysicalCrates.clear();
 
@@ -281,11 +285,17 @@ public class Registry {
                     if(loco.getBlock().getType().equals(BlockTypes.AIR)){
                         this.dirtyPhysicalCrates.add(loco);
                         HuskyCrates.instance.logger.warn("CrateLocation #" + id + " provides a location where there is not a block. Flagging for removal.");
+                        HologramInstance.cleanup(loco);
                     }else {
                         this.registerPhysicalCrate(new PhysicalCrate(loco, crateID, entityCrate));
                         HuskyCrates.instance.logger.info("Loaded " + crateID + " @ " + x + "," + y + "," + z + ((entityCrate) ? " (ENTITY CRATE)" : ""));
                     }
                 }else{
+                    if(!this.isCrate(crateID) && Sponge.getServer().getWorld(worldUUID).isPresent()){
+                        World world = Sponge.getServer().getWorld(worldUUID).get();
+                        Location<World> loco = new Location<>(world,x,y,z);
+                        HologramInstance.cleanup(loco);
+                    }
                     HuskyCrates.instance.logger.warn("CrateLocation #" + id + " provides an invalid world UUID or invalid crate ID. Removing from table.");
                     Statement removal = connection.createStatement();
                     removal.executeQuery("SELECT  * FROM CRATELOCATIONS WHERE ID='" + id + "'");

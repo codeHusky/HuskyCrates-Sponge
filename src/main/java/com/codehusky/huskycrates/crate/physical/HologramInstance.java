@@ -30,16 +30,23 @@ public class HologramInstance {
 
         init();
     }
-    public void cleanup(){
-        double maxYOffset = Math.max(hologram.getYOffset(),hologram.getYOffset());
+    public void cleanup() {
+        cleanup(location);
+    }
+
+    public static void cleanup(Location<World> location){
+        //double maxYOffset = Math.max(hologram.getYOffset(),hologram.getYOffset());
         Collection<Entity> potential = location.getExtent().getNearbyEntities(location.getPosition().clone().add(0.5,0,0.5).add(0,0.4,0),0.8);
         for(int i = 1; i < 2; i++){
             potential.addAll(location.getExtent().getNearbyEntities(location.getPosition().clone().add(0.5,0,0.5).add(0,0.4+(0.8*i),0),0.8));
         }
         for(Entity e : potential){
-            e.remove();
+            if(e instanceof ArmorStand) {
+                e.remove();
+            }
         }
     }
+
     public void init() {
         cleanup();
 
