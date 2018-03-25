@@ -159,16 +159,16 @@ public class Slot {
                 }
 
             }else if(rewardType == RewardType.SERVERMESSAGE){
-                Sponge.getServer().getBroadcastChannel().send(TextSerializers.FORMATTING_CODE.deserialize(rewardString));
+                Sponge.getServer().getBroadcastChannel().send(TextSerializers.FORMATTING_CODE.deserialize(rewardString.replace("%p",player.getName()).replace("%P",player.getUniqueId().toString())));
 
             }else if(rewardType == RewardType.USERMESSAGE){
-                player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(rewardString));
+                player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(rewardString.replace("%p",player.getName()).replace("%P",player.getUniqueId().toString())));
 
             }else if(rewardType == RewardType.SERVERCOMMAND){
-                Sponge.getCommandManager().process(Sponge.getServer().getConsole(),rewardString);
+                Sponge.getCommandManager().process(Sponge.getServer().getConsole(),rewardString.replace("%p",player.getName()).replace("%P",player.getUniqueId().toString()));
 
             }else if(rewardType == RewardType.USERCOMMAND){
-                Sponge.getCommandManager().process(player,rewardString);
+                Sponge.getCommandManager().process(player,rewardString.replace("%p",player.getName()).replace("%P",player.getUniqueId().toString()));
 
             }else if(rewardType == RewardType.EFFECT){
                 HuskyCrates.registry.runEffect(effect,(effectOnPlayer)? player.getLocation() : physicalLocation );

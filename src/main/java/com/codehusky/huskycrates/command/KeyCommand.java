@@ -1,5 +1,6 @@
 package com.codehusky.huskycrates.command;
 
+import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.Util;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
@@ -25,6 +26,7 @@ public class KeyCommand implements CommandExecutor {
         Optional<Crate> crate = args.getOne(Text.of("crate"));
         Optional<Key> key = args.getOne(Text.of("key"));
         Optional<Integer> pamount = args.getOne(Text.of("amount"));
+        boolean isVirtual = args.getOne(Text.of("virtual")).isPresent();
 
         Optional<Player> player = args.getOne(Text.of("player"));
         Optional<String> all = args.getOne(Text.of("all"));
@@ -43,42 +45,65 @@ public class KeyCommand implements CommandExecutor {
             return CommandResult.success();
         }
 
-        if(workingWith.isVirtual()){
+        if(workingWith.isVirtual() && !isVirtual){
             src.sendMessage(keyCommandMessages.getCrateKeyVirtual());
             return CommandResult.success();
         }
         int amount = pamount.orElse(1);
-        String crateName = (crate.isPresent())?crate.get().getName():key.get().getName();
-        if(all.isPresent()){
+        String keyName = (crate.isPresent())?crate.get().getName():key.get().getName();
+
+        if(all.isPresent()){/** Deliver keys to all players **/
             int deliveredTo = 0;
             for(Player p : Sponge.getServer().getOnlinePlayers()){
-                InventoryTransactionResult result = Util.getHotbarFirst(p.getInventory()).offer(workingWith.getKeyItemStack(amount));
-                if(result.getType() != InventoryTransactionResult.Type.SUCCESS){
+                InventoryTransactionResult result = null;
+
+                if(!isVirtual)
+                    result = Util.getHotbarFirst(p.getInventory()).offer(workingWith.getKeyItemStack(amount));
+                else
+                    HuskyCrates.registry.addVirtualKeys(p.getUniqueId(),workingWith.getId(),amount);
+
+                if(!isVirtual && result.getType() != InventoryTransactionResult.Type.SUCCESS){
                     src.sendMessage(keyCommandMessages.getKeyDeliveryFail(p.getName(),amount));
                 }else{
-                    p.sendMessage(keyCommandMessages.getReceivedKey(workingWith.getName(),amount));
+                    p.sendMessage(keyCommandMessages.getReceivedKey(keyName,amount));
                     deliveredTo++;
                 }
             }
-            src.sendMessage(Text.of(deliveredTo + " players were given " + amount + " key(s)."));
-        }else if(player.isPresent()){
-            InventoryTransactionResult result = Util.getHotbarFirst(player.get().getInventory()).offer(workingWith.getKeyItemStack(amount));
-            if(result.getType() != InventoryTransactionResult.Type.SUCCESS){
+            src.sendMessage(keyCommandMessages.getMassKeyDeliverySuccess(deliveredTo,amount));
+
+        }else if(player.isPresent()){ /** Deliver keys to a player **/
+            InventoryTransactionResult result = null;
+
+            if(!isVirtual)
+                result = Util.getHotbarFirst(player.get().getInventory()).offer(workingWith.getKeyItemStack(amount));
+            else
+                HuskyCrates.registry.addVirtualKeys(player.get().getUniqueId(),workingWith.getId(),amount);
+
+            if(!isVirtual && result.getType() != InventoryTransactionResult.Type.SUCCESS){
                 src.sendMessage(keyCommandMessages.getKeyDeliveryFail(player.get().getName(),amount));
             }else{
-                player.get().sendMessage(keyCommandMessages.getReceivedKey(workingWith.getName(),amount));
+                player.get().sendMessage(keyCommandMessages.getReceivedKey(keyName,amount));
                 src.sendMessage(keyCommandMessages.getKeyDeliverySuccess(player.get().getName(),amount));
             }
-        }else if(src instanceof Player) {
+
+        }else if(src instanceof Player) { /** Deliver keys to self **/
             Player psrc = (Player) src;
-            InventoryTransactionResult result = Util.getHotbarFirst(psrc.getInventory()).offer(workingWith.getKeyItemStack(amount));
-            if(result.getType() != InventoryTransactionResult.Type.SUCCESS){
+            InventoryTransactionResult result = null;
+
+            if(!isVirtual)
+                result = Util.getHotbarFirst(psrc.getInventory()).offer(workingWith.getKeyItemStack(amount));
+            else
+                HuskyCrates.registry.addVirtualKeys(psrc.getUniqueId(),workingWith.getId(),amount);
+
+            if(!isVirtual && result.getType() != InventoryTransactionResult.Type.SUCCESS){
                 src.sendMessage(keyCommandMessages.getSelfKeyDeliveryFail());
             }else{
                 src.sendMessage(keyCommandMessages.getSelfKeyDeliverySuccess(amount));
             }
-        }else{
+
+        }else{ /** No valid subject... **/
             src.sendMessage(keyCommandMessages.getNoPlayersFound());
+
         }
         return CommandResult.success();
     }
@@ -97,7 +122,7 @@ public class KeyCommand implements CommandExecutor {
             this.crateNoLocalKey = node.getNode("crateNoLocalKey")
                     .getString("&cThe supplied crate did not have a local key.");
             this.crateKeyVirtual = node.getNode("crateKeyVirtual")
-                    .getString("&cThe resolved key is virtual only. Please supply a key that can be a physical item.");
+                    .getString("&cThe resolved key is virtual only. Please supply a key that can be a physical item, or use the \"v\" flag.");
             this.receivedKey = node.getNode("receivedKey")
                     .getString("&aYou received {amount} {key}{amount.plural}&r!");
             this.keyDeliveryFail = node.getNode("keyDeliveryFail")

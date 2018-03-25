@@ -36,6 +36,12 @@ public class CrateListeners {
                         player.sendMessage(physicalCrate.getCrate().getMessages().format(Crate.Messages.Type.RejectionCooldown,player));
                     }
                 }else if(!physicalCrate.getCrate().isTimedOut(player.getUniqueId())){
+
+                    /////////////////////////
+                    // ATTEMPT 1
+                    // Try Physical Key
+                    /////////////////////////
+
                     Optional<ItemStack> pItemInHand = player.getItemInHand(HandTypes.MAIN_HAND);
                     if (pItemInHand.isPresent()) {
                         String keyID = Key.extractKeyId(pItemInHand.get());
@@ -43,15 +49,39 @@ public class CrateListeners {
                             if (HuskyCrates.registry.getKey(keyID).testKey(pItemInHand.get())) {
 
                                 if (physicalCrate.getCrate().testKey(pItemInHand.get())) {
-                                    physicalCrate.getCrate().launchView(physicalCrate, player);
-                                    return;
+
+                                    int toConsume = 1; //assume local key
+                                    if(physicalCrate.getCrate().getAcceptedKeys().containsKey(keyID)){
+                                        toConsume = physicalCrate.getCrate().getAcceptedKeys().get(keyID);
+                                    }
+                                    if(HuskyCrates.registry.consumeSecureKey(keyID,Key.extractKeyUUID(pItemInHand.get()),toConsume)) {
+                                        if (pItemInHand.get().getQuantity() > toConsume) {
+                                            player.setItemInHand(HandTypes.MAIN_HAND, ItemStack.builder().from(pItemInHand.get()).quantity(pItemInHand.get().getQuantity() - toConsume).build());
+                                        } else {
+                                            player.setItemInHand(HandTypes.MAIN_HAND, ItemStack.empty());
+                                        }
+
+                                        physicalCrate.getCrate().launchView(physicalCrate, player);
+                                        return;
+                                    }else{
+                                        
+                                    }
                                 }
                             }
                         }
-                    }else if(physicalCrate.getCrate().testVirtualKey(player.getUniqueId())){
+                    }
+
+                    /////////////////////////
+                    // ATTEMPT 2
+                    // Try Virtual Key
+                    /////////////////////////
+
+                    if(physicalCrate.getCrate().testVirtualKey(player.getUniqueId())){
+                        physicalCrate.getCrate().consumeVirtualKeys(player.getUniqueId());
                         physicalCrate.getCrate().launchView(physicalCrate, player);
                         return;
                     }
+
                     player.playSound(SoundTypes.ENTITY_CREEPER_DEATH, player.getPosition(), 1.0);
                     if (physicalCrate.getCrate().getRejectEffect() != null) {
                         HuskyCrates.registry.runEffect(physicalCrate.getCrate().getRejectEffect(), physicalCrate.getLocation());

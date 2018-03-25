@@ -24,12 +24,8 @@ public class CommandRegister {
                         .build(),"b","blk","block")
                 .child(CommandSpec.builder()
                         .executor(new KeyCommand())
-                        .arguments(GenericArguments.firstParsing(new CrateArgument(Text.of("crate")),new KeyArgument(Text.of("key"))),GenericArguments.optionalWeak(GenericArguments.integer(Text.of("amount"))),GenericArguments.optional(GenericArguments.firstParsing(GenericArguments.player(Text.of("player")),GenericArguments.literal(Text.of("all"),"@a"))))
+                        .arguments(GenericArguments.optionalWeak(GenericArguments.literal(Text.of("virtual"),"v")),GenericArguments.firstParsing(new CrateArgument(Text.of("crate")),new KeyArgument(Text.of("key"))),GenericArguments.optionalWeak(GenericArguments.integer(Text.of("amount"))),GenericArguments.optional(GenericArguments.firstParsing(GenericArguments.player(Text.of("player")),GenericArguments.literal(Text.of("all"),"@a"))))
                         .build(),"k","key")
-                .child(CommandSpec.builder()
-                        .executor(new VirtualKeyCommand())
-                        .arguments()
-                        .build(),"vk","vkey","virtualkey")
                 .child(CommandSpec.builder()
                         .executor(new ReloadCommand())
                         .build(),"rl","r","reload")
@@ -37,6 +33,8 @@ public class CommandRegister {
                         .executor(new MainCommand())
                         .build(),"h","help")
                 .executor(new MainCommand())
+                .description(Text.of("Main HuskyCrates Command."))
+                .extendedDescription(Text.of("For more information on the commands you can use with HuskyCrates, please visit the HuskyCrates documentation.\nYou can find a link to the documentation within /hc help."))
                 .build();
         Sponge.getCommandManager().register(plugin,mainCommand,"hc","husky","huskycrates");
     }

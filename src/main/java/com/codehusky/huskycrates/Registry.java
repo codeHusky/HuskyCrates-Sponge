@@ -67,19 +67,42 @@ public class Registry {
         return physicalCrates;
     }
 
-    public boolean isSecureKey(String crateID, UUID uuid){
-        return keysInCirculation.containsKey(uuid) && keysInCirculation.get(uuid).getKey().equals(crateID) && keysInCirculation.get(uuid).getValue() > 0;
+    public boolean isSecureKey(String keyID, UUID uuid){
+        return keysInCirculation.containsKey(uuid) && keysInCirculation.get(uuid).getKey().equals(keyID) && keysInCirculation.get(uuid).getValue() > 0;
     }
 
-    public UUID generateSecureKey(String crateID){
-        return this.generateSecureKey(crateID,1);
+    public UUID generateSecureKey(String keyID){
+        return this.generateSecureKey(keyID,1);
     }
 
-    public UUID generateSecureKey(String crateID, int amount){
+    public UUID generateSecureKey(String keyID, int amount){
+        if(!isKey(keyID)) return null;
+
         UUID uuid = UUID.randomUUID();
-        keysInCirculation.put(uuid,new Pair<>(crateID,amount));
+        keysInCirculation.put(uuid,new Pair<>(keyID,amount));
         dirtyKeysInCirculation.add(uuid);
         return uuid;
+    }
+
+    public boolean consumeSecureKey(String keyID, UUID keyUUID, int amount){
+        if(!isKey(keyID)) return false;
+        if(keysInCirculation.containsKey(keyUUID)){
+            if(keysInCirculation.get(keyUUID).getKey().equals(keyID)){
+                if(keysInCirculation.get(keyUUID).getValue() <= amount){
+
+                    if(keysInCirculation.get(keyUUID).getValue() == amount){
+                        keysInCirculation.remove(keyUUID);
+                    }else {
+                        Pair<String, Integer> newPair = new Pair<>(keyID, keysInCirculation.get(keyUUID).getValue() - amount);
+                        keysInCirculation.put(keyUUID,newPair);
+                    }
+
+                    dirtyKeysInCirculation.add(keyUUID);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public void runEffect(Effect effect, Location<World> location){
@@ -165,7 +188,7 @@ public class Registry {
     }
 
     public boolean addVirtualKeys(UUID playerUUID, String keyID, Integer amount){
-        if(isCrate(keyID)){
+        if(isKey(keyID)){
             HashMap<String, Integer> balances = virtualKeys.getOrDefault(playerUUID,new HashMap<>());
             balances.put(keyID,(balances.containsKey(keyID))?amount + balances.get(keyID):amount);
             virtualKeys.put(playerUUID,balances);
@@ -183,7 +206,7 @@ public class Registry {
     }
 
     public boolean setVirtualKeys(UUID playerUUID, String keyID, Integer amount){
-        if(isCrate(keyID)){
+        if(isKey(keyID)){
             HashMap<String, Integer> balances = virtualKeys.getOrDefault(playerUUID,new HashMap<>());
             balances.put(keyID,amount);
             virtualKeys.put(playerUUID,balances);
@@ -369,17 +392,17 @@ public class Registry {
             while(keyBalances.next()){
                 //HuskyCrates.instance.logger.info("keyBalances thing!");
                 UUID userUUID = UUID.fromString(keyBalances.getString("userUUID"));
-                String crateID = keyBalances.getString("crateID");
+                String keyID = keyBalances.getString("keyID");
                 int amount = keyBalances.getInt("amount");
-                if(this.isCrate(crateID)){
+                if(this.isKey(keyID)){
                     HashMap<String,Integer> t = new HashMap<>();
                     if(this.virtualKeys.containsKey(userUUID)){
                         t = this.virtualKeys.get(userUUID);
                     }
-                    t.put(crateID,amount);
+                    t.put(keyID,amount);
                     this.virtualKeys.put(userUUID, t);
                 }else{
-                    HuskyCrates.instance.logger.warn("KeyBalances for UUID " + userUUID + " provides an invalid crate ID. Removing from table.");
+                    HuskyCrates.instance.logger.warn("A Key Balance for UUID " + userUUID + " provides an invalid key ID. Removing from table.");
                     Statement removal = connection.createStatement();
                     removal.executeQuery("SELECT  * FROM KEYBALANCES WHERE USERUUID='" + userUUID.toString() + "'");
                     removal.executeUpdate("DELETE FROM KEYBALANCES");

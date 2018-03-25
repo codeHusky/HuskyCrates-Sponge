@@ -6,12 +6,10 @@ import com.codehusky.huskycrates.crate.virtual.effects.Effect;
 import com.codehusky.huskycrates.crate.virtual.effects.elements.Particle;
 import com.codehusky.huskycrates.crate.virtual.views.SpinnerView;
 import com.codehusky.huskycrates.crate.virtual.views.ViewConfig;
-import com.codehusky.huskycrates.exception.ConfigParseError;
-import com.codehusky.huskycrates.exception.InvalidMessageTypeError;
-import com.codehusky.huskycrates.exception.NoMessageContextError;
-import com.codehusky.huskycrates.exception.SlotSelectionError;
+import com.codehusky.huskycrates.exception.*;
 import com.flowpowered.math.vector.Vector3d;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Keys;
@@ -199,7 +197,7 @@ public class Crate {
         }
         for(String thisid : acceptedKeys.keySet()){
             Key potential = HuskyCrates.registry.getKey(thisid);
-            if(potential.testKey(stack)) return true;
+            if(potential.testKey(stack) && stack.getQuantity() >= acceptedKeys.get(thisid)) return true;
         }
         return false;
     }
@@ -211,6 +209,40 @@ public class Crate {
             }
         }
         return useLocalKey && HuskyCrates.registry.getVirtualKeyBalance(playerUUID,getLocalKey().getId()) >= 1;
+    }
+
+    public void consumeVirtualKeys(UUID playerUUID){
+        if(testVirtualKey(playerUUID)){
+            for(String keyID : acceptedKeys.keySet()){
+                if(HuskyCrates.registry.getVirtualKeyBalance(playerUUID,keyID) >= acceptedKeys.get(keyID)){
+                    HuskyCrates.registry.removeVirtualKeys(playerUUID,keyID,acceptedKeys.get(keyID));
+                    Sponge.getServer().getPlayer(playerUUID).ifPresent(player ->
+                        player.sendMessage(
+                            messages.getVirtualKeyConsumed(
+                                HuskyCrates.registry.getKey(keyID).getName(),
+                                acceptedKeys.get(keyID),
+                                HuskyCrates.registry.getVirtualKeyBalance(playerUUID,keyID)
+                            )
+                        )
+                    );
+                    return;
+                }
+            }
+            if(useLocalKey && HuskyCrates.registry.getVirtualKeyBalance(playerUUID,getLocalKey().getId()) >= 1){
+                HuskyCrates.registry.removeVirtualKeys(playerUUID,getLocalKey().getId(),1);
+                Sponge.getServer().getPlayer(playerUUID).ifPresent(player ->
+                        player.sendMessage(
+                                messages.getVirtualKeyConsumed(
+                                        getLocalKey().getName(),
+                                        1,
+                                        HuskyCrates.registry.getVirtualKeyBalance(playerUUID,getLocalKey().getId())
+                                )
+                        )
+                );
+                return;
+            }
+            throw new VirtualKeyStarvedError("No virtual key could be found to consume in exchange for a crate use. Report this to a developer.");
+        }
     }
 
     public boolean hasLocalKey(){
@@ -226,7 +258,7 @@ public class Crate {
     public ItemStack getCratePlacementBlock(ItemType itemType) {
         ItemStack stack = ItemStack.builder()
                 .itemType(itemType)
-                .add(Keys.DISPLAY_NAME, Text.of(TextSerializers.FORMATTING_CODE.deserialize(name)," crate placer"))
+                .add(Keys.DISPLAY_NAME, Text.of(TextSerializers.FORMATTING_CODE.deserialize(name)," Placement Block"))
                 .build();
         return ItemStack.builder()
                 .fromContainer(stack.toContainer().set(DataQuery.of("UnsafeData","HCCRATEID"),this.id))
@@ -333,11 +365,12 @@ public class Crate {
     public static class Messages {
         private String rejectionNeedKey;
         private String rejectionCooldown;
+        private String virtualKeyConsumed;
         private String crateID;
 
         public enum Type {
             RejectionNeedKey,
-            RejectionCooldown,
+            RejectionCooldown
         }
 
         public String getRejectionCooldown() {
@@ -348,11 +381,17 @@ public class Crate {
             return rejectionNeedKey;
         }
 
+        public String getVirtualKeyConsumed() {
+            return virtualKeyConsumed;
+        }
+
         public Messages(ConfigurationNode node, @Nullable String crateID, @Nullable Messages defaultMessages){
             this.rejectionNeedKey = node.getNode("rejectionNeedKey")
                     .getString((defaultMessages != null)?defaultMessages.getRejectionNeedKey():"&cYou need a {key.0.name} to use this crate.");
             this.rejectionCooldown = node.getNode("rejectionCooldown")
                     .getString((defaultMessages != null)?defaultMessages.getRejectionCooldown():"&aCalm down! &7You need to wait {cooldown.remaining} second{cooldown.remaining.plural} before you can use another {crate.name}&r&7!");
+            this.virtualKeyConsumed = node.getNode("virtualKeyConsumed")
+                    .getString((defaultMessages != null)?defaultMessages.getVirtualKeyConsumed():"&eYou just used {amount} {key}{amount.plural}&r&e from your key balance. You have {amountRemaining} {key}&r&e{amountRemaining.plural} left.");
 
             this.crateID = crateID;
         }
@@ -380,6 +419,16 @@ public class Crate {
                 throw new NoMessageContextError("Invalid crate id: " + crateID);
             }
             return format(messageType, HuskyCrates.registry.getCrate(crateID), player);
+        }
+
+        public Text getVirtualKeyConsumed(String keyName, Integer amountConsumed, Integer amountRemaining){
+            return TextSerializers.FORMATTING_CODE.deserialize(
+                    this.virtualKeyConsumed
+                            .replace("{amount}",amountConsumed.toString())
+                            .replace("{amount.plural}",(amountConsumed != 1)?"s":"")
+                            .replace("{amountRemaining}",amountRemaining.toString())
+                            .replace("{amountRemaining.plural}",(amountRemaining != 1)?"s":"")
+                            .replace("{key}",keyName));
         }
 
         public Text format(Type messageType, Crate crate, Player player){
