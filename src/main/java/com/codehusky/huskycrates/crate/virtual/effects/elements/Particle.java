@@ -100,6 +100,9 @@ public class Particle {
                 case "orbit":
                     this.animationCode = "x=Math.sin(time/5)*0.7; y=Math.sin(time/3)*0.2; z=Math.cos(time/5)*0.7;";
                     break;
+                case "counterorbit":
+                    this.animationCode = "x=Math.cos(time/5)*0.7; y=Math.sin(time/3)*0.2; z=Math.sin(time/5)*0.7;";
+                    break;
                 default:
                     throw new ConfigParseError("Invalid animation preset specified!",node.getNode("animationPreset").getPath());
             }
@@ -159,7 +162,7 @@ public class Particle {
                                 .option(ParticleOptions.COLOR, Color.ofRgb(r, g, b))
                                 .build();
                     }
-                    particlePos = location.getPosition().clone().add(0.5, 0.5, 0.5).add(x, y, z);
+                    particlePos = location.getPosition().clone().add(position).add(x, y, z);
                 }
                 if(player != null){
                     player.spawnParticles(ourParticle,particlePos);
