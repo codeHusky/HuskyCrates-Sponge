@@ -129,7 +129,7 @@ public class Crate {
                     viewConfig = new ViewConfig(node.getNode("viewConfig"));
                     break;
             }
-        }catch (IllegalArgumentException e){
+        }catch (Exception e){
             throw new ConfigParseError("Invalid view type!", node.getNode("viewType").getPath());
         }
 

@@ -19,7 +19,7 @@ public class Hologram {
             throw new ConfigParseError("Hologram lines must be strings!",node.getNode("lines").getPath());
         }
 
-        this.yOffset = node.getNode("yOffset").getDouble(0.2);
+        this.yOffset = node.getNode("yOffset").getDouble(0.0);
         this.entityYOffset = node.getNode("entityYOffset").getDouble(this.yOffset);
     }
 

@@ -146,9 +146,9 @@ public class Particle {
                     sc.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
                     ScriptObjectMirror scriptObjectMirror = (ScriptObjectMirror) compiled.eval(sc);
 
-                    double x = (double) scriptObjectMirror.get("x");
-                    double y = (double) scriptObjectMirror.get("y");
-                    double z = (double) scriptObjectMirror.get("z");
+                    double x = Double.valueOf("" + scriptObjectMirror.get("x"));
+                    double y = Double.valueOf("" + scriptObjectMirror.get("y"));
+                    double z = Double.valueOf("" + scriptObjectMirror.get("z"));
 
                     int r = Math.max(0, Math.min(255, ((Double) scriptObjectMirror.get("r")).intValue()));
                     int g = Math.max(0, Math.min(255, ((Double) scriptObjectMirror.get("g")).intValue()));
