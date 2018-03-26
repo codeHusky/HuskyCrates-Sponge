@@ -98,10 +98,10 @@ public class Particle {
         }else{
             switch (node.getNode("animationPreset").getString("").toLowerCase()){
                 case "orbit":
-                    this.animationCode = "x=Math.sin(time/5)*0.7; y=Math.sin(time/3)*0.2; z=Math.cos(time/5)*0.7;";
-                    break;
+                    this.animationCode = "x=Math.sin(time/4)*0.7; y=Math.sin((time/4)) * 0.2 ; z=Math.cos(time/4)*0.7;";
+                    break; //TODO: double check these numbers match old code
                 case "counterorbit":
-                    this.animationCode = "x=Math.cos(time/5)*0.7; y=Math.sin(time/3)*0.2; z=Math.sin(time/5)*0.7;";
+                    this.animationCode = "x=Math.cos(time/4)*0.7; y=Math.sin((time/4)+ 10) * 0.2 - 0.10; z=Math.sin(time/4)*0.7;";
                     break;
                 default:
                     throw new ConfigParseError("Invalid animation preset specified!",node.getNode("animationPreset").getPath());

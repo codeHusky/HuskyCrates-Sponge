@@ -56,7 +56,7 @@ public class HologramInstance {
             ArmorStand as = (ArmorStand) location.getExtent().createEntity(EntityTypes.ARMOR_STAND,
                         location.getPosition()
                             .clone()
-                            .add(0.5,0,0.5)
+                            .add(0.5,1,0.5)
                             .add(0,((isEntity)?hologram.getEntityYOffset():hologram.getEntityYOffset()) - (linenum * 0.23),0));
 
             as.offer(Keys.HAS_GRAVITY,false);
@@ -66,6 +66,8 @@ public class HologramInstance {
             as.offer(Keys.INVISIBLE,true);
             as.offer(Keys.INVULNERABILITY_TICKS,-1);
             as.offer(Keys.DISPLAY_NAME,textline);
+            as.offer(Keys.ARMOR_STAND_MARKER,true);
+            as.offer(Keys.ARMOR_STAND_HAS_ARMS,false);
 
             location.getExtent().spawnEntity(as);
             linenum++;
