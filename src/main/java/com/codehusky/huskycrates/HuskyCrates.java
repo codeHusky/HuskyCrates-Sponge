@@ -223,8 +223,6 @@ public class HuskyCrates {
         registry.pushDirty();
         registry.clearRegistry();
         loadConfig();
-        registry.pushDirty();
-        registry.clearRegistry();
         if(!inErrorState) {
             registry.loadFromDatabase();
         }

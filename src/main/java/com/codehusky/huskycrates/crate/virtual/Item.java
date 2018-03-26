@@ -59,7 +59,7 @@ public class Item {
 
         this.name = node.getNode("name").getString();
         this.count = node.getNode("count").getInt(1);
-        this.damage = node.getNode("damage").getInt();
+        this.damage = node.getNode("damage").getInt(node.getNode("meta").getInt(node.getNode("metadata").getInt()));
         this.durability = node.getNode("durability").getInt();
 
         if(!node.getNode("lore").isVirtual()){

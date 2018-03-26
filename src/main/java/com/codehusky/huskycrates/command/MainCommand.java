@@ -26,6 +26,7 @@ public class MainCommand implements CommandExecutor {
                     Text.of(TextColors.YELLOW,"/hc reload"),
                     Text.of(TextColors.YELLOW,"/hc block <crate> [block id] [user]"),
                     Text.of(TextColors.YELLOW,"/hc key [v] <key/crate> [amount] [user or @a]"),
+                    Text.of(TextColors.YELLOW,"/hc bal [user]"),
                     Text.of(TextColors.GRAY,"For more information or command aliases, review the documentation ",Text.builder().onClick(TextActions.openUrl(new URL("https://huskycrates.readthedocs.io/"))).append(Text.of(TextStyles.UNDERLINE,"here")).onHover(TextActions.showText(Text.of("https://huskycrates.readthedocs.io/"))).build(),"."));
         } catch (MalformedURLException e) {
             e.printStackTrace();
