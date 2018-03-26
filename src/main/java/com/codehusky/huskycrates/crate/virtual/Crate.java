@@ -117,12 +117,7 @@ public class Crate {
             }
         }
 
-        if(node.getNode("messages").isVirtual()){
-            messages = HuskyCrates.crateMessages.clone();
-            messages.setCrateID(this.id);
-        }else{
-            messages = new Messages(node.getNode("messages"),this.id, HuskyCrates.crateMessages);
-        }
+        messages = new Messages(node.getNode("messages"),this.id, HuskyCrates.crateMessages);
 
         try {
             this.viewType = ViewType.valueOf(node.getNode("viewType").getString().toUpperCase());
@@ -214,31 +209,35 @@ public class Crate {
     public void consumeVirtualKeys(UUID playerUUID){
         if(testVirtualKey(playerUUID)){
             for(String keyID : acceptedKeys.keySet()){
-                if(HuskyCrates.registry.getVirtualKeyBalance(playerUUID,keyID) >= acceptedKeys.get(keyID)){
-                    HuskyCrates.registry.removeVirtualKeys(playerUUID,keyID,acceptedKeys.get(keyID));
-                    Sponge.getServer().getPlayer(playerUUID).ifPresent(player ->
+                int consumed = acceptedKeys.get(keyID);
+                if(HuskyCrates.registry.getVirtualKeyBalance(playerUUID,keyID) >= consumed){
+                    HuskyCrates.registry.removeVirtualKeys(playerUUID,keyID,consumed);
+                    System.out.println(consumed);
+                    if(Sponge.getServer().getPlayer(playerUUID).isPresent()) {
+                        Player player = Sponge.getServer().getPlayer(playerUUID).get();
                         player.sendMessage(
-                            messages.getVirtualKeyConsumed(
-                                HuskyCrates.registry.getKey(keyID).getName(),
-                                acceptedKeys.get(keyID),
-                                HuskyCrates.registry.getVirtualKeyBalance(playerUUID,keyID)
-                            )
-                        )
-                    );
+                                messages.getVirtualKeyConsumed(
+                                        HuskyCrates.registry.getKey(keyID).getName(),
+                                        consumed,
+                                        HuskyCrates.registry.getVirtualKeyBalance(playerUUID, keyID)
+                                )
+                        );
+                    }
                     return;
                 }
             }
             if(useLocalKey && HuskyCrates.registry.getVirtualKeyBalance(playerUUID,getLocalKey().getId()) >= 1){
                 HuskyCrates.registry.removeVirtualKeys(playerUUID,getLocalKey().getId(),1);
-                Sponge.getServer().getPlayer(playerUUID).ifPresent(player ->
-                        player.sendMessage(
-                                messages.getVirtualKeyConsumed(
-                                        getLocalKey().getName(),
-                                        1,
-                                        HuskyCrates.registry.getVirtualKeyBalance(playerUUID,getLocalKey().getId())
-                                )
-                        )
-                );
+                if(Sponge.getServer().getPlayer(playerUUID).isPresent()) {
+                    Player player = Sponge.getServer().getPlayer(playerUUID).get();
+                    player.sendMessage(
+                            messages.getVirtualKeyConsumed(
+                                    getLocalKey().getName(),
+                                    1,
+                                    HuskyCrates.registry.getVirtualKeyBalance(playerUUID, getLocalKey().getId())
+                            )
+                    );
+                }
                 return;
             }
             throw new VirtualKeyStarvedError("No virtual key could be found to consume in exchange for a crate use. Report this to a developer.");
