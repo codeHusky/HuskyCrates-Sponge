@@ -448,7 +448,10 @@ public class Crate {
                     .replace("{crate.name}", crate.getName())
                     .replace("{crate.id}", crate.getId());
 
-            List<Key> keys = (crate.hasLocalKey())? Collections.singletonList(crate.getLocalKey()) : new ArrayList<>();
+            ArrayList<Key> keys = new ArrayList<>();
+            if(crate.hasLocalKey()){
+                keys.add(crate.getLocalKey());
+            }
             for(String keyID : crate.getAcceptedKeys().keySet()) {
                 keys.add(HuskyCrates.registry.getKey(keyID));
             }

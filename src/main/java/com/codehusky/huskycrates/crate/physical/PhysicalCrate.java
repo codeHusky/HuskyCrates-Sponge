@@ -2,6 +2,7 @@ package com.codehusky.huskycrates.crate.physical;
 
 import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.crate.virtual.Crate;
+import com.codehusky.huskycrates.exception.InvalidCrateIDError;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
@@ -25,9 +26,11 @@ public class PhysicalCrate {
         if(HuskyCrates.registry.isCrate(representedCrateID)) {
             this.representedCrateID = representedCrateID;
         }else{
-
+            throw new InvalidCrateIDError("No crate with id " + representedCrateID);
         }
         this.isEntity = isEntity;
+
+        System.out.println(representedCrateID);
 
         Crate crate = HuskyCrates.registry.getCrate(this.representedCrateID);
 

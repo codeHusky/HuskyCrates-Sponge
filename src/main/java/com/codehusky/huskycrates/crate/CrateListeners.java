@@ -13,11 +13,11 @@ import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectTypes;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -127,20 +127,22 @@ public class CrateListeners {
 
     @Listener(order = Order.PRE)
     public void placeCrate(ChangeBlockEvent.Place event, @Root Player player){
-        boolean notCreative = !player.get(Keys.GAME_MODE).orElse(GameModes.NOT_SET).equals(GameModes.CREATIVE);
-        if(player.getItemInHand(HandTypes.MAIN_HAND).isPresent() || notCreative) {
+        if(event.getContext().get(EventContextKeys.USED_ITEM).isPresent()) {
             for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
                 Optional<Location<World>> pLocation = transaction.getFinal().getLocation();
-
+                ItemStack stackUsed = event.getContext().get(EventContextKeys.USED_ITEM).get().createStack();
+                System.out.println(event.getContext().get(EventContextKeys.USED_ITEM).get().toContainer());
                 if (pLocation.isPresent()) {
                     Location<World> location = pLocation.get();
                     String pID = null;
                     try{
-                        pID= Crate.extractCrateID(player.getItemInHand(HandTypes.MAIN_HAND).get());
-                    }catch (Exception e){}
-                    if(!notCreative && pID != null && HuskyCrates.registry.isCrate(pID) || notCreative) {
-                        if(!notCreative && !player.getItemInHand(HandTypes.MAIN_HAND).get().getType().getBlock().isPresent()) return;
-                        if (notCreative || player.getItemInHand(HandTypes.MAIN_HAND).get().getType().getBlock().get().equals(transaction.getFinal().getState().getType())) {
+                        pID= Crate.extractCrateID(stackUsed);
+                    }catch (Exception e){
+                        return;
+                    }
+                    if(pID != null && HuskyCrates.registry.isCrate(pID)) {
+                        if(!stackUsed.getType().getBlock().isPresent()) return;
+                        if (stackUsed.getType().getBlock().get().equals(transaction.getFinal().getState().getType())) {
                             if(!player.hasPermission("huskycrates.admin")) {
                                 event.setCancelled(true);
                                 player.setItemInHand(HandTypes.MAIN_HAND,ItemStack.empty());
