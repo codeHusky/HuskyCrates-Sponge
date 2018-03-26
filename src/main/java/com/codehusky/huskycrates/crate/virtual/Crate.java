@@ -69,46 +69,6 @@ public class Crate {
         this.id = node.getKey().toString();
         this.name = node.getNode("name").getString();
 
-        if(node.getNode("slots").isVirtual()){
-            throw new ConfigParseError("Crates must have associated slots!", node.getNode("slots").getPath());
-        }else{
-            for(ConfigurationNode slot : node.getNode("slots").getChildrenList()){
-                Slot thisSlot = new Slot(slot);
-                slotChanceMax += thisSlot.getChance();
-                slots.add(thisSlot);
-            }
-            if(slots.size() == 0){
-                throw new ConfigParseError("Crates must have associated slots!", node.getNode("slots").getPath());
-            }
-        }
-
-        if(node.getNode("messages").isVirtual()){
-            messages = HuskyCrates.crateMessages.clone();
-            messages.setCrateID(this.id);
-        }else{
-            messages = new Messages(node.getNode("messages"),this.id, HuskyCrates.crateMessages);
-        }
-
-        try {
-            this.viewType = ViewType.valueOf(node.getNode("viewType").getString().toUpperCase());
-            switch(this.viewType){
-                case SPINNER:
-                    viewConfig = new SpinnerView.Config(node.getNode("viewConfig"));
-                    break;
-                default:
-                    viewConfig = new ViewConfig(node.getNode("viewConfig"));
-                    break;
-            }
-        }catch (IllegalArgumentException e){
-            throw new ConfigParseError("Invalid view type!", node.getNode("viewType").getPath());
-        }
-
-        this.free = node.getNode("free").getBoolean(false);
-
-        this.cooldownSeconds = node.getNode("cooldownSeconds").getLong(0);
-
-        this.scrambleSlots = node.getNode("scrambleSlots").getBoolean(false);
-
         this.useLocalKey = node.getNode("useLocalKey").getBoolean(false);
 
         ConfigurationNode aKeyNode = node.getNode("acceptedKeys");
@@ -143,6 +103,46 @@ public class Crate {
         }else if(aKeyNode.isVirtual()){
             throw new ConfigParseError("Crate has no accepted keys!",node.getPath());
         }
+
+        if(node.getNode("slots").isVirtual()){
+            throw new ConfigParseError("Crates must have associated slots!", node.getNode("slots").getPath());
+        }else{
+            for(ConfigurationNode slot : node.getNode("slots").getChildrenList()){
+                Slot thisSlot = new Slot(slot,this);
+                slotChanceMax += thisSlot.getChance();
+                slots.add(thisSlot);
+            }
+            if(slots.size() == 0){
+                throw new ConfigParseError("Crates must have associated slots!", node.getNode("slots").getPath());
+            }
+        }
+
+        if(node.getNode("messages").isVirtual()){
+            messages = HuskyCrates.crateMessages.clone();
+            messages.setCrateID(this.id);
+        }else{
+            messages = new Messages(node.getNode("messages"),this.id, HuskyCrates.crateMessages);
+        }
+
+        try {
+            this.viewType = ViewType.valueOf(node.getNode("viewType").getString().toUpperCase());
+            switch(this.viewType){
+                case SPINNER:
+                    viewConfig = new SpinnerView.Config(node.getNode("viewConfig"));
+                    break;
+                default:
+                    viewConfig = new ViewConfig(node.getNode("viewConfig"));
+                    break;
+            }
+        }catch (IllegalArgumentException e){
+            throw new ConfigParseError("Invalid view type!", node.getNode("viewType").getPath());
+        }
+
+        this.free = node.getNode("free").getBoolean(false);
+
+        this.cooldownSeconds = node.getNode("cooldownSeconds").getLong(0);
+
+        this.scrambleSlots = node.getNode("scrambleSlots").getBoolean(false);
 
         ConfigurationNode eNode = node.getNode("effects");
         if(!eNode.getNode("idle").isVirtual()){

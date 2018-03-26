@@ -1,5 +1,6 @@
 package com.codehusky.huskycrates;
 
+import com.codehusky.huskycrates.command.BalanceCommand;
 import com.codehusky.huskycrates.command.BlockCommand;
 import com.codehusky.huskycrates.command.CommandRegister;
 import com.codehusky.huskycrates.command.KeyCommand;
@@ -76,6 +77,7 @@ public class HuskyCrates {
 
     public static KeyCommand.Messages keyCommandMessages;
     public static BlockCommand.Messages blockCommandMessages;
+    public static BalanceCommand.Messages balanceCommandMessages;
     public static Crate.Messages crateMessages;
 
     private static ScriptEngineManager mgr = new ScriptEngineManager();
@@ -147,6 +149,7 @@ public class HuskyCrates {
 
                 keyCommandMessages = new KeyCommand.Messages(mainConfig.getNode("messages","keyCommand"));
                 blockCommandMessages = new BlockCommand.Messages(mainConfig.getNode("messages","blockCommand"));
+                balanceCommandMessages = new BalanceCommand.Messages(mainConfig.getNode("messages","balanceCommand"));
 
                 crateMessages = new Crate.Messages(mainConfig.getNode("messages","crate"),null);
 
@@ -220,6 +223,8 @@ public class HuskyCrates {
         registry.pushDirty();
         registry.clearRegistry();
         loadConfig();
+        registry.pushDirty();
+        registry.clearRegistry();
         if(!inErrorState) {
             registry.loadFromDatabase();
         }

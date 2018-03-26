@@ -1,5 +1,6 @@
 package com.codehusky.huskycrates.command;
 
+import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.Util;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -37,7 +38,7 @@ public class BlockCommand implements CommandExecutor {
             playerToGive = otherPlayer.get();
 
         if(playerToGive == null){
-            src.sendMessage(Text.of(TextColors.RED,"A valid player could not be found to give a crate placement block to."));
+            src.sendMessage(HuskyCrates.blockCommandMessages.getNoPlayersFound());
             return CommandResult.success();
         }
 
@@ -45,7 +46,7 @@ public class BlockCommand implements CommandExecutor {
         if(block.isPresent()){
             Optional<ItemType> itP = block.get().getItem();
             if(!itP.isPresent()){
-                src.sendMessage(Text.of(TextColors.RED,"The block you supplied could not be converted to an item. Please try again with a different block."));
+                src.sendMessage(HuskyCrates.blockCommandMessages.getItemOnlyFailure());
                 return CommandResult.success();
             }
             stack = crate.getCratePlacementBlock(itP.get());

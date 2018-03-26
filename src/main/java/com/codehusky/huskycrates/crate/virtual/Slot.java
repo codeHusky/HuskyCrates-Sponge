@@ -32,7 +32,7 @@ public class Slot {
 
     private Boolean pickUnique; // if winnings have to be unique or if they can be repeated in one pick
 
-    public Slot(ConfigurationNode node){
+    public Slot(ConfigurationNode node, Crate holder){
         this.displayItem = new Item(node.getNode("displayItem"));
 
 
@@ -40,11 +40,11 @@ public class Slot {
             if(rNode.hasListChildren()){
                 ArrayList<Reward> rewardGroup = new ArrayList<>();
                 for(ConfigurationNode rgNode : rNode.getChildrenList()){
-                    rewardGroup.add(new Reward(rgNode,node.getNode("displayItem")));
+                    rewardGroup.add(new Reward(rgNode,node.getNode("displayItem"),holder));
                 }
                 this.rewardGroups.add(rewardGroup);
             }else {
-                this.rewards.add(new Reward(rNode,node.getNode("displayItem")));
+                this.rewards.add(new Reward(rNode,node.getNode("displayItem"),holder));
             }
         }
 
@@ -126,17 +126,26 @@ public class Slot {
         private Effect effect;
         private boolean effectOnPlayer = false;
 
-        private Reward(ConfigurationNode node, ConfigurationNode displayItemNode){
+        private Integer keyCount;
+
+        private Reward(ConfigurationNode node, ConfigurationNode displayItemNode, Crate holder){
             try {
                 this.rewardType = RewardType.valueOf(node.getNode("type").getString("").toUpperCase());
             }catch(IllegalArgumentException e){
                 throw new ConfigParseError("Invalid reward type or no reward type specified.",node.getNode("type").getPath());
             }
 
-            if(this.rewardType == RewardType.USERCOMMAND || this.rewardType == RewardType.SERVERCOMMAND || this.rewardType == RewardType.SERVERMESSAGE || this.rewardType == RewardType.USERMESSAGE){
+            if(this.rewardType == RewardType.USERCOMMAND || this.rewardType == RewardType.SERVERCOMMAND || this.rewardType == RewardType.SERVERMESSAGE || this.rewardType == RewardType.USERMESSAGE || this.rewardType == RewardType.KEY){
                 rewardString = node.getNode("data").getString();
                 if(rewardString == null){
                     throw new ConfigParseError("No data specified for reward.",node.getNode("data").getPath());
+                }
+                if(this.rewardType == RewardType.KEY){
+                    if(!HuskyCrates.registry.isKey(rewardString) && !holder.hasLocalKey() && !holder.getLocalKey().getId().equals(rewardString)){
+                        throw new ConfigParseError("Invalid key ID!",node.getNode("data").getPath());
+                    }else{
+                        this.keyCount = node.getNode("keyCount").getInt(1);
+                    }
                 }
             }else if(this.rewardType == RewardType.ITEM){
                 if(node.getNode("item").isVirtual()){
@@ -172,6 +181,11 @@ public class Slot {
 
             }else if(rewardType == RewardType.EFFECT){
                 HuskyCrates.registry.runEffect(effect,(effectOnPlayer)? player.getLocation() : physicalLocation );
+            }else if(rewardType == RewardType.KEY){
+                InventoryTransactionResult result = Util.getHotbarFirst(player.getInventory()).offer(HuskyCrates.registry.getKey(rewardString).getKeyItemStack(this.keyCount));
+                if(result.getType() != InventoryTransactionResult.Type.SUCCESS){
+                    throw new RewardDeliveryError("Failed to deliver key to " + player.getName() + " from reward.");
+                }
             } else {
                 throw new RewardDeliveryError("Failed to deliver reward to " + player.getName() + " due to invalid reward type. If you see this, contact the developer immediately.");
             }
@@ -191,6 +205,8 @@ public class Slot {
 
         ITEM,
 
-        EFFECT
+        EFFECT,
+
+        KEY
     }
 }

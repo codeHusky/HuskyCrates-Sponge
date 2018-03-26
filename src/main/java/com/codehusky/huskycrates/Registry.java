@@ -86,10 +86,10 @@ public class Registry {
 
     public boolean consumeSecureKey(String keyID, UUID keyUUID, int amount){
         if(!isKey(keyID)) return false;
+
         if(keysInCirculation.containsKey(keyUUID)){
             if(keysInCirculation.get(keyUUID).getKey().equals(keyID)){
-                if(keysInCirculation.get(keyUUID).getValue() <= amount){
-
+                if(keysInCirculation.get(keyUUID).getValue() >= amount){
                     if(keysInCirculation.get(keyUUID).getValue() == amount){
                         keysInCirculation.remove(keyUUID);
                     }else {
@@ -226,6 +226,13 @@ public class Registry {
             }
         }
         return 0;
+    }
+
+    public HashMap<String, Integer> getVirtualKeyBalances(UUID playerUUID){
+        if(virtualKeys.containsKey(playerUUID)){
+            return virtualKeys.get(playerUUID);
+        }
+        return new HashMap<>();
     }
 
     public void updateLastUse(String crateID, UUID playerUUID){

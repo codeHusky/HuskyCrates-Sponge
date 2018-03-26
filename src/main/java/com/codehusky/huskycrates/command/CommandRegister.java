@@ -29,6 +29,13 @@ public class CommandRegister {
                         .permission("huskycrates.key.base")
                         .build(),"k","key")
                 .child(CommandSpec.builder()
+                        .executor(new BalanceCommand())
+                        .arguments(GenericArguments.optionalWeak(GenericArguments.user(Text.of("player"))),
+                                GenericArguments.optionalWeak(GenericArguments.uuid(Text.of("uuid"))),
+                                GenericArguments.optionalWeak(GenericArguments.string(Text.of("username"))))
+                        .permission("huskycrates.bal.base")
+                        .build(),"bal","balance")
+                .child(CommandSpec.builder()
                         .executor(new ReloadCommand())
                         .permission("huskycrates.reload")
                         .build(),"rl","r","reload")
