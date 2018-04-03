@@ -7,7 +7,6 @@ import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
 import com.codehusky.huskycrates.crate.virtual.effects.Effect;
 import com.codehusky.huskycrates.exception.DoubleRegistrationError;
-import javafx.util.Pair;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.service.sql.SqlService;
@@ -16,10 +15,7 @@ import org.spongepowered.api.world.World;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * This class is intended to contain Crate and Keys, Crate locations w/ virtual,
@@ -31,7 +27,7 @@ public class Registry {
     private HashMap<UUID, HashMap<String, Integer>> virtualKeys = new HashMap<>();
     private HashMap<UUID, HashSet<String>> dirtyVirtualKeys = new HashMap<>();
 
-    private HashMap<UUID, Pair<String,Integer>> keysInCirculation = new HashMap<>();
+    private HashMap<UUID, Map.Entry<String,Integer>> keysInCirculation = new HashMap<>();
     private HashSet<UUID> dirtyKeysInCirculation = new HashSet<>();
 
     private HashMap<UUID, HashMap<String, Long>> lastCrateUse = new HashMap<>();
@@ -79,7 +75,7 @@ public class Registry {
         if(!isKey(keyID)) return null;
 
         UUID uuid = UUID.randomUUID();
-        keysInCirculation.put(uuid,new Pair<>(keyID,amount));
+        keysInCirculation.put(uuid,new AbstractMap.SimpleEntry<>(keyID,amount));
         dirtyKeysInCirculation.add(uuid);
         return uuid;
     }
@@ -93,8 +89,7 @@ public class Registry {
                     if(keysInCirculation.get(keyUUID).getValue() == amount){
                         keysInCirculation.remove(keyUUID);
                     }else {
-                        Pair<String, Integer> newPair = new Pair<>(keyID, keysInCirculation.get(keyUUID).getValue() - amount);
-                        keysInCirculation.put(keyUUID,newPair);
+                        keysInCirculation.put(keyUUID,new AbstractMap.SimpleEntry<>(keyID, keysInCirculation.get(keyUUID).getValue() - amount));
                     }
 
                     dirtyKeysInCirculation.add(keyUUID);
@@ -383,7 +378,7 @@ public class Registry {
                 String crateID = crateKeyUUIDs.getString("crateID");
                 int amount = crateKeyUUIDs.getInt("amount");
                 if(this.isCrate(crateID) || this.isKey(crateID)){
-                    this.keysInCirculation.put(keyUUID,new Pair<>(crateID,amount));
+                    this.keysInCirculation.put(keyUUID,new AbstractMap.SimpleEntry<>(crateID,amount));
                 }else{
                     HuskyCrates.instance.logger.warn("ValidKeys " + keyUUID + " provides an invalid crate ID. Removing from table.");
                     Statement removal = connection.createStatement();
