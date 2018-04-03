@@ -71,7 +71,7 @@ public class Slot {
         }
     }
 
-    public boolean rewardPlayer(Player player, Location<World> physicalLocation){
+    public boolean rewardPlayer(Player player, Location<World> crateLocation){
         List<Object> theseRewards = new ArrayList<>(rewards);
         theseRewards.addAll(rewardGroups);
         if(this.pickRandom){
@@ -90,10 +90,10 @@ public class Slot {
         try {
             for (Object reward : theseRewards) {
                 if(reward instanceof Reward) {
-                    ((Reward)reward).actOnReward(player, physicalLocation);
+                    ((Reward)reward).actOnReward(player, crateLocation);
                 }else if(reward instanceof List){
                     for(Reward rr : (List<Reward>)reward){
-                        rr.actOnReward(player,physicalLocation);
+                        rr.actOnReward(player,crateLocation);
                     }
                 }
             }
@@ -159,7 +159,7 @@ public class Slot {
             }
         }
 
-        public void actOnReward(Player player, Location<World> physicalLocation) {
+        public void actOnReward(Player player, Location<World> crateLocation) {
             if(rewardType == RewardType.ITEM){
 
                 InventoryTransactionResult result = Util.getHotbarFirst(player.getInventory()).offer(rewardItem.toItemStack());
@@ -180,7 +180,7 @@ public class Slot {
                 Sponge.getCommandManager().process(player,rewardString.replace("%p",player.getName()).replace("%P",player.getUniqueId().toString()));
 
             }else if(rewardType == RewardType.EFFECT){
-                HuskyCrates.registry.runEffect(effect,(effectOnPlayer)? player.getLocation() : physicalLocation );
+                HuskyCrates.registry.runEffect(effect,(effectOnPlayer)? player.getLocation() : crateLocation );
             }else if(rewardType == RewardType.KEY){
                 InventoryTransactionResult result = Util.getHotbarFirst(player.getInventory()).offer(HuskyCrates.registry.getKey(rewardString).getKeyItemStack(this.keyCount));
                 if(result.getType() != InventoryTransactionResult.Type.SUCCESS){

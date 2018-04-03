@@ -4,6 +4,7 @@ import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.effects.Effect;
 import com.codehusky.huskycrates.crate.virtual.effects.elements.Particle;
+import com.codehusky.huskycrates.crate.virtual.views.SimpleView;
 import com.codehusky.huskycrates.crate.virtual.views.SpinnerView;
 import com.codehusky.huskycrates.crate.virtual.views.ViewConfig;
 import com.codehusky.huskycrates.exception.*;
@@ -21,6 +22,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import javax.annotation.Nullable;
@@ -59,7 +61,10 @@ public class Crate {
     private ViewConfig viewConfig;
 
     enum ViewType{
-        SPINNER
+        SPINNER, // User watches as their desired reward is selected.
+        ROULETTE, // User gets to pick when the reward they want is selected.
+        INSTANT, // Basically just delivers a reward.
+        SIMPLE // Delivers a reward with a slight delay.
     }
 
     private Messages messages;
@@ -351,12 +356,20 @@ public class Crate {
 
     public void launchView(PhysicalCrate pcrate, Player player){
         HuskyCrates.registry.updateLastUse(id,player.getUniqueId());
-        player.playSound(SoundTypes.BLOCK_WOOD_BUTTON_CLICK_OFF, player.getPosition(), 1.0);
+
         switch(viewType){
             case SPINNER:
                 new SpinnerView(pcrate,player);
                 break;
+            case INSTANT:
+                player.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, player.getPosition(), 1.0);
+                this.getSlot(selectSlot()).rewardPlayer(player,pcrate.getLocation());
+                break;
+            case SIMPLE:
+                new SimpleView(pcrate,player);
+                break;
             default:
+                player.sendMessage(Text.of(TextColors.RED,"The view type this crate is set to is currently not supported."));
                 break;
         }
     }

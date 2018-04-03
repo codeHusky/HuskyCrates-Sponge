@@ -39,6 +39,7 @@ public class SpinnerView implements Consumer<Page> {
         this.variance = (int)Math.round(new Random().nextDouble() * config.getTicksToSelectionVariance());
         this.selectedSlot = crate.selectSlot();
         this.player = player;
+        player.playSound(SoundTypes.BLOCK_WOOD_BUTTON_CLICK_OFF, player.getPosition(), 1.0);
         Page.PageBuilder builder =
             Page.builder()
                 .setAutoPaging(false)
