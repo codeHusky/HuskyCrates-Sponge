@@ -131,7 +131,7 @@ public class CrateListeners {
             for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
                 Optional<Location<World>> pLocation = transaction.getFinal().getLocation();
                 ItemStack stackUsed = event.getContext().get(EventContextKeys.USED_ITEM).get().createStack();
-                System.out.println(event.getContext().get(EventContextKeys.USED_ITEM).get().toContainer());
+                //System.out.println(event.getContext().get(EventContextKeys.USED_ITEM).get().toContainer());
                 if (pLocation.isPresent()) {
                     Location<World> location = pLocation.get();
                     String pID = null;
