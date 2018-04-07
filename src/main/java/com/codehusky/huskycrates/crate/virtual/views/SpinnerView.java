@@ -100,9 +100,10 @@ public class SpinnerView implements Consumer<Page> {
             int num = 0;
             for (Inventory slot : page.getPageView().slots()) {
                 if (num >= 10 && num <= 16) {
-                    int slotSelected = Math.max(0,(spinnerOffset + num - 3 + selectedSlot) % crate.getSlotCount());
+                    int spinnerSlotAffected = (num-10);
+                    int slotSelected = Math.max(0,(spinnerOffset + spinnerSlotAffected - 3 + selectedSlot) % crate.getSlotCount());
                     if(currentTicks >= currentTickDelay && num == 13){
-                        //System.out.println(slotSelected + " should be " + selectedSlot + " (" + ((config.getTicksToSelection() + variance ) - spinnerOffset) + " ticks remain)");
+                        System.out.println(slotSelected + " should be " + selectedSlot + " (" + ((config.getTicksToSelection() + variance ) - spinnerOffset) + " ticks remain) (" + spinnerOffset + ")");
                     }
                     slot.set(
                             //(spinner offset + (a buffer to prevent neg numbers + (sel slot + 1 offset) - 3 for centering) + (slotnum rel to center) % slot count
