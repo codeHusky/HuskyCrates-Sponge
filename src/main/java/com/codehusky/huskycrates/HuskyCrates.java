@@ -21,6 +21,7 @@ import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.game.GameReloadEvent;
+import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
@@ -93,6 +94,10 @@ public class HuskyCrates {
         keyConfigPath = configDir.resolve("keys.conf");
         crateConfig = HoconConfigurationLoader.builder().setPath(crateConfigPath).build();
         keyConfig = HoconConfigurationLoader.builder().setPath(keyConfigPath).build();
+    }
+
+    @Listener
+    public void gamePostInit(GamePostInitializationEvent event){
         loadConfig();
 
         crateListeners = new CrateListeners();

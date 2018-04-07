@@ -55,7 +55,9 @@ public class CrateListeners {
 
                     Optional<ItemStack> pItemInHand = player.getItemInHand(HandTypes.MAIN_HAND);
                     if (pItemInHand.isPresent()) {
-                        handleKeyItem(physicalCrate,pItemInHand.get(),player);
+                        if(handleKeyItem(physicalCrate,pItemInHand.get(),player)){
+                            return;
+                        }
                     }
 
                     /////////////////////////
@@ -71,10 +73,14 @@ public class CrateListeners {
 
                     player.playSound(SoundTypes.ENTITY_CREEPER_DEATH, player.getPosition(), 1.0);
                     if (physicalCrate.getCrate().getRejectEffect() != null) {
-                        HuskyCrates.registry.runEffect(physicalCrate.getCrate().getRejectEffect(), physicalCrate.getLocation());
+                        HuskyCrates.registry.runClientEffect(physicalCrate.getCrate().getRejectEffect(), physicalCrate.getLocation(),player);
                     }
                     player.sendMessage(physicalCrate.getCrate().getMessages().format(Crate.Messages.Type.RejectionNeedKey,player));
                 }else{
+                    player.playSound(SoundTypes.ENTITY_CREEPER_DEATH, player.getPosition(), 1.0);
+                    if (physicalCrate.getCrate().getRejectEffect() != null) {
+                        HuskyCrates.registry.runClientEffect(physicalCrate.getCrate().getRejectEffect(), physicalCrate.getLocation(),player);
+                    }
                     player.sendMessage(physicalCrate.getCrate().getMessages().format(Crate.Messages.Type.RejectionCooldown,player));
                 }
             }
@@ -191,7 +197,7 @@ public class CrateListeners {
         }
     }
 
-    @Listener
+    @Listener(order = Order.POST)
     public void keyInteract(InteractItemEvent.Secondary.MainHand event, @Root Player player){
         String keyid = Key.extractKeyId(event.getItemStack().createStack());
         if(keyid != null){
@@ -200,7 +206,7 @@ public class CrateListeners {
                 if(key.canLaunchCrate()){
                     handleKeyItem(new PhysicalCrate(null,key.crateToLaunch().getId(),false),event.getItemStack().createStack(),player);
                 }
-                event.setCancelled(true);
+                //event.setCancelled(true);
             }
         }
     }

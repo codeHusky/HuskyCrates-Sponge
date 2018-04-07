@@ -103,7 +103,7 @@ public class SpinnerView implements Consumer<Page> {
                     int spinnerSlotAffected = (num-10);
                     int slotSelected = Math.max(0,(spinnerOffset + spinnerSlotAffected - 3 + selectedSlot) % crate.getSlotCount());
                     if(currentTicks >= currentTickDelay && num == 13){
-                        System.out.println(slotSelected + " should be " + selectedSlot + " (" + ((config.getTicksToSelection() + variance ) - spinnerOffset) + " ticks remain) (" + spinnerOffset + ")");
+                        //System.out.println(slotSelected + " should be " + selectedSlot + " (" + ((config.getTicksToSelection() + variance ) - spinnerOffset) + " ticks remain) (" + spinnerOffset + ")");
                     }
                     slot.set(
                             //(spinner offset + (a buffer to prevent neg numbers + (sel slot + 1 offset) - 3 for centering) + (slotnum rel to center) % slot count

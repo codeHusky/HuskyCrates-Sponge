@@ -9,6 +9,7 @@ import com.codehusky.huskycrates.crate.virtual.effects.Effect;
 import com.codehusky.huskycrates.exception.DoubleRegistrationError;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -102,6 +103,10 @@ public class Registry {
 
     public void runEffect(Effect effect, Location<World> location){
         effects.add(new EffectInstance(effect,location));
+    }
+
+    public void runClientEffect(Effect effect, Location<World> location, Player player){
+        effects.add(new EffectInstance(effect,location,player));
     }
 
     public ArrayList<EffectInstance> getEffects() {
