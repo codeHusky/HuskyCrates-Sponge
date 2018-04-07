@@ -17,6 +17,8 @@ public class Key {
     private String id;
     private String name;
     private Boolean isVirtual;
+    private Boolean canLaunchCrate;
+    private String crateIDToLaunch;
     private Item item;
 
     public Key(ConfigurationNode node){
@@ -26,17 +28,22 @@ public class Key {
         if(!this.isVirtual){
             this.item = new Item(node.getNode("item"));
         }
+        this.canLaunchCrate = !isVirtual && node.getNode("canLaunchCrate").getBoolean(false);
+        this.crateIDToLaunch = node.getNode("crateIDToLaunch").getString();
     }
 
     public Key(String id){
         this.id = id;
         this.isVirtual = true;
+        this.canLaunchCrate = false;
     }
 
-    public Key(String id, Item item){
+    public Key(String id, Item item, boolean canLaunchCrate){
         this.id = id;
         this.item = item;
         this.isVirtual = false;
+        this.canLaunchCrate = canLaunchCrate;
+        this.crateIDToLaunch = (this.canLaunchCrate)?id.replace("LOCALKEY_",""):null;
     }
 
     public String getId() {
@@ -52,6 +59,17 @@ public class Key {
 
     public Boolean isVirtual() {
         return isVirtual;
+    }
+
+    public Boolean canLaunchCrate() {
+        return canLaunchCrate;
+    }
+
+    public Crate crateToLaunch() {
+        if(canLaunchCrate && HuskyCrates.registry.isCrate(crateIDToLaunch)){
+            return HuskyCrates.registry.getCrate(crateIDToLaunch);
+        }
+        return null;
     }
 
     public Item getItem() {

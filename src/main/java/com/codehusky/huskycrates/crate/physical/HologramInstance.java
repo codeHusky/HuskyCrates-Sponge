@@ -36,6 +36,7 @@ public class HologramInstance {
 
     public static void cleanup(Location<World> location){
         //double maxYOffset = Math.max(hologram.getYOffset(),hologram.getYOffset());
+        if(location == null) return;
         Collection<Entity> potential = location.getExtent().getNearbyEntities(location.getPosition().clone().add(0.5,0,0.5).add(0,0.4,0),0.8);
         for(int i = 1; i < 2; i++){
             potential.addAll(location.getExtent().getNearbyEntities(location.getPosition().clone().add(0.5,0,0.5).add(0,0.4+(0.8*i),0),0.8));

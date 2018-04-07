@@ -33,7 +33,7 @@ public class PhysicalCrate {
         System.out.println(representedCrateID);
 
         Crate crate = HuskyCrates.registry.getCrate(this.representedCrateID);
-
+        if(location == null) return;
         if(crate.getIdleEffect() != null)
             idleEffect = new EffectInstance(crate.getIdleEffect(),location);
 

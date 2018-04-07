@@ -20,6 +20,7 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.filter.cause.Root;
+import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -54,37 +55,7 @@ public class CrateListeners {
 
                     Optional<ItemStack> pItemInHand = player.getItemInHand(HandTypes.MAIN_HAND);
                     if (pItemInHand.isPresent()) {
-                        String keyID = Key.extractKeyId(pItemInHand.get());
-                        if (keyID != null && HuskyCrates.registry.isKey(keyID)) {
-                            if (HuskyCrates.registry.getKey(keyID).testKey(pItemInHand.get())) {
-
-                                if (physicalCrate.getCrate().testKey(pItemInHand.get())) {
-
-                                    int toConsume = 1; //assume local key
-                                    if(physicalCrate.getCrate().getAcceptedKeys().containsKey(keyID)){
-                                        toConsume = physicalCrate.getCrate().getAcceptedKeys().get(keyID);
-                                    }
-                                    if(!HuskyCrates.KEY_SECURITY || HuskyCrates.registry.consumeSecureKey(keyID,Key.extractKeyUUID(pItemInHand.get()),toConsume)) {
-                                        if (pItemInHand.get().getQuantity() > toConsume) {
-                                            player.setItemInHand(HandTypes.MAIN_HAND, ItemStack.builder().from(pItemInHand.get()).quantity(pItemInHand.get().getQuantity() - toConsume).build());
-                                        } else {
-                                            player.setItemInHand(HandTypes.MAIN_HAND, ItemStack.empty());
-                                        }
-
-                                        physicalCrate.getCrate().launchView(physicalCrate, player);
-                                        return;
-                                    }else{
-                                       player.playSound(SoundTypes.ENTITY_CAT_HISS,player.getPosition(),1.0);
-                                       player.sendMessage(Text.of(TextColors.RED,"Caught you!\nYou attempted to use fake keys (stack of " + pItemInHand.get().getQuantity() + ") with this crate!\nThis will be reported to admins."));
-                                       Util.alertAdminsDupe(player,pItemInHand.get());
-                                       List<PotionEffect> pe = player.getOrElse(Keys.POTION_EFFECTS,new ArrayList<>());
-                                       pe.add(PotionEffect.of(PotionEffectTypes.BLINDNESS,0,40));
-                                       player.offer(Keys.POTION_EFFECTS,pe);
-                                       return;
-                                    }
-                                }
-                            }
-                        }
+                        handleKeyItem(physicalCrate,pItemInHand.get(),player);
                     }
 
                     /////////////////////////
@@ -108,6 +79,47 @@ public class CrateListeners {
                 }
             }
         }
+    }
+
+    private boolean handleKeyItem(PhysicalCrate physicalCrate, ItemStack stack, Player player){
+        String keyID = Key.extractKeyId(stack);
+        if (keyID != null && HuskyCrates.registry.isKey(keyID)) {
+            Key key = HuskyCrates.registry.getKey(keyID);
+            boolean ignoreCompatability = key.canLaunchCrate() && key.crateToLaunch().getId().equals(physicalCrate.getCrate().getId());
+            if (key.testKey(stack) || ignoreCompatability) {
+
+                if (physicalCrate.getCrate().testKey(stack) || ignoreCompatability) {
+
+                    int toConsume = 1; //assume local key
+                    if(physicalCrate.getCrate().getAcceptedKeys().containsKey(keyID)){
+                        toConsume = physicalCrate.getCrate().getAcceptedKeys().get(keyID);
+                    }
+                    if(!HuskyCrates.KEY_SECURITY || HuskyCrates.registry.consumeSecureKey(keyID,Key.extractKeyUUID(stack),toConsume)) {
+                        if (stack.getQuantity() > toConsume) {
+                            player.setItemInHand(HandTypes.MAIN_HAND, ItemStack.builder().from(stack).quantity(stack.getQuantity() - toConsume).build());
+                        } else if(stack.getQuantity() == toConsume) {
+                            System.out.println("uhhh");
+                            player.setItemInHand(HandTypes.MAIN_HAND, ItemStack.empty());
+                        }else{
+                            player.sendMessage(physicalCrate.getCrate().getMessages().format(Crate.Messages.Type.RejectionNeedKey,player));
+                            return false;
+                        }
+
+                        physicalCrate.getCrate().launchView(physicalCrate, player);
+                        return true;
+                    }else{
+                        player.playSound(SoundTypes.ENTITY_CAT_HISS,player.getPosition(),1.0);
+                        player.sendMessage(Text.of(TextColors.RED,"Caught you!\nYou attempted to use fake keys (stack of " + stack.getQuantity() + ") with this crate!\nThis will be reported to admins."));
+                        Util.alertAdminsDupe(player,stack);
+                        List<PotionEffect> pe = player.getOrElse(Keys.POTION_EFFECTS,new ArrayList<>());
+                        pe.add(PotionEffect.of(PotionEffectTypes.BLINDNESS,0,40));
+                        player.offer(Keys.POTION_EFFECTS,pe);
+                        return false;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     @Listener
@@ -175,6 +187,20 @@ public class CrateListeners {
                         HuskyCrates.registry.unregisterPhysicalCrate(original.getLocation().get());
                     }
                 }
+            }
+        }
+    }
+
+    @Listener
+    public void keyInteract(InteractItemEvent.Secondary.MainHand event, @Root Player player){
+        String keyid = Key.extractKeyId(event.getItemStack().createStack());
+        if(keyid != null){
+            if(HuskyCrates.registry.isKey(keyid)){
+                Key key = HuskyCrates.registry.getKey(keyid);
+                if(key.canLaunchCrate()){
+                    handleKeyItem(new PhysicalCrate(null,key.crateToLaunch().getId(),false),event.getItemStack().createStack(),player);
+                }
+                event.setCancelled(true);
             }
         }
     }
