@@ -77,7 +77,7 @@ public class SpinnerView implements Consumer<Page> {
     long tickWinBegin = 0;
 
     private boolean winCondition() {
-        return spinnerOffset + variance >= config.getTicksToSelection();
+        return spinnerOffset > config.getTicksToSelection() + variance;
     }
 
     private ItemStack getConfetti() {
@@ -100,9 +100,13 @@ public class SpinnerView implements Consumer<Page> {
             int num = 0;
             for (Inventory slot : page.getPageView().slots()) {
                 if (num >= 10 && num <= 16) {
+                    int slotSelected = Math.max(0,(spinnerOffset + num - 3 + selectedSlot) % crate.getSlotCount());
+                    if(currentTicks >= currentTickDelay && num == 13){
+                        //System.out.println(slotSelected + " should be " + selectedSlot + " (" + ((config.getTicksToSelection() + variance ) - spinnerOffset) + " ticks remain)");
+                    }
                     slot.set(
                             //(spinner offset + (a buffer to prevent neg numbers + (sel slot + 1 offset) - 3 for centering) + (slotnum rel to center) % slot count
-                            crate.getSlot(((spinnerOffset + (crate.getSlotCount() * 3) + (selectedSlot + 1) - 3) + (num - 10)) % crate.getSlotCount())
+                            crate.getSlot(slotSelected)
                                     .getDisplayItem()
                                     .toItemStack()
                     );
@@ -151,7 +155,7 @@ public class SpinnerView implements Consumer<Page> {
             }else{
                 this.selectorItem = new Item("&6HuskyCrates", ItemTypes.REDSTONE_TORCH,null,1,null,null,null,null);
             }
-
+            System.out.println(node.getNode("ticksToSelection").getValue());
             this.ticksToSelection = node.getNode("ticksToSelection").getInt(30);
             this.tickDelayMultiplier = node.getNode("tickDelayMultiplier").getDouble(1.08);
             this.ticksToSelectionVariance = node.getNode("ticksToSelectionVariance").getInt(0);

@@ -126,7 +126,7 @@ public class Slot {
         private Effect effect;
         private boolean effectOnPlayer = false;
 
-        private Integer keyCount;
+        private Integer keyCount = 1;
 
         private Reward(ConfigurationNode node, ConfigurationNode displayItemNode, Crate holder){
             try {

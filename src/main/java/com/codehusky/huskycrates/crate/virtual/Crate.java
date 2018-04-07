@@ -369,7 +369,7 @@ public class Crate {
                 new SimpleView(pcrate,player);
                 break;
             default:
-                player.sendMessage(Text.of(TextColors.RED,"The view type this crate is set to is currently not supported."));
+                player.sendMessage(Text.of(TextColors.RED,"The view type \"" + viewType.name() + "\" is currently not supported."));
                 break;
         }
     }

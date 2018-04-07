@@ -1,5 +1,6 @@
 package com.codehusky.huskycrates.crate.virtual;
 
+import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.exception.ConfigParseError;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -51,6 +52,8 @@ public class Item {
             try {
                 this.itemType = node.getNode("id").getValue(TypeToken.of(ItemType.class));
             } catch (ObjectMappingException e) {
+                HuskyCrates.instance.logger.error("Printing out ItemID ObjectMappingException below!");
+                e.printStackTrace();
                 throw new ConfigParseError("Supplied Item ID is not valid!",node.getNode("id").getPath());
             }
         }else{
