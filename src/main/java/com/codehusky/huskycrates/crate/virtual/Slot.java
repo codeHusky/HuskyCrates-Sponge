@@ -116,7 +116,7 @@ public class Slot {
         return rewards;
     }
 
-    class Reward {
+    public class Reward {
         private RewardType rewardType;
 
         private String rewardString; // can be a message or a command. :3
@@ -196,7 +196,7 @@ public class Slot {
             return rewardType;
         }
     }
-    enum RewardType {
+    public enum RewardType {
         USERCOMMAND,
         SERVERCOMMAND,
 
