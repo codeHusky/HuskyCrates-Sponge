@@ -13,6 +13,7 @@ import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectTypes;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -71,17 +72,13 @@ public class CrateListeners {
                         return;
                     }
 
-                    player.playSound(SoundTypes.ENTITY_CREEPER_DEATH, player.getPosition(), 1.0);
-                    if (physicalCrate.getCrate().getRejectEffect() != null) {
-                        HuskyCrates.registry.runClientEffect(physicalCrate.getCrate().getRejectEffect(), physicalCrate.getLocation(),player);
-                    }
                     player.sendMessage(physicalCrate.getCrate().getMessages().format(Crate.Messages.Type.RejectionNeedKey,player));
                 }else{
-                    player.playSound(SoundTypes.ENTITY_CREEPER_DEATH, player.getPosition(), 1.0);
-                    if (physicalCrate.getCrate().getRejectEffect() != null) {
-                        HuskyCrates.registry.runClientEffect(physicalCrate.getCrate().getRejectEffect(), physicalCrate.getLocation(),player);
-                    }
                     player.sendMessage(physicalCrate.getCrate().getMessages().format(Crate.Messages.Type.RejectionCooldown,player));
+                }
+                player.playSound(SoundTypes.ENTITY_CREEPER_DEATH, player.getPosition(), 1.0);
+                if (physicalCrate.getCrate().getRejectEffect() != null) {
+                    HuskyCrates.registry.runClientEffect(physicalCrate.getCrate().getRejectEffect(), physicalCrate.getLocation(),player);
                 }
             }
         }
@@ -130,7 +127,17 @@ public class CrateListeners {
 
     @Listener
     public void openCratePreviewBlock(InteractBlockEvent.Primary.MainHand event, @Root Player player){
-
+        if(event.getTargetBlock().getLocation().isPresent()) {
+            if (HuskyCrates.registry.isPhysicalCrate(event.getTargetBlock().getLocation().get())) {
+                PhysicalCrate physicalCrate = HuskyCrates.registry.getPhysicalCrate(event.getTargetBlock().getLocation().get());
+                if(physicalCrate.getCrate().isPreviewable()){
+                    if(!player.hasPermission("huskycrates.admin") || player.getOrNull(Keys.GAME_MODE) != GameModes.CREATIVE){
+                        physicalCrate.getCrate().launchPreview(player);
+                        event.setCancelled(true);
+                    }
+                }
+            }
+        }
     }
 
     @Listener
