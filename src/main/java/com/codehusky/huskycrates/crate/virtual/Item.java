@@ -16,10 +16,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Items are basically just ItemStacks, except they haven't been constructed yet. These
@@ -119,7 +116,7 @@ public class Item {
         if(this.nbt != null){
             DataContainer container = stack.toContainer();
             if(container.get(DataQuery.of("UnsafeData")).isPresent()) {
-                LinkedHashMap<Object,Object> real = ((LinkedHashMap) container.getMap(DataQuery.of("UnsafeData")).get());
+                Map real = (container.getMap(DataQuery.of("UnsafeData")).get());
                 this.nbt.putAll(real);
             }
             container.set(DataQuery.of("UnsafeData"),this.nbt);
