@@ -81,6 +81,9 @@ public class Crate {
     private Messages messages;
 
     public Crate(ConfigurationNode node){
+        if(!node.hasMapChildren()){
+            throw new ConfigParseError("Invalid data in crates.conf. Please remove it.",node.getPath());
+        }
         slots = new ArrayList<>();
         this.id = node.getKey().toString();
         this.name = node.getNode("name").getString();
@@ -109,6 +112,7 @@ public class Crate {
                 throw new ConfigParseError("Invalid key format specified. Odd.",aKeyNode.getPath());
             }
         }
+        this.free = node.getNode("free").getBoolean(false);
 
         if(this.useLocalKey){
             boolean localKeyLaunchesCrate = node.getNode("localKeyLaunchesCrate").getBoolean(false);
@@ -117,8 +121,8 @@ public class Crate {
             }else{
                 this.localKey = new Key("LOCALKEY_" + this.id, new Item("&8" + this.name + " Key", ItemTypes.NETHER_STAR, null, 1, null, null, null, null),localKeyLaunchesCrate);
             }
-        }else if(aKeyNode.isVirtual()){
-            throw new ConfigParseError("Crate has no accepted keys!",node.getPath());
+        }else if(aKeyNode.isVirtual() && !this.free){
+            throw new ConfigParseError("Non-free crate has no accepted keys!",node.getPath());
         }
 
         if(node.getNode("slots").isVirtual()){
@@ -150,7 +154,7 @@ public class Crate {
             throw new ConfigParseError("Invalid view type!", node.getNode("viewType").getPath());
         }
 
-        this.free = node.getNode("free").getBoolean(false);
+
 
         this.cooldownSeconds = node.getNode("cooldownSeconds").getLong(0);
 
@@ -278,7 +282,7 @@ public class Crate {
     public ItemStack getCratePlacementBlock(ItemType itemType) {
         ItemStack stack = ItemStack.builder()
                 .itemType(itemType)
-                .add(Keys.DISPLAY_NAME, Text.of(TextSerializers.FORMATTING_CODE.deserialize(name)," Placement Block"))
+                .add(Keys.DISPLAY_NAME, Text.of(TextSerializers.FORMATTING_CODE.deserialize((this.name != null)?this.name:this.id)," Placement Block"))
                 .build();
         return ItemStack.builder()
                 .fromContainer(stack.toContainer().set(DataQuery.of("UnsafeData","HCCRATEID"),this.id))
@@ -298,7 +302,7 @@ public class Crate {
     }
 
     public String getName() {
-        return name;
+        return (this.name != null)?this.name:this.id;
     }
 
     public ViewType getViewType() {

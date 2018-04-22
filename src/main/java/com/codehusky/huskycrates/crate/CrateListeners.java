@@ -42,8 +42,13 @@ public class CrateListeners {
                 PhysicalCrate physicalCrate = HuskyCrates.registry.getPhysicalCrate(event.getTargetBlock().getLocation().get());
                 event.setCancelled(true);
                 if(physicalCrate.getCrate().isFree()){
+                    //////////////////////////
+                    // ATTEMPT 0
+                    // Try Free
+                    //////////////////////////
                     if(!physicalCrate.getCrate().isTimedOut(player.getUniqueId())) {
                         physicalCrate.getCrate().launchView(physicalCrate, player);
+                        return;
                     }else{
                         player.sendMessage(physicalCrate.getCrate().getMessages().format(Crate.Messages.Type.RejectionCooldown,player));
                     }
@@ -187,13 +192,19 @@ public class CrateListeners {
     @Listener
     public void crateBlockDestroyed(ChangeBlockEvent event){
         if(event instanceof ChangeBlockEvent.Place || event instanceof ChangeBlockEvent.Post) return;
-
         for(Transaction<BlockSnapshot> trans : event.getTransactions()){
             BlockSnapshot original = trans.getOriginal();
             BlockSnapshot after = trans.getFinal();
 
             if(original.getLocation().isPresent()){
                 if(HuskyCrates.registry.isPhysicalCrate(original.getLocation().get())){
+                    if(event.getCause().root() instanceof Player){
+                        Player plr = (Player)event.getCause().root();
+                        if(!plr.hasPermission("huskycrates.admin")){
+                            event.setCancelled(true);
+                            return;
+                        }
+                    }
                     if(!original.getState().getType().equals(after.getState().getType())){
                         PhysicalCrate pc = HuskyCrates.registry.getPhysicalCrate(original.getLocation().get());
                         pc.cleanup();

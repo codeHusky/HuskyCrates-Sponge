@@ -77,6 +77,9 @@ public class SimpleView implements Consumer<Page> {
                 e.set(getConfetti());
             count ++;
         }
+        if(page.getTicks() > 20*3){
+            page.getObserver().closeInventory();
+        }
     }
 
 //    public static class Config extends ViewConfig {

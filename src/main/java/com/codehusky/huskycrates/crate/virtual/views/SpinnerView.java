@@ -46,6 +46,8 @@ public class SpinnerView implements Consumer<Page> {
                 .setTitle(TextSerializers.FORMATTING_CODE.deserialize(crate.getName()))
                 .setUpdatable(true)
                 .setUpdater(this)
+                    //.setUpdateTickRate(5)
+
                 .setInterrupt(() -> {
                     if(!rewardGiven) {
                         crate.getSlot(selectedSlot).rewardPlayer(player,this.physicalLocation);
@@ -76,8 +78,12 @@ public class SpinnerView implements Consumer<Page> {
     boolean hasWon = false;
     long tickWinBegin = 0;
 
+    private long getTicksToSelection() {
+        return config.getTicksToSelection() + variance;
+    }
+
     private boolean winCondition() {
-        return spinnerOffset > config.getTicksToSelection() + variance;
+        return spinnerOffset > getTicksToSelection();
     }
 
     private ItemStack getConfetti() {
@@ -101,7 +107,14 @@ public class SpinnerView implements Consumer<Page> {
             for (Inventory slot : page.getPageView().slots()) {
                 if (num >= 10 && num <= 16) {
                     int spinnerSlotAffected = (num-10);
-                    int slotSelected = Math.max(0,(spinnerOffset + spinnerSlotAffected - 3 + selectedSlot) % crate.getSlotCount());
+                    int slotSelected = Math.max(0,(
+                            /* Buffer and Centering*/
+                            (spinnerOffset + spinnerSlotAffected - 3 + crate.getSlotCount())
+                    ) );
+                    //offset to fit
+                    slotSelected+= selectedSlot - (getTicksToSelection()%crate.getSlotCount());
+                    //wrap
+                    slotSelected = slotSelected % crate.getSlotCount();
                     if(currentTicks >= currentTickDelay && num == 13){
                         //System.out.println(slotSelected + " should be " + selectedSlot + " (" + ((config.getTicksToSelection() + variance ) - spinnerOffset) + " ticks remain) (" + spinnerOffset + ")");
                     }

@@ -9,6 +9,7 @@ import com.codehusky.huskycrates.crate.physical.EffectInstance;
 import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
+import com.codehusky.huskycrates.exception.ConfigParseError;
 import com.google.inject.Inject;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -42,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "2.0.0PRE6", description = "A Crate Plugin for Sponge!",dependencies = {@Dependency(id="huskyui",version = "0.5.2")})
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "2.0.0PRE7", description = "A Crate Plugin for Sponge!",dependencies = {@Dependency(id="huskyui",version = "0.5.2")})
 public class HuskyCrates {
     //@Inject
     public Logger logger;
@@ -145,6 +146,14 @@ public class HuskyCrates {
                 mainConfig = config.load();
                 crates = crateConfig.load();
                 keys = keyConfig.load();
+
+                if(!mainConfig.getNode("crates").isVirtual()){
+                    throw new ConfigParseError("HuskyCrates.conf contains 1.x config data! Please update it using the Config Converter application!",mainConfig.getNode("crates").getPath());
+                }
+
+                if(!crates.getNode("secureKeys").hasMapChildren()){
+                    throw new ConfigParseError("\"secureKeys\" must be removed from \"crates.conf\"!",crates.getNode("secureKeys").getPath());
+                }
 
                 if(mainConfig.getNode("secureKeys").isVirtual()){
                     mainConfig.getNode("secureKeys").setValue(HuskyCrates.KEY_SECURITY);

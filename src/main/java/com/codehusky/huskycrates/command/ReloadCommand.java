@@ -1,6 +1,7 @@
 package com.codehusky.huskycrates.command;
 
 import com.codehusky.huskycrates.HuskyCrates;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -15,7 +16,7 @@ public class ReloadCommand implements CommandExecutor {
         src.sendMessage(Text.of("Reloading HuskyCrates..."));
         HuskyCrates.instance.reload();
         if(HuskyCrates.instance.inErrorState){
-            src.sendMessage(Text.of(TextColors.RED,"HuskyCrates experienced an error while reloading. Please check the console for more information."));
+            src.sendMessage(Text.of(TextColors.RED,"HuskyCrates experienced an error while reloading. Please check the console for more information." + (!Sponge.getPlatform().asMap().get("ImplementationName").equals("SpongeVanilla")?"\nYou may have to view a file named like \"fml-junk.log\" to see the errors.":"")));
         }else{
             src.sendMessage(Text.of("HuskyCrates reloaded successfully."));
         }
