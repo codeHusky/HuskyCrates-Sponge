@@ -151,7 +151,7 @@ public class HuskyCrates {
                     throw new ConfigParseError("HuskyCrates.conf contains 1.x config data! Please update it using the Config Converter application!",mainConfig.getNode("crates").getPath());
                 }
 
-                if(!crates.getNode("secureKeys").hasMapChildren()){
+                if(!crates.getNode("secureKeys").isVirtual() && !crates.getNode("secureKeys").hasMapChildren()){
                     throw new ConfigParseError("\"secureKeys\" must be removed from \"crates.conf\"!",crates.getNode("secureKeys").getPath());
                 }
 
