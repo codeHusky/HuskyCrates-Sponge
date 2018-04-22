@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 
-@Plugin(id="huskycrates", name = "HuskyCrates", version = "2.0.0PRE7", description = "A Crate Plugin for Sponge!",dependencies = {@Dependency(id="huskyui",version = "0.5.2")})
+@Plugin(id="huskycrates", name = "HuskyCrates", version = "2.0.0PRE7", description = "A Crate Plugin for Sponge!",dependencies = {@Dependency(id="huskyui",version = "0.6.0PRE2")})
 public class HuskyCrates {
     //@Inject
     public Logger logger;
