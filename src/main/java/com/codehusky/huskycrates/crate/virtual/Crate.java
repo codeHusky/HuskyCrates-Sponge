@@ -404,8 +404,9 @@ public class Crate {
             for(int j = 45 * i; j < (45*i) + 45 && j < slots.size(); j++) {
                 ItemStack orig = slots.get(j).getDisplayItem().toItemStack();
                 List<Text> oldLore = orig.getOrElse(Keys.ITEM_LORE,new ArrayList<>());
-                BigDecimal occurance = new BigDecimal((double)slots.get(j).getChance()/(double)slotChanceMax).setScale(4,BigDecimal.ROUND_HALF_UP);
-                oldLore.add(Text.of(TextStyles.NONE,TextColors.GRAY,"Occurrence: " + occurance.toString() + "%"));
+                double val = ((double)slots.get(j).getChance()/(double)slotChanceMax)*100;
+                BigDecimal occurance = new BigDecimal(val).setScale(2,BigDecimal.ROUND_HALF_UP);
+                oldLore.add(Text.of(TextStyles.NONE,TextColors.GRAY,"Occurrence: " + ((val < 0.01)?"< 0.01":occurance.toString()) + "%"));
                 oldLore.add(Text.of(TextStyles.NONE,TextColors.GRAY,"Rewards: " + slots.get(j).getRewards().size()));
                 builder.addElement(new Element(ItemStack.builder().from(orig).add(Keys.ITEM_LORE,oldLore).build()));
             }
