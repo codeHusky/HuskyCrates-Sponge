@@ -399,7 +399,7 @@ public class Crate {
         int pageCount = (int)Math.ceil((double)slots.size() / 45.0);
         for(int i = 0; i < pageCount; i++){
             Page.PageBuilder builder = Page.builder();
-            builder.setTitle(Text.of(TextSerializers.FORMATTING_CODE.deserialize(this.name), (pageCount > 1?" - Page " + (i+1):"")));
+            builder.setTitle(Text.of(TextSerializers.FORMATTING_CODE.deserialize(getName()), (pageCount > 1?" - Page " + (i+1):"")));
             builder.setAutoPaging(true);
             for(int j = 45 * i; j < (45*i) + 45 && j < slots.size(); j++) {
                 ItemStack orig = slots.get(j).getDisplayItem().toItemStack();

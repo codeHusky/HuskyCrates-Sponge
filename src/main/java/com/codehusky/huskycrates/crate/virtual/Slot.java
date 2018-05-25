@@ -159,6 +159,26 @@ public class Slot {
             }
         }
 
+        private String replaceCommand(Player player, Location<World> crateLocation){
+            return rewardString
+                    .replace("%p",player.getName())
+                    .replace("%P",player.getUniqueId().toString())
+
+                    .replace("%cxi",crateLocation.getBlockX() + "")
+                    .replace("%cyi",crateLocation.getBlockY() + "")
+                    .replace("%czi",crateLocation.getBlockZ() + "")
+                    .replace("%cxd",crateLocation.getX() + "")
+                    .replace("%cyd",crateLocation.getY() + "")
+                    .replace("%czd",crateLocation.getZ() + "")
+
+                    .replace("%pxi",player.getLocation().getBlockX() + "")
+                    .replace("%pyi",player.getLocation().getBlockY() + "")
+                    .replace("%pzi",player.getLocation().getBlockZ() + "")
+                    .replace("%pxd",player.getLocation().getX() + "")
+                    .replace("%pyd",player.getLocation().getY() + "")
+                    .replace("%pzd",player.getLocation().getZ() + "");
+        }
+
         public void actOnReward(Player player, Location<World> crateLocation) {
             if(rewardType == RewardType.ITEM){
 
@@ -168,16 +188,16 @@ public class Slot {
                 }
 
             }else if(rewardType == RewardType.SERVERMESSAGE){
-                Sponge.getServer().getBroadcastChannel().send(TextSerializers.FORMATTING_CODE.deserialize(rewardString.replace("%p",player.getName()).replace("%P",player.getUniqueId().toString())));
+                Sponge.getServer().getBroadcastChannel().send(TextSerializers.FORMATTING_CODE.deserialize(replaceCommand(player,crateLocation)));
 
             }else if(rewardType == RewardType.USERMESSAGE){
-                player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(rewardString.replace("%p",player.getName()).replace("%P",player.getUniqueId().toString())));
+                player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(replaceCommand(player, crateLocation)));
 
             }else if(rewardType == RewardType.SERVERCOMMAND){
-                Sponge.getCommandManager().process(Sponge.getServer().getConsole(),rewardString.replace("%p",player.getName()).replace("%P",player.getUniqueId().toString()));
+                Sponge.getCommandManager().process(Sponge.getServer().getConsole(),replaceCommand(player, crateLocation));
 
             }else if(rewardType == RewardType.USERCOMMAND){
-                Sponge.getCommandManager().process(player,rewardString.replace("%p",player.getName()).replace("%P",player.getUniqueId().toString()));
+                Sponge.getCommandManager().process(player,replaceCommand(player, crateLocation));
 
             }else if(rewardType == RewardType.EFFECT){
                 HuskyCrates.registry.runEffect(effect,(effectOnPlayer)? player.getLocation() : crateLocation );

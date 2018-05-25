@@ -109,7 +109,7 @@ public class SpinnerView implements Consumer<Page> {
                     int spinnerSlotAffected = (num-10);
                     int slotSelected = Math.max(0,(
                             /* Buffer and Centering*/
-                            (spinnerOffset + spinnerSlotAffected - 3 + crate.getSlotCount())
+                            (spinnerOffset + spinnerSlotAffected - 3 + crate.getSlotCount()*5)
                     ) );
                     //offset to fit
                     slotSelected+= selectedSlot - (getTicksToSelection()%crate.getSlotCount());

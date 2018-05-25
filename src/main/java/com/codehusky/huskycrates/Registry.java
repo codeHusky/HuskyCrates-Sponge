@@ -40,6 +40,14 @@ public class Registry {
 
     private ArrayList<EffectInstance> effects = new ArrayList<>();
 
+    public String stats() {
+        int items = 0;
+        for(Crate crate: crates.values()){
+            items+= crate.getSlots().size();
+        }
+        return "keys: " + keys.size() + "\ncrates: " + crates.size() + "\nslot sum: " + items + "\nphysicalCrates: " + physicalCrates.size() + "\nrunningEffects: " + effects.size();
+    }
+
     public Key getKey(String id){
         //handling local keys.
         if(!isKey(id)) return null;

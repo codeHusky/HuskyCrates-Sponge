@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -108,25 +109,30 @@ public class HuskyCrates {
         Sponge.getScheduler().createTaskBuilder().execute(new Consumer<Task>() {
             @Override
             public void accept(Task task) {
-                for(Location<World> location: registry.getPhysicalCrates().keySet()){
-                    PhysicalCrate pcrate = registry.getPhysicalCrate(location);
-                    if(pcrate.getIdleEffect() != null){
-                        pcrate.getIdleEffect().tick();
+                try {
+                    long startTime = System.currentTimeMillis();
+                    for (Location<World> location : registry.getPhysicalCrates().keySet()) {
+                        PhysicalCrate pcrate = registry.getPhysicalCrate(location);
+                        if (pcrate.getIdleEffect() != null) {
+                            pcrate.getIdleEffect().tick();
+                        }
                     }
-                }
-                ArrayList<EffectInstance> nuke = new ArrayList<>();
-                for(EffectInstance inst : registry.getEffects()){
-                    inst.tick();
-                    if(inst.getEffect().isFinished()){
-                        nuke.add(inst);
+                    long endTime = System.currentTimeMillis();
+                    //System.out.println((endTime - startTime) + " milliseconds");
+                    ArrayList<EffectInstance> nuke = new ArrayList<>();
+                    for (EffectInstance inst : registry.getEffects()) {
+                        inst.tick();
+                        if (inst.getEffect().isFinished()) {
+                            nuke.add(inst);
+                        }
                     }
-                }
-                for(EffectInstance inst : nuke){
-                    inst.resetEffect();
-                    registry.removeEffect(inst);
-                }
+                    for (EffectInstance inst : nuke) {
+                        inst.resetEffect();
+                        registry.removeEffect(inst);
+                    }
+                }catch (ConcurrentModificationException e){}
             }
-        }).intervalTicks(1).submit(this);
+        }).intervalTicks(1).async().submit(this);
 
         Sponge.getScheduler().createTaskBuilder()
                 .execute(registry::pushDirty)
