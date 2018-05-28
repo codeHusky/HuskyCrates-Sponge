@@ -17,6 +17,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
@@ -149,8 +150,13 @@ public class SpinnerView implements Consumer<Page> {
                 }
             }
             if(page.getTicks() > tickWinBegin + 20*3){
-                crate.getSlot(selectedSlot).rewardPlayer(player,this.physicalLocation);
-                page.getObserver().playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, page.getObserver().getLocation().getPosition(), 0.5);
+                try {
+                    crate.getSlot(selectedSlot).rewardPlayer(player, this.physicalLocation);
+                    page.getObserver().playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, page.getObserver().getLocation().getPosition(), 0.5);
+                }catch (Exception e){
+                    e.printStackTrace();
+                    page.getObserver().sendMessage(Text.of(TextColors.RED,"A fatal exception has occurred while delivering your reward. Please contact server administration."));
+                }
                 rewardGiven = true;
                 page.getObserver().closeInventory();
             }

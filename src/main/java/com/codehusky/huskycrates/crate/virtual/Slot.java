@@ -10,6 +10,8 @@ import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -99,6 +101,7 @@ public class Slot {
             }
         }catch(RewardDeliveryError e){
             e.printStackTrace();
+            player.sendMessage(Text.of(TextColors.RED,"A fatal error has occurred while trying to deliver your reward. Please contact server administration."));
             return false;
         }
         return true;
@@ -202,7 +205,16 @@ public class Slot {
             }else if(rewardType == RewardType.EFFECT){
                 HuskyCrates.registry.runEffect(effect,(effectOnPlayer)? player.getLocation() : crateLocation );
             }else if(rewardType == RewardType.KEY){
-                InventoryTransactionResult result = Util.getHotbarFirst(player.getInventory()).offer(HuskyCrates.registry.getKey(rewardString).getKeyItemStack(this.keyCount));
+                if(HuskyCrates.registry.getKey(rewardString) == null){
+                    throw new RewardDeliveryError("Failed to deliver key to " + player.getName() + ": \"" + rewardString + "\" is not a valid key id.");
+                }
+                //BUG!!!
+                InventoryTransactionResult result = Util.getHotbarFirst(
+                        player.getInventory())
+                        .offer(
+                                HuskyCrates.registry.getKey(rewardString)
+                                        .getKeyItemStack(this.keyCount)
+                        );
                 if(result.getType() != InventoryTransactionResult.Type.SUCCESS){
                     throw new RewardDeliveryError("Failed to deliver key to " + player.getName() + " from reward.");
                 }
