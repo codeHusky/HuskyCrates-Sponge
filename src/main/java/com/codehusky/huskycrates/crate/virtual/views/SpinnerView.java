@@ -1,5 +1,6 @@
 package com.codehusky.huskycrates.crate.virtual.views;
 
+import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Item;
@@ -156,6 +157,7 @@ public class SpinnerView implements Consumer<Page> {
                     page.getObserver().playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, page.getObserver().getLocation().getPosition(), 0.5);
                 }catch (Exception e){
                     e.printStackTrace();
+                    HuskyCrates.instance.logger.error("Error occurred while trying to reward player.");
                     page.getObserver().sendMessage(Text.of(TextColors.RED,"A fatal exception has occurred while delivering your reward. Please contact server administration."));
                 }
                 rewardGiven = true;

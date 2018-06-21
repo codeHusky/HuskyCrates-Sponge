@@ -99,7 +99,7 @@ public class Slot {
                     }
                 }
             }
-        }catch(RewardDeliveryError e){
+        }catch(Exception e){
             e.printStackTrace();
             player.sendMessage(Text.of(TextColors.RED,"A fatal error has occurred while trying to deliver your reward. Please contact server administration."));
             return false;
