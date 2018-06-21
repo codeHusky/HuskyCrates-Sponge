@@ -183,43 +183,48 @@ public class Slot {
         }
 
         public void actOnReward(Player player, Location<World> crateLocation) {
-            if(rewardType == RewardType.ITEM){
+            try {
+                if (rewardType == RewardType.ITEM) {
 
-                InventoryTransactionResult result = Util.getHotbarFirst(player.getInventory()).offer(rewardItem.toItemStack());
-                if(result.getType() != InventoryTransactionResult.Type.SUCCESS){
-                    throw new RewardDeliveryError("Failed to deliver item to " + player.getName() + " from reward.");
+                    InventoryTransactionResult result = Util.getHotbarFirst(player.getInventory()).offer(rewardItem.toItemStack());
+                    if (result.getType() != InventoryTransactionResult.Type.SUCCESS) {
+                        throw new RewardDeliveryError("Failed to deliver item to " + player.getName() + " from reward.");
+                    }
+
+                } else if (rewardType == RewardType.SERVERMESSAGE) {
+                    Sponge.getServer().getBroadcastChannel().send(TextSerializers.FORMATTING_CODE.deserialize(replaceCommand(player, crateLocation)));
+
+                } else if (rewardType == RewardType.USERMESSAGE) {
+                    player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(replaceCommand(player, crateLocation)));
+
+                } else if (rewardType == RewardType.SERVERCOMMAND) {
+                    Sponge.getCommandManager().process(Sponge.getServer().getConsole(), replaceCommand(player, crateLocation));
+
+                } else if (rewardType == RewardType.USERCOMMAND) {
+                    Sponge.getCommandManager().process(player, replaceCommand(player, crateLocation));
+
+                } else if (rewardType == RewardType.EFFECT) {
+                    HuskyCrates.registry.runEffect(effect, (effectOnPlayer) ? player.getLocation() : crateLocation);
+                } else if (rewardType == RewardType.KEY) {
+                    if (HuskyCrates.registry.getKey(rewardString) == null) {
+                        throw new RewardDeliveryError("Failed to deliver key to " + player.getName() + ": \"" + rewardString + "\" is not a valid key id.");
+                    }
+                    //BUG!!!
+                    InventoryTransactionResult result = Util.getHotbarFirst(
+                            player.getInventory())
+                            .offer(
+                                    HuskyCrates.registry.getKey(rewardString)
+                                            .getKeyItemStack(this.keyCount)
+                            );
+                    if (result.getType() != InventoryTransactionResult.Type.SUCCESS) {
+                        throw new RewardDeliveryError("Failed to deliver key to " + player.getName() + " from reward.");
+                    }
+                } else {
+                    throw new RewardDeliveryError("Failed to deliver reward to " + player.getName() + " due to invalid reward type. If you see this, contact the developer immediately.");
                 }
-
-            }else if(rewardType == RewardType.SERVERMESSAGE){
-                Sponge.getServer().getBroadcastChannel().send(TextSerializers.FORMATTING_CODE.deserialize(replaceCommand(player,crateLocation)));
-
-            }else if(rewardType == RewardType.USERMESSAGE){
-                player.sendMessage(TextSerializers.FORMATTING_CODE.deserialize(replaceCommand(player, crateLocation)));
-
-            }else if(rewardType == RewardType.SERVERCOMMAND){
-                Sponge.getCommandManager().process(Sponge.getServer().getConsole(),replaceCommand(player, crateLocation));
-
-            }else if(rewardType == RewardType.USERCOMMAND){
-                Sponge.getCommandManager().process(player,replaceCommand(player, crateLocation));
-
-            }else if(rewardType == RewardType.EFFECT){
-                HuskyCrates.registry.runEffect(effect,(effectOnPlayer)? player.getLocation() : crateLocation );
-            }else if(rewardType == RewardType.KEY){
-                if(HuskyCrates.registry.getKey(rewardString) == null){
-                    throw new RewardDeliveryError("Failed to deliver key to " + player.getName() + ": \"" + rewardString + "\" is not a valid key id.");
-                }
-                //BUG!!!
-                InventoryTransactionResult result = Util.getHotbarFirst(
-                        player.getInventory())
-                        .offer(
-                                HuskyCrates.registry.getKey(rewardString)
-                                        .getKeyItemStack(this.keyCount)
-                        );
-                if(result.getType() != InventoryTransactionResult.Type.SUCCESS){
-                    throw new RewardDeliveryError("Failed to deliver key to " + player.getName() + " from reward.");
-                }
-            } else {
-                throw new RewardDeliveryError("Failed to deliver reward to " + player.getName() + " due to invalid reward type. If you see this, contact the developer immediately.");
+            }catch (Exception e){
+                e.printStackTrace();
+                throw new RewardDeliveryError("Failed to deliver reward to " + player.getName() + ". See error above for more information.");
             }
         }
 

@@ -53,6 +53,7 @@ public class SpinnerView implements Consumer<Page> {
                     if(!rewardGiven) {
                         crate.getSlot(selectedSlot).rewardPlayer(player,this.physicalLocation);
                         player.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, player.getLocation().getPosition(), 0.5);
+                        rewardGiven = true;
                     }
                 })
                 .setInventoryDimension(InventoryDimension.of(9,3));
