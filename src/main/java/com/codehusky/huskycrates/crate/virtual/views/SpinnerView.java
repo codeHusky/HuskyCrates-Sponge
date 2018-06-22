@@ -51,11 +51,16 @@ public class SpinnerView implements Consumer<Page> {
                     //.setUpdateTickRate(5)
 
                 .setInterrupt(() -> {
-                    if(!rewardGiven) {
-                        crate.getSlot(selectedSlot).rewardPlayer(player,this.physicalLocation);
+                    if(rewardGiven) return;
+                    try {
+                        crate.getSlot(selectedSlot).rewardPlayer(player, this.physicalLocation);
                         player.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, player.getLocation().getPosition(), 0.5);
-                        rewardGiven = true;
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        HuskyCrates.instance.logger.error("Error occurred while trying to reward player.");
+                        player.sendMessage(Text.of(TextColors.RED,"A fatal exception has occurred while delivering your reward. Please contact server administration."));
                     }
+                    rewardGiven = true;
                 })
                 .setInventoryDimension(InventoryDimension.of(9,3));
 
@@ -152,15 +157,6 @@ public class SpinnerView implements Consumer<Page> {
                 }
             }
             if(page.getTicks() > tickWinBegin + 20*3){
-                try {
-                    crate.getSlot(selectedSlot).rewardPlayer(player, this.physicalLocation);
-                    page.getObserver().playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, page.getObserver().getLocation().getPosition(), 0.5);
-                }catch (Exception e){
-                    e.printStackTrace();
-                    HuskyCrates.instance.logger.error("Error occurred while trying to reward player.");
-                    page.getObserver().sendMessage(Text.of(TextColors.RED,"A fatal exception has occurred while delivering your reward. Please contact server administration."));
-                }
-                rewardGiven = true;
                 page.getObserver().closeInventory();
             }
         }

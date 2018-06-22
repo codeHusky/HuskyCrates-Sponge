@@ -106,7 +106,6 @@ public class CrateListeners {
                         if (stack.getQuantity() > toConsume) {
                             player.setItemInHand(HandTypes.MAIN_HAND, ItemStack.builder().from(stack).quantity(stack.getQuantity() - toConsume).build());
                         } else if(stack.getQuantity() == toConsume) {
-                            System.out.println("uhhh");
                             player.setItemInHand(HandTypes.MAIN_HAND, ItemStack.empty());
                         }else{
                             player.sendMessage(physicalCrate.getCrate().getMessages().format(Crate.Messages.Type.RejectionNeedKey,player));
