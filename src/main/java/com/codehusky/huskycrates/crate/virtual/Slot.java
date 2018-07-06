@@ -50,7 +50,7 @@ public class Slot {
             }
         }
 
-        if(this.rewards.size() == 0){
+        if(this.rewards.size() == 0 && this.rewardGroups.size() == 0){
             HuskyCrates.instance.logger.warn("Slot has no rewards @ " + ConfigError.readablePath(node.getNode("rewards").getPath()));
         }
 
@@ -65,7 +65,7 @@ public class Slot {
         if(this.pickRandom){
             this.pickSize = node.getNode("pickSize").getInt(1);
 
-            if(this.pickSize > this.rewards.size()){
+            if(this.pickSize > (this.rewards.size() + this.rewardGroups.size())){
                 throw new ConfigParseError("pickSize is bigger than the amount of rewards.",node.getNode("pickSize").getPath());
             }
 
