@@ -10,9 +10,6 @@ import com.codehusky.huskycrates.crate.virtual.views.ViewConfig;
 import com.codehusky.huskycrates.exception.*;
 import com.codehusky.huskyui.StateContainer;
 import com.codehusky.huskyui.states.Page;
-import com.codehusky.huskyui.states.action.Action;
-import com.codehusky.huskyui.states.action.ActionType;
-import com.codehusky.huskyui.states.element.ActionableElement;
 import com.codehusky.huskyui.states.element.Element;
 import com.flowpowered.math.vector.Vector3d;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -27,7 +24,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
@@ -396,37 +392,22 @@ public class Crate {
 
     public void launchPreview(Player player){
         StateContainer previewContainer = new StateContainer();
-        int pageCount = (int)Math.ceil((double)slots.size() / 45.0);
-        for(int i = 0; i < pageCount; i++){
-            Page.PageBuilder builder = Page.builder();
-            builder.setTitle(Text.of(TextSerializers.FORMATTING_CODE.deserialize(getName()), (pageCount > 1?" - Page " + (i+1):"")));
-            builder.setAutoPaging(true);
-            for(int j = 45 * i; j < (45*i) + 45 && j < slots.size(); j++) {
-                ItemStack orig = slots.get(j).getDisplayItem().toItemStack();
-                List<Text> oldLore = orig.getOrElse(Keys.ITEM_LORE,new ArrayList<>());
-                double val = ((double)slots.get(j).getChance()/(double)slotChanceMax)*100;
-                BigDecimal occurance = new BigDecimal(val).setScale(2,BigDecimal.ROUND_HALF_UP);
-                oldLore.add(Text.of(TextStyles.NONE,TextColors.GRAY,"Occurrence: " + ((val < 0.01)?"< 0.01":occurance.toString()) + "%"));
-                oldLore.add(Text.of(TextStyles.NONE,TextColors.GRAY,"Rewards: " + slots.get(j).getRewards().size()));
-                builder.addElement(new Element(ItemStack.builder().from(orig).add(Keys.ITEM_LORE,oldLore).build()));
-            }
-            builder.setInventoryDimension(InventoryDimension.of(9,6));
-            if(i != 0) {
-                builder.putElement(45, new ActionableElement(
-                        new Action(previewContainer, ActionType.NORMAL, "page" + (i - 1)),
-                        ItemStack.builder().itemType(ItemTypes.MAP).add(Keys.DISPLAY_NAME, Text.of("Back")).build()));
-            }
-            if((i+1) < pageCount) {
-                builder.putElement(53, new ActionableElement(
-                        new Action(previewContainer, ActionType.NORMAL, "page" + (i + 1)),
-                        ItemStack.builder().itemType(ItemTypes.MAP).add(Keys.DISPLAY_NAME, Text.of("Next")).build()));
-            }
-            Page built = builder.build("page" + i);
-            if(i == 0)
-                previewContainer.setInitialState(built);
-            else
-                previewContainer.addState(built);
+        Page.PageBuilder builder = Page.builder();
+
+        builder.setTitle(Text.of(TextSerializers.FORMATTING_CODE.deserialize(getName())));
+        builder.setAutoPaging(true);
+        for(int j = 0; j  < slots.size(); j++) {
+            ItemStack orig = slots.get(j).getDisplayItem().toItemStack();
+            List<Text> oldLore = orig.getOrElse(Keys.ITEM_LORE,new ArrayList<>());
+            double val = ((double)slots.get(j).getChance()/(double)slotChanceMax)*100;
+            BigDecimal occurance = new BigDecimal(val).setScale(2,BigDecimal.ROUND_HALF_UP);
+            oldLore.add(Text.of(TextStyles.NONE,TextColors.GRAY,"Occurrence: " + ((val < 0.01)?"< 0.01":occurance.toString()) + "%"));
+            oldLore.add(Text.of(TextStyles.NONE,TextColors.GRAY,"Rewards: " + slots.get(j).getRewards().size()));
+            builder.addElement(new Element(ItemStack.builder().from(orig).add(Keys.ITEM_LORE,oldLore).build()));
         }
+        Page built = builder.build("preview");
+        previewContainer.setInitialState(built);
+
         previewContainer.launchFor(player);
     }
 
