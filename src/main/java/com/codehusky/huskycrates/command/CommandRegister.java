@@ -20,12 +20,12 @@ public class CommandRegister {
                         .executor(new BlockCommand())
                         .arguments(new CrateArgument(Text.of("crate")),
                                 GenericArguments.optionalWeak(GenericArguments.catalogedElement(Text.of("block"),BlockType.class)),
-                                GenericArguments.optionalWeak(GenericArguments.player(Text.of("player"))),GenericArguments.optional(GenericArguments.integer(Text.of("damage"))))
+                                GenericArguments.optionalWeak(GenericArguments.player(Text.of("player"))),GenericArguments.optional(GenericArguments.integer(Text.of("amount"))))
                         .permission("huskycrates.block.base")
-                        .build(),"b","blk","block")
+                        .build(),"b","blk","block","chest")
                 .child(CommandSpec.builder()
                         .executor(new KeyCommand())
-                        .arguments(GenericArguments.optionalWeak(GenericArguments.literal(Text.of("virtual"),"v")),GenericArguments.firstParsing(new CrateArgument(Text.of("crate")),new KeyArgument(Text.of("key"))),GenericArguments.optionalWeak(GenericArguments.integer(Text.of("amount"))),GenericArguments.optional(GenericArguments.firstParsing(GenericArguments.literal(Text.of("all"),"@a"),GenericArguments.player(Text.of("player")))))
+                        .arguments(GenericArguments.optionalWeak(GenericArguments.literal(Text.of("virtual"),"v")),GenericArguments.firstParsing(new CrateArgument(Text.of("crate")),new KeyArgument(Text.of("key"))),GenericArguments.optional(GenericArguments.firstParsing(GenericArguments.literal(Text.of("all"),"@a"),GenericArguments.player(Text.of("player")))),GenericArguments.optionalWeak(GenericArguments.integer(Text.of("amount"))))
                         .permission("huskycrates.key.base")
                         .build(),"k","key")
                 .child(CommandSpec.builder()
@@ -50,7 +50,7 @@ public class CommandRegister {
                 .description(Text.of("Main HuskyCrates Command."))
                 .extendedDescription(Text.of("For more information on the commands you can use with HuskyCrates, please visit the HuskyCrates documentation.\nYou can find a link to the documentation within /hc help."))
                 .build();
-        Sponge.getCommandManager().register(plugin,mainCommand,"hc","husky","huskycrates");
+        Sponge.getCommandManager().register(plugin,mainCommand,"hc","husky","huskycrates","crate");
     }
 
     public static class CrateArgument extends CommandElement {

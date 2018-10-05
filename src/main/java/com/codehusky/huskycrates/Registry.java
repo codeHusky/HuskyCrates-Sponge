@@ -310,7 +310,7 @@ public class Registry {
 
         DataSource dbSource = null;
         try {
-            dbSource = Sponge.getServiceManager().provide(SqlService.class).get().getDataSource("jdbc:h2:./" + HuskyCrates.instance.configDir.resolve("data"));
+            dbSource = Sponge.getServiceManager().provide(SqlService.class).get().getDataSource("jdbc:h2:" + HuskyCrates.instance.configDir.resolve("data"));
             Connection connection = dbSource.getConnection();
             boolean cP = connection.getMetaData().getTables(null,null,"CRATELOCATIONS",null).next();
             boolean cKU = connection.getMetaData().getTables(null,null,"VALIDKEYS",null).next();
