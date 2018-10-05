@@ -50,7 +50,9 @@ public class CommandRegister {
                 .description(Text.of("Main HuskyCrates Command."))
                 .extendedDescription(Text.of("For more information on the commands you can use with HuskyCrates, please visit the HuskyCrates documentation.\nYou can find a link to the documentation within /hc help."))
                 .build();
-        Sponge.getCommandManager().register(plugin,mainCommand,"hc","husky","huskycrates");
+        if(Sponge.getCommandManager().get("crate").isPresent())
+            Sponge.getCommandManager().removeMapping(Sponge.getCommandManager().get("crate").get()); // /crate will be mine simon, like it or not
+        Sponge.getCommandManager().register(plugin,mainCommand,"hc","husky","huskycrates","crate");
     }
 
     public static class CrateArgument extends CommandElement {
