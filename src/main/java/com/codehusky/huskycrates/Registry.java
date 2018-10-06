@@ -306,6 +306,12 @@ public class Registry {
         dirtyLastCrateUse.clear();
     }
 
+    public void postInjection() {
+        crates.forEach((id, crate) -> {
+            crate.postInjectionChecks();
+        });
+    }
+
     private Connection getConnection() {
 
         DataSource dbSource = null;

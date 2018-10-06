@@ -5,6 +5,7 @@ import com.codehusky.huskycrates.Util;
 import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
+import com.codehusky.huskycrates.event.CrateInjectionEvent;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.key.Keys;
@@ -226,5 +227,10 @@ public class CrateListeners {
                 //event.setCancelled(true);
             }
         }
+    }
+
+    @Listener(order = Order.POST)
+    public void afterInjection(CrateInjectionEvent event){
+        HuskyCrates.registry.postInjection();
     }
 }

@@ -5,7 +5,9 @@ import com.codehusky.huskycrates.Util;
 import com.codehusky.huskycrates.crate.virtual.effects.Effect;
 import com.codehusky.huskycrates.exception.ConfigError;
 import com.codehusky.huskycrates.exception.ConfigParseError;
+import com.codehusky.huskycrates.exception.InjectionDataError;
 import com.codehusky.huskycrates.exception.RewardDeliveryError;
+import com.sun.istack.internal.NotNull;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -71,6 +73,44 @@ public class Slot {
 
             this.pickUnique = node.getNode("pickUnique").getBoolean(true);
         }
+    }
+
+    public Slot(@NotNull Item displayItem, List<Reward> rewards, List<List<Reward>> rewardGroups, @NotNull Integer chance, Boolean pickRandom, Integer pickSize, Boolean pickUnique){
+        this.displayItem = displayItem;
+        this.chance = chance;
+
+        if(rewards != null){
+            this.rewards = rewards;
+        }else{
+            this.rewards = new ArrayList<>();
+        }
+
+        if(rewardGroups != null){
+            this.rewardGroups = rewardGroups;
+        }else{
+            this.rewardGroups = new ArrayList<>();
+        }
+
+        if(pickRandom != null){
+            this.pickRandom = pickRandom;
+
+            if(this.pickRandom){
+                if(pickSize != null){
+                    this.pickSize = pickSize;
+                }else{
+                    this.pickSize = 1;
+                }
+
+                if(pickUnique != null){
+                    this.pickUnique = pickUnique;
+                }else{
+                    this.pickUnique = true;
+                }
+            }
+        }else{
+            this.pickRandom = false;
+        }
+
     }
 
     public boolean rewardPlayer(Player player, Location<World> crateLocation){
@@ -159,6 +199,40 @@ public class Slot {
             }else if(this.rewardType == RewardType.EFFECT){
                 effect = new Effect(node.getNode("effect"));
                 effectOnPlayer = node.getNode("effectOnPlayer").getBoolean(false);
+            }
+        }
+
+        public Reward(@NotNull Crate holder, @NotNull RewardType rewardType,  String rewardString, Item rewardItem, Item slotDisplayItem, Effect effect, Boolean effectOnPlayer, Integer keyCount){
+            this.rewardType = rewardType;
+            if(this.rewardType == RewardType.USERCOMMAND || this.rewardType == RewardType.SERVERCOMMAND || this.rewardType == RewardType.SERVERMESSAGE || this.rewardType == RewardType.USERMESSAGE || this.rewardType == RewardType.KEY){
+                this.rewardString = rewardString;
+                if(rewardString == null){
+                    throw new InjectionDataError("No data specified for injected reward.");
+                }
+                if(this.rewardType == RewardType.KEY){
+                    if(!HuskyCrates.registry.isKey(rewardString) && !holder.hasLocalKey() && !holder.getLocalKey().getId().equals(rewardString)){
+                        throw new InjectionDataError("Invalid injected key ID!");
+                    }else{
+                        if(keyCount != null) {
+                            this.keyCount = keyCount;
+                        }else{
+                            throw new InjectionDataError("You cannot inject null as keyCount.");
+                        }
+                    }
+                }
+            }else if(this.rewardType == RewardType.ITEM){
+                if(rewardItem == null){
+                    if(slotDisplayItem != null) {
+                        this.rewardItem = slotDisplayItem;
+                    }else{
+                        throw new InjectionDataError("Either slotDisplayItem or rewardItem must be an Item");
+                    }
+                }else {
+                    this.rewardItem = rewardItem;
+                }
+            }else if(this.rewardType == RewardType.EFFECT){
+                this.effect = effect;
+                this.effectOnPlayer = (effectOnPlayer != null)?effectOnPlayer:false;
             }
         }
 

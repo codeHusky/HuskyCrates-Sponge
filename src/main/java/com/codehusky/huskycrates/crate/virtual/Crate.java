@@ -75,7 +75,7 @@ public class Crate {
     }
 
     private Messages messages;
-
+    private boolean injection;
     public Crate(ConfigurationNode node){
         if(!node.hasMapChildren()){
             throw new ConfigParseError("Invalid data in crates.conf. Please remove it.",node.getPath());
@@ -85,6 +85,9 @@ public class Crate {
         this.name = node.getNode("name").getString();
 
         this.useLocalKey = node.getNode("useLocalKey").getBoolean(false);
+
+        this.injection = node.getNode("waitForInjection").getBoolean(false);
+
 
         ConfigurationNode aKeyNode = node.getNode("acceptedKeys");
         if(!aKeyNode.isVirtual()) {
@@ -121,8 +124,13 @@ public class Crate {
             throw new ConfigParseError("Non-free crate has no accepted keys!",node.getPath());
         }
 
+
         if(node.getNode("slots").isVirtual()){
-            throw new ConfigParseError("Crates must have associated slots!", node.getNode("slots").getPath());
+            if(this.injection) {
+                throw new ConfigParseError("Crates must have associated slots!", node.getNode("slots").getPath());
+            }else{
+                HuskyCrates.instance.logger.warn("Crate with id of " + this.id + " is waiting for injection.");
+            }
         }else{
             for(ConfigurationNode slot : node.getNode("slots").getChildrenList()){
                 Slot thisSlot = new Slot(slot,this);
@@ -186,6 +194,23 @@ public class Crate {
         }
 
         this.previewable = node.getNode("previewable").getBoolean(false);
+    }
+
+    public boolean isInjectable() {
+        return this.injection;
+    }
+
+    public void injectSlot(Slot slot) {
+        slots.add(slot);
+        slotChanceMax += slot.getChance();
+    }
+
+    public void postInjectionChecks() {
+        if(this.injection){
+            if(this.slots.size() == 0){
+                throw new InjectionMissedError("Injectable crates with no slots must be injected!");
+            }
+        }
     }
 
     public String getId() {
