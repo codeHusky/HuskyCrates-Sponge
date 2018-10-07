@@ -33,6 +33,7 @@ public class Item {
     private List<Enchantment> enchantments;
     private LinkedHashMap nbt;
 
+    //TODO: builder pattern
     public Item(String name, ItemType itemType, List<String> lore, Integer count, Integer damage, Integer durability, List<Enchantment> enchantments, LinkedHashMap nbt){
         this.name = name;
         this.itemType = itemType;

@@ -75,6 +75,7 @@ public class Slot {
         }
     }
 
+    //TODO: builder pattern
     public Slot(@NotNull Item displayItem, List<Reward> rewards, List<List<Reward>> rewardGroups, @NotNull Integer chance, Boolean pickRandom, Integer pickSize, Boolean pickUnique){
         this.displayItem = displayItem;
         this.chance = chance;
@@ -202,6 +203,7 @@ public class Slot {
             }
         }
 
+        //TODO: builder pattern
         public Reward(@NotNull Crate holder, @NotNull RewardType rewardType,  String rewardString, Item rewardItem, Item slotDisplayItem, Effect effect, Boolean effectOnPlayer, Integer keyCount){
             this.rewardType = rewardType;
             if(this.rewardType == RewardType.USERCOMMAND || this.rewardType == RewardType.SERVERCOMMAND || this.rewardType == RewardType.SERVERMESSAGE || this.rewardType == RewardType.USERMESSAGE || this.rewardType == RewardType.KEY){
