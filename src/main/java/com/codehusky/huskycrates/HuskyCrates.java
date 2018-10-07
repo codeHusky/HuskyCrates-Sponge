@@ -9,6 +9,7 @@ import com.codehusky.huskycrates.crate.physical.EffectInstance;
 import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
+import com.codehusky.huskycrates.event.CrateInjectionEvent;
 import com.codehusky.huskycrates.exception.ConfigParseError;
 import com.google.inject.Inject;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -97,7 +98,9 @@ public class HuskyCrates {
         crateConfig = HoconConfigurationLoader.builder().setPath(crateConfigPath).build();
         keyConfig = HoconConfigurationLoader.builder().setPath(keyConfigPath).build();
     }
-
+    private float cumulative = 0;
+    private int iterations = 0;
+    private long lastMessage = 0;
     @Listener
     public void gamePostInit(GamePostInitializationEvent event){
         loadConfig();
@@ -110,15 +113,29 @@ public class HuskyCrates {
             @Override
             public void accept(Task task) {
                 try {
-                    long startTime = System.currentTimeMillis();
+                    long startTime = System.nanoTime();
+                    int particles = 0;
                     for (Location<World> location : registry.getPhysicalCrates().keySet()) {
                         PhysicalCrate pcrate = registry.getPhysicalCrate(location);
                         if (pcrate.getIdleEffect() != null) {
                             pcrate.getIdleEffect().tick();
+                            particles += pcrate.getIdleEffect().getEffect().getParticleCount();
                         }
                     }
-                    long endTime = System.currentTimeMillis();
-                    //System.out.println((endTime - startTime) + " milliseconds");
+                    long endTime = System.nanoTime();
+                    cumulative += (endTime - startTime);
+                    iterations++;
+                    if(lastMessage + 1000 < System.currentTimeMillis()){
+                        lastMessage = System.currentTimeMillis();
+                        float avg = (cumulative / ((float)iterations));
+                        /*System.out.println("AVG PARTICLE TIME: " + avg + " nanoseconds (" + (avg / 1000000) + " milliseconds)");
+                        System.out.println("EST TIME PER EFFECT: " + (avg / particles) + " nanoseconds (" + (avg / particles / 1000000) + " milliseconds)");
+                        System.out.println("PARTICLES: " + particles);
+                        System.out.println("--------------------------");*/
+                        iterations = 0;
+                        cumulative = 0;
+                    }
+                    //System.out.println("PARTICLE TIME: " + ((endTime - startTime)/1000000.0) + " milliseconds");
                     ArrayList<EffectInstance> nuke = new ArrayList<>();
                     for (EffectInstance inst : registry.getEffects()) {
                         inst.tick();
@@ -187,6 +204,7 @@ public class HuskyCrates {
                 }
 
                 config.save(mainConfig);
+                Sponge.getEventManager().post(new CrateInjectionEvent());
 
             }catch(Exception e){
                 inErrorState = true;

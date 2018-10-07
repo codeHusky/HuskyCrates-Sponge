@@ -126,7 +126,7 @@ public class Crate {
 
 
         if(node.getNode("slots").isVirtual()){
-            if(this.injection) {
+            if(!this.injection) {
                 throw new ConfigParseError("Crates must have associated slots!", node.getNode("slots").getPath());
             }else{
                 HuskyCrates.instance.logger.warn("Crate with id of " + this.id + " is waiting for injection.");
@@ -209,6 +209,8 @@ public class Crate {
         if(this.injection){
             if(this.slots.size() == 0){
                 throw new InjectionMissedError("Injectable crates with no slots must be injected!");
+            }else{
+                HuskyCrates.instance.logger.info("Injection successful on " + this.id);
             }
         }
     }
