@@ -160,7 +160,7 @@ public class Slot {
         return rewards;
     }
 
-    public class Reward {
+    public static class Reward {
         private RewardType rewardType;
 
         private String rewardString; // can be a message or a command. :3
