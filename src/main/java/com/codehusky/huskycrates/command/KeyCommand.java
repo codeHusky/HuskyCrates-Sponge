@@ -19,8 +19,6 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.Optional;
 
-import static com.codehusky.huskycrates.HuskyCrates.keyCommandMessages;
-
 public class KeyCommand implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
@@ -47,12 +45,12 @@ public class KeyCommand implements CommandExecutor {
             workingWith = key.get();
         }
         if(workingWith == null){
-            src.sendMessage(keyCommandMessages.getCrateNoLocalKey());
+            src.sendMessage(HuskyCrates.keyCommandMessages.getCrateNoLocalKey());
             return CommandResult.success();
         }
 
         if(workingWith.isVirtual() && !isVirtual){
-            src.sendMessage(keyCommandMessages.getCrateKeyVirtual());
+            src.sendMessage(HuskyCrates.keyCommandMessages.getCrateKeyVirtual());
             return CommandResult.success();
         }
         int amount = pamount.orElse(1);
@@ -73,13 +71,13 @@ public class KeyCommand implements CommandExecutor {
                     HuskyCrates.registry.addVirtualKeys(p.getUniqueId(),workingWith.getId(),amount);
 
                 if(!isVirtual && result.getType() != InventoryTransactionResult.Type.SUCCESS){
-                    src.sendMessage(keyCommandMessages.getKeyDeliveryFail(p.getName(),amount));
+                    src.sendMessage(HuskyCrates.keyCommandMessages.getKeyDeliveryFail(p.getName(),amount));
                 }else{
-                    p.sendMessage(keyCommandMessages.getReceivedKey(keyName,amount));
+                    p.sendMessage(HuskyCrates.keyCommandMessages.getReceivedKey(keyName,amount));
                     deliveredTo++;
                 }
             }
-            src.sendMessage(keyCommandMessages.getMassKeyDeliverySuccess(deliveredTo,amount));
+            src.sendMessage(HuskyCrates.keyCommandMessages.getMassKeyDeliverySuccess(deliveredTo,amount));
 
         }else if(player.isPresent()){ /** Deliver keys to a player **/
             if(!src.hasPermission("huskycrates.key.others")){
@@ -94,10 +92,10 @@ public class KeyCommand implements CommandExecutor {
                 HuskyCrates.registry.addVirtualKeys(player.get().getUniqueId(),workingWith.getId(),amount);
 
             if(!isVirtual && result.getType() != InventoryTransactionResult.Type.SUCCESS){
-                src.sendMessage(keyCommandMessages.getKeyDeliveryFail(player.get().getName(),amount));
+                src.sendMessage(HuskyCrates.keyCommandMessages.getKeyDeliveryFail(player.get().getName(),amount));
             }else{
-                player.get().sendMessage(keyCommandMessages.getReceivedKey(keyName,amount));
-                src.sendMessage(keyCommandMessages.getKeyDeliverySuccess(player.get().getName(),amount));
+                player.get().sendMessage(HuskyCrates.keyCommandMessages.getReceivedKey(keyName,amount));
+                src.sendMessage(HuskyCrates.keyCommandMessages.getKeyDeliverySuccess(player.get().getName(),amount));
             }
 
         }else if(src instanceof Player) { /** Deliver keys to self **/
@@ -114,13 +112,13 @@ public class KeyCommand implements CommandExecutor {
                 HuskyCrates.registry.addVirtualKeys(psrc.getUniqueId(),workingWith.getId(),amount);
 
             if(!isVirtual && result.getType() != InventoryTransactionResult.Type.SUCCESS){
-                src.sendMessage(keyCommandMessages.getSelfKeyDeliveryFail());
+                src.sendMessage(HuskyCrates.keyCommandMessages.getSelfKeyDeliveryFail());
             }else{
-                src.sendMessage(keyCommandMessages.getSelfKeyDeliverySuccess(amount));
+                src.sendMessage(HuskyCrates.keyCommandMessages.getSelfKeyDeliverySuccess(amount));
             }
 
         }else{ /** No valid subject... **/
-            src.sendMessage(keyCommandMessages.getNoPlayersFound());
+            src.sendMessage(HuskyCrates.keyCommandMessages.getNoPlayersFound());
 
         }
         return CommandResult.success();

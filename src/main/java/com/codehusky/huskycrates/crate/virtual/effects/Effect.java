@@ -32,6 +32,10 @@ public class Effect {
         }
     }
 
+    public int getParticleCount() {
+        return particles.size();
+    }
+
     public Effect(boolean disabled, long duration, boolean loop, boolean resetOnTimeout, boolean clientSide, ArrayList<Particle> particles){
         this.disabled = disabled;
         this.duration = duration;
