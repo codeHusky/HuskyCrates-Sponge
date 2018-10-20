@@ -232,5 +232,6 @@ public class CrateListeners {
     @Listener(order = Order.POST)
     public void afterInjection(CrateInjectionEvent event){
         HuskyCrates.registry.postInjection();
+        HuskyCrates.instance.logger.info("Injection checks passed.");
     }
 }

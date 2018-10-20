@@ -5,6 +5,7 @@ import com.codehusky.huskycrates.crate.physical.HologramInstance;
 import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskycrates.crate.virtual.Key;
+import com.codehusky.huskycrates.crate.virtual.Slot;
 import com.codehusky.huskycrates.crate.virtual.effects.Effect;
 import com.codehusky.huskycrates.exception.DoubleRegistrationError;
 import org.spongepowered.api.Sponge;
@@ -304,6 +305,10 @@ public class Registry {
 
         lastCrateUse.clear();
         dirtyLastCrateUse.clear();
+    }
+
+    public void injectSlot(String crateID, Slot slot) {
+        crates.get(crateID).injectSlot(slot);
     }
 
     public void postInjection() {

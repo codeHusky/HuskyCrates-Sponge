@@ -494,7 +494,7 @@ public class Crate {
             if(!HuskyCrates.registry.isCrate(crateID)){
                 throw new NoMessageContextError("Invalid crate id: " + crateID);
             }
-            return format(messageType, HuskyCrates.registry.getCrate(crateID), player);
+            return format(messageType, HuskyCrates.registry.getCrate(crateID), player, null);
         }
 
         public Text getVirtualKeyConsumed(String keyName, Integer amountConsumed, Integer amountRemaining){
@@ -507,7 +507,7 @@ public class Crate {
                             .replace("{key}",keyName));
         }
 
-        public Text format(Type messageType, Crate crate, Player player){
+        public Text format(Type messageType, Crate crate, Player player, Slot slot){
             String newMessage;
             switch(messageType){
                 case RejectionNeedKey:

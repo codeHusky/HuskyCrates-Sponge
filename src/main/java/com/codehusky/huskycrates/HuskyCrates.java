@@ -23,7 +23,6 @@ import org.spongepowered.api.config.DefaultConfig;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.game.GameReloadEvent;
-import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartedServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
@@ -102,59 +101,9 @@ public class HuskyCrates {
     private int iterations = 0;
     private long lastMessage = 0;
     @Listener
-    public void gamePostInit(GamePostInitializationEvent event){
-        loadConfig();
-
+    public void gamePostInit(GamePreInitializationEvent event){
         crateListeners = new CrateListeners();
-
         Sponge.getEventManager().registerListeners(this,crateListeners);
-
-        Sponge.getScheduler().createTaskBuilder().execute(new Consumer<Task>() {
-            @Override
-            public void accept(Task task) {
-                try {
-                    long startTime = System.nanoTime();
-                    int particles = 0;
-                    for (Location<World> location : registry.getPhysicalCrates().keySet()) {
-                        PhysicalCrate pcrate = registry.getPhysicalCrate(location);
-                        if (pcrate.getIdleEffect() != null) {
-                            pcrate.getIdleEffect().tick();
-                            particles += pcrate.getIdleEffect().getEffect().getParticleCount();
-                        }
-                    }
-                    long endTime = System.nanoTime();
-                    cumulative += (endTime - startTime);
-                    iterations++;
-                    if(lastMessage + 1000 < System.currentTimeMillis()){
-                        lastMessage = System.currentTimeMillis();
-                        float avg = (cumulative / ((float)iterations));
-                        /*System.out.println("AVG PARTICLE TIME: " + avg + " nanoseconds (" + (avg / 1000000) + " milliseconds)");
-                        System.out.println("EST TIME PER EFFECT: " + (avg / particles) + " nanoseconds (" + (avg / particles / 1000000) + " milliseconds)");
-                        System.out.println("PARTICLES: " + particles);
-                        System.out.println("--------------------------");*/
-                        iterations = 0;
-                        cumulative = 0;
-                    }
-                    //System.out.println("PARTICLE TIME: " + ((endTime - startTime)/1000000.0) + " milliseconds");
-                    ArrayList<EffectInstance> nuke = new ArrayList<>();
-                    for (EffectInstance inst : registry.getEffects()) {
-                        inst.tick();
-                        if (inst.getEffect().isFinished()) {
-                            nuke.add(inst);
-                        }
-                    }
-                    for (EffectInstance inst : nuke) {
-                        inst.resetEffect();
-                        registry.removeEffect(inst);
-                    }
-                }catch (ConcurrentModificationException e){}
-            }
-        }).intervalTicks(1).async().submit(this);
-
-        Sponge.getScheduler().createTaskBuilder()
-                .execute(registry::pushDirty)
-                .interval(1, TimeUnit.MINUTES)
-                .submit(this);
     }
 
     public void loadConfig() {
@@ -240,6 +189,60 @@ public class HuskyCrates {
 
     @Listener
     public void gameStarted(GameStartedServerEvent event){
+        logger.info("Loading Crates...");
+        loadConfig();
+
+
+
+
+
+        Sponge.getScheduler().createTaskBuilder().execute(new Consumer<Task>() {
+            @Override
+            public void accept(Task task) {
+                try {
+                    long startTime = System.nanoTime();
+                    int particles = 0;
+                    for (Location<World> location : registry.getPhysicalCrates().keySet()) {
+                        PhysicalCrate pcrate = registry.getPhysicalCrate(location);
+                        if (pcrate.getIdleEffect() != null) {
+                            pcrate.getIdleEffect().tick();
+                            particles += pcrate.getIdleEffect().getEffect().getParticleCount();
+                        }
+                    }
+                    long endTime = System.nanoTime();
+                    cumulative += (endTime - startTime);
+                    iterations++;
+                    if(lastMessage + 1000 < System.currentTimeMillis()){
+                        lastMessage = System.currentTimeMillis();
+                        float avg = (cumulative / ((float)iterations));
+                        /*System.out.println("AVG PARTICLE TIME: " + avg + " nanoseconds (" + (avg / 1000000) + " milliseconds)");
+                        System.out.println("EST TIME PER EFFECT: " + (avg / particles) + " nanoseconds (" + (avg / particles / 1000000) + " milliseconds)");
+                        System.out.println("PARTICLES: " + particles);
+                        System.out.println("--------------------------");*/
+                        iterations = 0;
+                        cumulative = 0;
+                    }
+                    //System.out.println("PARTICLE TIME: " + ((endTime - startTime)/1000000.0) + " milliseconds");
+                    ArrayList<EffectInstance> nuke = new ArrayList<>();
+                    for (EffectInstance inst : registry.getEffects()) {
+                        inst.tick();
+                        if (inst.getEffect().isFinished()) {
+                            nuke.add(inst);
+                        }
+                    }
+                    for (EffectInstance inst : nuke) {
+                        inst.resetEffect();
+                        registry.removeEffect(inst);
+                    }
+                }catch (ConcurrentModificationException e){}
+            }
+        }).intervalTicks(1).async().submit(this);
+
+        Sponge.getScheduler().createTaskBuilder()
+                .execute(registry::pushDirty)
+                .interval(1, TimeUnit.MINUTES)
+                .submit(this);
+
         HuskyCrates.registry.loadFromDatabase();
         CommandRegister.register(this);
         if(inErrorState) {

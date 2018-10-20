@@ -19,6 +19,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -166,18 +167,24 @@ public class Slot {
         private String rewardString; // can be a message or a command. :3
 
         private Item rewardItem;
+        private Item displayItem;
 
         private Effect effect;
         private boolean effectOnPlayer = false;
 
         private Integer keyCount = 1;
 
+        private String crateid;
+
         private Reward(ConfigurationNode node, ConfigurationNode displayItemNode, Crate holder){
+            crateid = holder.getId();
             try {
                 this.rewardType = RewardType.valueOf(node.getNode("type").getString("").toUpperCase());
             }catch(IllegalArgumentException e){
                 throw new ConfigParseError("Invalid reward type or no reward type specified.",node.getNode("type").getPath());
             }
+
+            displayItem = new Item(displayItemNode);
 
             if(this.rewardType == RewardType.USERCOMMAND || this.rewardType == RewardType.SERVERCOMMAND || this.rewardType == RewardType.SERVERMESSAGE || this.rewardType == RewardType.USERMESSAGE || this.rewardType == RewardType.KEY){
                 rewardString = node.getNode("data").getString();
@@ -193,7 +200,7 @@ public class Slot {
                 }
             }else if(this.rewardType == RewardType.ITEM){
                 if(node.getNode("item").isVirtual()){
-                    rewardItem = new Item(displayItemNode);
+                    rewardItem = displayItem;
                 }else {
                     rewardItem = new Item(node.getNode("item"));
                 }
@@ -205,6 +212,8 @@ public class Slot {
 
         //TODO: builder pattern
         public Reward(@NotNull Crate holder, @NotNull RewardType rewardType,  String rewardString, Item rewardItem, Item slotDisplayItem, Effect effect, Boolean effectOnPlayer, Integer keyCount){
+            this.displayItem = slotDisplayItem;
+            this.crateid = holder.getId();
             this.rewardType = rewardType;
             if(this.rewardType == RewardType.USERCOMMAND || this.rewardType == RewardType.SERVERCOMMAND || this.rewardType == RewardType.SERVERMESSAGE || this.rewardType == RewardType.USERMESSAGE || this.rewardType == RewardType.KEY){
                 this.rewardString = rewardString;
@@ -239,6 +248,7 @@ public class Slot {
         }
 
         private String replaceCommand(Player player, Location<World> crateLocation){
+            ArrayList<String> vowels = new ArrayList<>(Arrays.asList("a","e","i","o","u"));
             return rewardString
                     .replace("%p",player.getName())
                     .replace("%P",player.getUniqueId().toString())
@@ -255,7 +265,10 @@ public class Slot {
                     .replace("%pzi",player.getLocation().getBlockZ() + "")
                     .replace("%pxd",player.getLocation().getX() + "")
                     .replace("%pyd",player.getLocation().getY() + "")
-                    .replace("%pzd",player.getLocation().getZ() + "");
+                    .replace("%pzd",player.getLocation().getZ() + "")
+                    .replace("%R", displayItem.getName())
+                    .replace("%a", vowels.indexOf(displayItem.getName().substring(0,1)) == 0 ? "an":"a")
+                    .replace("%C", (HuskyCrates.registry.isCrate(crateid))?HuskyCrates.registry.getCrate(crateid).getName():"INVALID CRATE! (CONTACT ADMINS)");
         }
 
         public void actOnReward(Player player, Location<World> crateLocation) {

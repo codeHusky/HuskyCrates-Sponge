@@ -2,6 +2,8 @@ package com.codehusky.huskycrates.crate.virtual;
 
 import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.exception.ConfigParseError;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
@@ -31,10 +33,10 @@ public class Item {
     private Integer durability; // amount of durability left on tool, weapon, armor, etc.
 
     private List<Enchantment> enchantments;
-    private LinkedHashMap nbt;
+    private Map nbt;
 
     //TODO: builder pattern
-    public Item(String name, ItemType itemType, List<String> lore, Integer count, Integer damage, Integer durability, List<Enchantment> enchantments, LinkedHashMap nbt){
+    public Item(String name, ItemType itemType, List<String> lore, Integer count, Integer damage, Integer durability, List<Enchantment> enchantments, Map nbt){
         this.name = name;
         this.itemType = itemType;
         this.lore = lore;
@@ -43,6 +45,9 @@ public class Item {
         this.durability = durability;
         this.enchantments = enchantments;
         this.nbt = nbt;
+        if(this.nbt instanceof ImmutableMap){
+            this.nbt = Maps.newHashMap(this.nbt);
+        }
     }
 
     public Item(ConfigurationNode node){
@@ -152,7 +157,7 @@ public class Item {
         return itemType;
     }
 
-    public LinkedHashMap getNBT() {
+    public Map getNBT() {
         return nbt;
     }
 
