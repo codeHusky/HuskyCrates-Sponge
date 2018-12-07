@@ -8,6 +8,7 @@ import com.codehusky.huskycrates.exception.ConfigParseError;
 import com.codehusky.huskycrates.exception.InjectionDataError;
 import com.codehusky.huskycrates.exception.RewardDeliveryError;
 import com.sun.istack.internal.NotNull;
+import me.rojo8399.placeholderapi.impl.PlaceholderServiceImpl;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -249,7 +250,8 @@ public class Slot {
 
         private String replaceCommand(Player player, Location<World> crateLocation){
             ArrayList<String> vowels = new ArrayList<>(Arrays.asList("a","e","i","o","u"));
-            return rewardString
+
+            String pP = rewardString
                     .replace("%p",player.getName())
                     .replace("%P",player.getUniqueId().toString())
 
@@ -269,6 +271,11 @@ public class Slot {
                     .replace("%R", displayItem.getName())
                     .replace("%a", vowels.indexOf(displayItem.getName().substring(0,1)) == 0 ? "an":"a")
                     .replace("%C", (HuskyCrates.registry.isCrate(crateid))?HuskyCrates.registry.getCrate(crateid).getName():"INVALID CRATE! (CONTACT ADMINS)");
+            
+            if(Sponge.getPluginManager().isLoaded("placeholderapi")) {
+                return TextSerializers.FORMATTING_CODE.serialize(PlaceholderServiceImpl.get().replacePlaceholders(pP, player, null));
+            }
+            return pP;
         }
 
         public void actOnReward(Player player, Location<World> crateLocation) {
