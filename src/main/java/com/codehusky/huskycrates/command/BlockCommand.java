@@ -26,7 +26,7 @@ public class BlockCommand implements CommandExecutor {
         Optional<BlockType> block = args.getOne(Text.of("block"));
         Optional<Player> otherPlayer = args.getOne(Text.of("player"));
         int amount = (int) args.getOne(Text.of("amount")).orElse(1);
-
+        int damage = (int) args.getOne(Text.of("damage")).orElse(0);
         Player playerToGive = null;
         if(src instanceof Player)
             playerToGive = (Player) src;
@@ -50,9 +50,9 @@ public class BlockCommand implements CommandExecutor {
                 src.sendMessage(HuskyCrates.blockCommandMessages.getItemOnlyFailure());
                 return CommandResult.success();
             }
-            stack = crate.getCratePlacementBlock(itP.get(),0);
+            stack = crate.getCratePlacementBlock(itP.get(),damage);
         }else{
-            stack = crate.getCratePlacementBlock(0);
+            stack = crate.getCratePlacementBlock(damage);
         }
         Util.getHotbarFirst(playerToGive.getInventory()).offer(ItemStack.builder().fromItemStack(stack).quantity(amount).build());
         return CommandResult.success();
