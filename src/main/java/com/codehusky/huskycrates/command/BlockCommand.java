@@ -25,7 +25,7 @@ public class BlockCommand implements CommandExecutor {
         Crate crate = args.<Crate>getOne(Text.of("crate")).get();
         Optional<BlockType> block = args.getOne(Text.of("block"));
         Optional<Player> otherPlayer = args.getOne(Text.of("player"));
-        int amount = (int) args.getOne(Text.of("amount")).orElse(0);
+        int amount = (int) args.getOne(Text.of("amount")).orElse(1);
 
         Player playerToGive = null;
         if(src instanceof Player)
