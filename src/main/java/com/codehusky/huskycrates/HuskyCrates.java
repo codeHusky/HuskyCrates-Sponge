@@ -82,6 +82,9 @@ public class HuskyCrates {
     private CrateListeners crateListeners;
 
     public static boolean KEY_SECURITY = true;
+    public static boolean FORCE_CRATE_CMD = true;
+
+    private static boolean firstBoot = false;
 
     public static KeyCommand.Messages keyCommandMessages;
     public static BlockCommand.Messages blockCommandMessages;
@@ -137,6 +140,22 @@ public class HuskyCrates {
                 }else{
                     HuskyCrates.KEY_SECURITY = mainConfig.getNode("secureKeys").getBoolean(true);
                 }
+
+                if(mainConfig.getNode("forceCrateCMD").isVirtual()){
+                    mainConfig.getNode("forceCrateCMD").setValue(HuskyCrates.FORCE_CRATE_CMD);
+                }else{
+                    if(firstBoot && mainConfig.getNode("forceCrateCMD").getBoolean(true) != HuskyCrates.FORCE_CRATE_CMD){
+                        logger.error("!!!!!! CRITICAL ERROR !!!!!!");
+                        logger.error("forceCrateCMD changes require a server reboot to apply!");
+                        logger.error("Please reboot immediately!");
+                        logger.error("!!!!!! CRITICAL ERROR !!!!!!");
+                        inErrorState=true;
+                    }else {
+                        HuskyCrates.FORCE_CRATE_CMD = mainConfig.getNode("forceCrateCMD").getBoolean(true);
+                    }
+                }
+
+                firstBoot = true;
 
                 keyCommandMessages = new KeyCommand.Messages(mainConfig.getNode("messages","keyCommand"));
                 blockCommandMessages = new BlockCommand.Messages(mainConfig.getNode("messages","blockCommand"));
