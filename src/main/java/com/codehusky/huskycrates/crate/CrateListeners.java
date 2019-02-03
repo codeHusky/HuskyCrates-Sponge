@@ -157,10 +157,16 @@ public class CrateListeners {
 
     @Listener(order = Order.PRE)
     public void placeCrate(ChangeBlockEvent.Place event, @Root Player player){
-        if(event.getContext().get(EventContextKeys.USED_ITEM).isPresent()) {
+        if(event.getContext().get(EventContextKeys.USED_ITEM).isPresent() || player.getItemInHand(HandTypes.MAIN_HAND).isPresent()) {
+
             for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
                 Optional<Location<World>> pLocation = transaction.getFinal().getLocation();
-                ItemStack stackUsed = event.getContext().get(EventContextKeys.USED_ITEM).get().createStack();
+                ItemStack stackUsed;
+                if(event.getContext().get(EventContextKeys.USED_ITEM).isPresent()){
+                    stackUsed = event.getContext().get(EventContextKeys.USED_ITEM).get().createStack();
+                }else{
+                    stackUsed = player.getItemInHand(HandTypes.MAIN_HAND).get().createSnapshot().createStack();
+                }
                 //System.out.println(event.getContext().get(EventContextKeys.USED_ITEM).get().toContainer());
                 if (pLocation.isPresent()) {
                     Location<World> location = pLocation.get();
@@ -191,7 +197,10 @@ public class CrateListeners {
 
     @Listener
     public void crateBlockDestroyed(ChangeBlockEvent event){
-        if(event instanceof ChangeBlockEvent.Place || event instanceof ChangeBlockEvent.Post) return;
+
+        if(!(event instanceof ChangeBlockEvent.Break)) return;
+        //System.out.println(event);
+
         for(Transaction<BlockSnapshot> trans : event.getTransactions()){
             BlockSnapshot original = trans.getOriginal();
             BlockSnapshot after = trans.getFinal();
