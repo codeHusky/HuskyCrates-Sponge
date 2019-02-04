@@ -47,7 +47,7 @@ import java.util.function.Consumer;
 @Plugin(
         id="huskycrates",
         name = "HuskyCrates",
-        version = "2.0.0PRE9",
+        version = "2.0.0PRE9H1",
         description = "A Crate Plugin for Sponge!",
         dependencies = {@Dependency(id="huskyui",version = "0.6.0PRE2"), @Dependency(id="placeholderapi", optional = true)})
 public class HuskyCrates {
@@ -275,12 +275,15 @@ public class HuskyCrates {
             logger.info("Crates has started successfully.");
 
         }
-        logger.warn("You are currently running a pre-release build!");
-        logger.warn("This is an unstable version of HuskyCrates and, as such,");
-        logger.warn("  it has not been tested thoroughly and will have bugs!");
-        logger.warn("Report all issues to codeHusky on the support discord!");
-        logger.warn("For help configuring, please consult the SRC or the discord.");
-        logger.warn("Thanks! - codeHusky");
+        if(pC.getVersion().get().contains("PRE")) {
+            logger.warn("You are currently running a pre-release build!");
+            logger.warn("This is an unstable version of HuskyCrates and, as such,");
+            logger.warn("  it has not been tested thoroughly and will have bugs!");
+            logger.warn("Report all issues to codeHusky on the support discord!");
+            logger.warn("For help configuring, please consult the SRC or the discord.");
+            logger.warn("Thanks! - codeHusky");
+        }
+        logger.info("Running HuskyCrates v" + pC.getVersion().get());
     }
 
     public void reload() {
