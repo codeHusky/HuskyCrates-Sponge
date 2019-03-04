@@ -68,7 +68,7 @@ public class RouletteView implements Consumer<Page> {
         g.offer(Keys.DISPLAY_NAME, Text.of(TextStyles.RESET,"You win!"));
         return g;
     }
-
+    private boolean safetyKill = false;
     @Override
     public void accept(Page page) {
         int count = 0;
@@ -78,7 +78,11 @@ public class RouletteView implements Consumer<Page> {
             count ++;
         }
         if(page.getTicks() > 20*3){
-            page.getObserver().closeInventory();
+            if(!safetyKill) {
+                page.getObserver().closeInventory();
+                safetyKill = true;
+                page.interrupt();
+            }
         }
     }
 

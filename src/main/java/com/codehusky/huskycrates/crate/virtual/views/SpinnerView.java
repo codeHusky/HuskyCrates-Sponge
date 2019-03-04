@@ -84,6 +84,7 @@ public class SpinnerView implements Consumer<Page> {
     boolean rewardGiven = false;
 
     boolean hasWon = false;
+    boolean safetyKill = false;
     long tickWinBegin = 0;
 
     private long getTicksToSelection() {
@@ -157,7 +158,11 @@ public class SpinnerView implements Consumer<Page> {
                 }
             }
             if(page.getTicks() > tickWinBegin + 20*3){
-                page.getObserver().closeInventory();
+                if(!safetyKill) {
+                    page.getObserver().closeInventory();
+                    safetyKill = true;
+                    page.interrupt();
+                }
             }
         }
     }

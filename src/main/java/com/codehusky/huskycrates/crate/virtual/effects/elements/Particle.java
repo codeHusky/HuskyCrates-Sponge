@@ -34,7 +34,7 @@ public class Particle {
     private Optional<String> colorPreset = Optional.empty();
 
     private ArrayList<ParticleEffect> palette = new ArrayList<>();
-    private ArrayList<ArrayList<Integer>> art = new ArrayList();
+    private ArrayList<ArrayList<Integer>> art = new ArrayList<>();
 
     public Particle(@NotNull ParticleEffect particle, int amount, int quantity, Vector3d offset, Vector3d position, String animationPreset, String colorPreset, Boolean animateColor, String animationCode){
         this.particle = particle;
