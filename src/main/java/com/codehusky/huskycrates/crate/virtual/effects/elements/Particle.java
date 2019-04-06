@@ -20,6 +20,8 @@ import org.spongepowered.api.world.World;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import javax.script.ScriptException;
+
 public class Particle {
     private ParticleEffect particle;
     private ParticlePattern pattern;
@@ -106,7 +108,11 @@ public class Particle {
         if(node.getNode("animationPreset").isVirtual()) {
             String code = node.getNode("animationCode").getString("x=Math.sin(time/5)*0.7;z=Math.cos(time/5)*0.7;");
             boolean animateColor = node.getNode("animateColor").getBoolean(false);
-            this.pattern = new JavaScriptParticlePattern(code, !animateColor);
+            try {
+                this.pattern = new JavaScriptParticlePattern(code, !animateColor);
+            } catch (ScriptException ex) {
+                throw new ConfigParseError("Invalid JS code!", node.getNode("animationCode").getPath());
+            }
         }else{
             PresetParticlePattern.ParticlePreset particlePreset;
             PresetParticlePattern.ColorPreset colorPreset;
