@@ -19,7 +19,7 @@ public class PresetParticlePattern implements ParticlePattern {
     }
 
     @Override
-    public Pair<Vector3d, Optional<Color>> getPositionForFrame(long tick, int particleNum) {
+    @Nonnull public Pair<Vector3d, Optional<Color>> getPositionForFrame(long tick, int particleNum) {
         Vector3d position = null;
         switch (this.particlePreset) {
             case ORBIT:

@@ -6,8 +6,10 @@ import org.spongepowered.api.util.Color;
 
 import java.util.Optional;
 
+import javax.annotation.Nonnull;
+
 public interface ParticlePattern {
 
-    Pair<Vector3d, Optional<Color>> getPositionForFrame(long tick, int particleNum);
+    @Nonnull Pair<Vector3d, Optional<Color>> getPositionForFrame(long tick, int particleNum);
 
 }
