@@ -35,6 +35,26 @@ public class Item {
     private List<Enchantment> enchantments;
     private Map nbt;
 
+    public static Item fromItemStack(ItemStack stack){
+        String name = TextSerializers.FORMATTING_CODE.serialize(stack.get(Keys.DISPLAY_NAME).orElse(Text.EMPTY));
+        List<String> lore = new ArrayList<>();
+        if(stack.get(Keys.ITEM_LORE).isPresent()){
+            stack.get(Keys.ITEM_LORE).get().forEach(text -> {
+                lore.add(TextSerializers.FORMATTING_CODE.serialize(text));
+            });
+        }
+        if(name.length() == 0) name = null;
+        return new Item(
+                name,
+                stack.getType(),
+                lore,
+                stack.getQuantity(),
+                stack.toContainer().getInt(DataQuery.of("UnsafeDamage")).orElse(null),
+                stack.get(Keys.ITEM_DURABILITY).orElse(null),
+                stack.get(Keys.ITEM_ENCHANTMENTS).orElse(null),
+                stack.toContainer().getMap(DataQuery.of("UnsafeData")).orElse(null)
+                );
+    }
     //TODO: builder pattern
     public Item(String name, ItemType itemType, List<String> lore, Integer count, Integer damage, Integer durability, List<Enchantment> enchantments, Map nbt){
         this.name = name;

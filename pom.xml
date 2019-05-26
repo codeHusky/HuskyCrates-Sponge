@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.github.codeHusky</groupId>
             <artifactId>HuskyUI-Plugin</artifactId>
-            <version>master-v0.5.2-PRE-g217d69a-1</version>
+            <version>3ee1a16335</version>
         </dependency>
         <dependency>
             <groupId>com.github.rojo8399</groupId>

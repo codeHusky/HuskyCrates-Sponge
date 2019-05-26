@@ -71,6 +71,9 @@ public class HuskyCrates {
     public Path keyConfigPath;
     public ConfigurationLoader<CommentedConfigurationNode> keyConfig;
 
+    public Path generatedItemConfigPath;
+    public ConfigurationLoader<CommentedConfigurationNode> generatedItemConfig;
+
     public Cause genericCause;
 
     public static HuskyCrates instance;
@@ -102,8 +105,10 @@ public class HuskyCrates {
 
         crateConfigPath = configDir.resolve("crates.conf");
         keyConfigPath = configDir.resolve("keys.conf");
+        generatedItemConfigPath = configDir.resolve("generateditems.conf");
         crateConfig = HoconConfigurationLoader.builder().setPath(crateConfigPath).build();
         keyConfig = HoconConfigurationLoader.builder().setPath(keyConfigPath).build();
+        generatedItemConfig = HoconConfigurationLoader.builder().setPath(generatedItemConfigPath).build();
     }
     private float cumulative = 0;
     private int iterations = 0;
@@ -114,14 +119,16 @@ public class HuskyCrates {
         Sponge.getEventManager().registerListeners(this,crateListeners);
     }
 
+    public static final String generalDefaultConfig = "# To configure HuskyCrates, please reference the documentation or use HuskyConfigurator!\n# For more information: https://discord.gg/FSETtcx";
+
     public void loadConfig() {
 
         CommentedConfigurationNode crates;
         CommentedConfigurationNode keys;
 
         CommentedConfigurationNode mainConfig;
-
-        if(checkOrInitalizeConfig(crateConfigPath) && checkOrInitalizeConfig(keyConfigPath)){
+        checkOrInitalizeConfig(generatedItemConfigPath,"# This config contains generated item objects that you create in-game. This file will not be read by the plugin.\n# With the admin permission, try /hc genitem with an item in your hand, then check back here.");
+        if(checkOrInitalizeConfig(crateConfigPath,generalDefaultConfig) && checkOrInitalizeConfig(keyConfigPath,generalDefaultConfig)){
             try {
                 mainConfig = config.load();
                 crates = crateConfig.load();
@@ -190,7 +197,7 @@ public class HuskyCrates {
         }
     }
 
-    private boolean checkOrInitalizeConfig(Path path){
+    private boolean checkOrInitalizeConfig(Path path, String defaultContent){
         if(!path.toFile().exists()) {
             try {
                 boolean success = path.toFile().createNewFile();
@@ -199,7 +206,7 @@ public class HuskyCrates {
                     return false;
                 }
                 PrintWriter pw = new PrintWriter(path.toFile());
-                pw.println("# To configure HuskyCrates, please reference the documentation or use HuskyConfigurator!\n# For more information: https://discord.gg/FSETtcx");
+                pw.println(defaultContent);
                 pw.close();
                 return true;
             } catch (IOException e) {

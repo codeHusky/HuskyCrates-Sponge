@@ -20,7 +20,9 @@ public class CommandRegister {
                         .executor(new BlockCommand())
                         .arguments(new CrateArgument(Text.of("crate")),
                                 GenericArguments.optionalWeak(GenericArguments.catalogedElement(Text.of("block"),BlockType.class)),
-                                GenericArguments.optionalWeak(GenericArguments.player(Text.of("player"))),GenericArguments.optional(GenericArguments.integer(Text.of("amount"))),GenericArguments.optional(GenericArguments.integer(Text.of("damage"))))
+                                GenericArguments.optionalWeak(GenericArguments.player(Text.of("player"))),
+                                GenericArguments.optional(GenericArguments.integer(Text.of("amount"))),
+                                GenericArguments.optional(GenericArguments.integer(Text.of("damage"))))
                         .permission("huskycrates.block.base")
                         .build(),"b","blk","block","chest")
                 .child(CommandSpec.builder()
@@ -43,6 +45,10 @@ public class CommandRegister {
                         .executor(new ItemNBTCommand())
                         .permission("huskycrates.admin")
                         .build(),"itemnbt","nbt","in")
+                .child(CommandSpec.builder()
+                        .executor(new ItemGenerateCommand())
+                        .permission("huskycrates.admin")
+                        .build(),"genitem","generateitem","gi")
                 .child(CommandSpec.builder()
                         .executor(new MainCommand())
                         .build(),"h","help")

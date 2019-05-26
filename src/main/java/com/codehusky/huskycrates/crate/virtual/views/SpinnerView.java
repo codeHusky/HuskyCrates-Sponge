@@ -161,7 +161,7 @@ public class SpinnerView implements Consumer<Page> {
                 if(!safetyKill) {
                     page.getObserver().closeInventory();
                     safetyKill = true;
-                    if(page.hasInterrupt()) {
+                    if(page.hasInterupt()) {
                         page.interrupt();
                     }
                 }
