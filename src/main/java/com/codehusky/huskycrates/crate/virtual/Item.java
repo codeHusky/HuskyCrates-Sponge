@@ -37,6 +37,7 @@ public class Item {
 
     public static Item fromItemStack(ItemStack stack){
         String name = TextSerializers.FORMATTING_CODE.serialize(stack.get(Keys.DISPLAY_NAME).orElse(Text.EMPTY));
+        if(name.length() == 0) name = null;
         List<String> lore = new ArrayList<>();
         if(stack.get(Keys.ITEM_LORE).isPresent()){
             stack.get(Keys.ITEM_LORE).get().forEach(text -> {
@@ -58,6 +59,7 @@ public class Item {
     //TODO: builder pattern
     public Item(String name, ItemType itemType, List<String> lore, Integer count, Integer damage, Integer durability, List<Enchantment> enchantments, Map nbt){
         this.name = name;
+        if(name.length() == 0) this.name = null;
         this.itemType = itemType;
         this.lore = lore;
         this.count = count;
@@ -84,6 +86,7 @@ public class Item {
         }
 
         this.name = node.getNode("name").getString();
+        if(this.name != null && this.name.length() == 0) this.name = null;
         this.count = node.getNode("count").getInt(1);
         this.damage = node.getNode("damage").getInt(node.getNode("meta").getInt(node.getNode("metadata").getInt()));
         this.durability = node.getNode("durability").getInt();
