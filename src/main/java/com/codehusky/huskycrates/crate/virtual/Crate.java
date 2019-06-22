@@ -236,16 +236,16 @@ public class Crate {
         if(useLocalKey){
             if(localKey.testKey(stack)) return true;
         }
-        for(String thisid : acceptedKeys.keySet()){
-            Key potential = HuskyCrates.registry.getKey(thisid);
-            if(potential.testKey(stack) && stack.getQuantity() >= acceptedKeys.get(thisid)) return true;
+        for(Map.Entry<String, Integer> entry : acceptedKeys.entrySet()){
+            Key potential = HuskyCrates.registry.getKey(entry.getKey());
+            if(potential.testKey(stack) && stack.getQuantity() >= entry.getValue()) return true;
         }
         return false;
     }
 
     public boolean testVirtualKey(UUID playerUUID){
-        for(String keyID : acceptedKeys.keySet()){
-            if(HuskyCrates.registry.getVirtualKeyBalance(playerUUID,keyID) >= acceptedKeys.get(keyID)){
+        for(Map.Entry<String, Integer> entry : acceptedKeys.entrySet()){
+            if(HuskyCrates.registry.getVirtualKeyBalance(playerUUID,entry.getKey()) >= entry.getValue()){
                 return true;
             }
         }
@@ -254,8 +254,9 @@ public class Crate {
 
     public void consumeVirtualKeys(UUID playerUUID){
         if(testVirtualKey(playerUUID)){
-            for(String keyID : acceptedKeys.keySet()){
-                int consumed = acceptedKeys.get(keyID);
+            for(Map.Entry<String, Integer> entry : acceptedKeys.entrySet()){
+                String keyID = entry.getKey();
+                int consumed = entry.getValue();
                 if(HuskyCrates.registry.getVirtualKeyBalance(playerUUID,keyID) >= consumed){
                     HuskyCrates.registry.removeVirtualKeys(playerUUID,keyID,consumed);
                     System.out.println(consumed);
