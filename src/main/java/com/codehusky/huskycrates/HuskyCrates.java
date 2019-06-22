@@ -74,6 +74,7 @@ public class HuskyCrates {
     public Path generatedItemConfigPath;
     public ConfigurationLoader<CommentedConfigurationNode> generatedItemConfig;
 
+    //TODO unused variable
     public Cause genericCause;
 
     public static HuskyCrates instance;

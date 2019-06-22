@@ -56,6 +56,7 @@ public class Crate {
 
     private long cooldownSeconds;
 
+    //TODO unused variable
     private BlockType defaultBlock;
 
     private Boolean useLocalKey;

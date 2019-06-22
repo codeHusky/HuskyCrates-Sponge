@@ -18,8 +18,10 @@ public class HologramInstance {
     private Location<World> location;
     private boolean isEntity;
 
+    //TODO unused variable
     private Entity assocEntity;
 
+    //TODO unused variable
     private List<ArmorStand> armorStands;
 
     public HologramInstance(Hologram hologram, Location<World> location, boolean isEntity){
