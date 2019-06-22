@@ -54,7 +54,7 @@ public class HologramInstance {
                         location.getPosition()
                             .clone()
                             .add(0.5,1,0.5)
-                            .add(0,((isEntity)?hologram.getEntityYOffset():hologram.getEntityYOffset()) - (linenum * 0.23),0));
+                            .add(0,hologram.getEntityYOffset() - (linenum * 0.23),0));
 
             as.offer(Keys.HAS_GRAVITY,false);
             as.offer(Keys.ARMOR_STAND_IS_SMALL,true);
