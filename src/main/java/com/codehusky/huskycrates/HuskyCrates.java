@@ -74,6 +74,8 @@ public class HuskyCrates {
     public Path generatedItemConfigPath;
     public ConfigurationLoader<CommentedConfigurationNode> generatedItemConfig;
 
+    public Cause genericCause;
+
     public static HuskyCrates instance;
 
     public static Registry registry;
