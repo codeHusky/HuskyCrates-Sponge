@@ -14,6 +14,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -64,8 +65,9 @@ public class BalanceCommand implements CommandExecutor {
 
         HashMap<String, Integer> balances = HuskyCrates.registry.getVirtualKeyBalances(balanceToUse);
 
-        for(String keyID : balances.keySet()){
-            src.sendMessage(HuskyCrates.balanceCommandMessages.getBalanceRow(HuskyCrates.registry.getKey(keyID).getName(),keyID,balances.get(keyID)));
+        for(Map.Entry<String, Integer> entry : balances.entrySet()){
+            String keyID = entry.getKey();
+            src.sendMessage(HuskyCrates.balanceCommandMessages.getBalanceRow(HuskyCrates.registry.getKey(keyID).getName(),keyID,entry.getValue()));
         }
 
         if(balances.size() == 0){
