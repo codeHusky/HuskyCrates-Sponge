@@ -18,10 +18,6 @@ public class HologramInstance {
     private Location<World> location;
     private boolean isEntity;
 
-    private Entity assocEntity;
-
-    private List<ArmorStand> armorStands;
-
     public HologramInstance(Hologram hologram, Location<World> location, boolean isEntity){
         this.hologram = hologram;
         this.location = location;
@@ -81,13 +77,5 @@ public class HologramInstance {
 
     public Hologram getHologram() {
         return hologram;
-    }
-
-    public Entity getAssocEntity() {
-        return assocEntity;
-    }
-
-    public List<ArmorStand> getArmorStands() {
-        return armorStands;
     }
 }
