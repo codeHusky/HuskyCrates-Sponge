@@ -12,6 +12,7 @@ import com.codehusky.huskyui.StateContainer;
 import com.codehusky.huskyui.states.Page;
 import com.codehusky.huskyui.states.element.Element;
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.collect.Lists;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
@@ -195,7 +196,41 @@ public class Crate {
 
         this.previewable = node.getNode("previewable").getBoolean(false);
     }
+    public Crate(String id, String name, Hologram hologram, Effect idleEffect, Effect rejectEffect, Effect winEffect, Effect openEffect, List<Slot> slots, boolean scrambleSlots, boolean free, boolean previewable, long cooldownSeconds, boolean useLocalKey, Key localKey, HashMap<String, Integer> acceptedKeys, ViewType viewType, ViewConfig viewConfig){
+        this.id = id;
+        this.name = name;
+        this.hologram = hologram;
+        this.idleEffect = idleEffect;
+        this.rejectEffect = rejectEffect;
+        this.winEffect = winEffect;
+        this.openEffect = openEffect;
+        this.slots = slots;
+        this.slotChanceMax = 0;
+        for(Slot slot : slots){
+            slotChanceMax += slot.getChance();
+        }
+        if(slots.size() == 0){
+            throw new ConfigParseError("Crates must have associated slots!", Lists.newArrayList("Injected!!!").toArray());
+        }
+        this.scrambleSlots =scrambleSlots;
+        this.free = free;
+        this.previewable = previewable;
+        this.cooldownSeconds = cooldownSeconds;
+        this.useLocalKey = useLocalKey;
+        this.localKey = localKey;
+        this.acceptedKeys = acceptedKeys;
+        this.viewType = viewType;
+        this.viewConfig = viewConfig;
+    }
 
+    public Crate getScrambledCrate() {
+        ArrayList<Slot> newSlots = new ArrayList<>(slots);
+        Collections.shuffle(newSlots);
+        return new Crate(id,name,hologram,idleEffect,rejectEffect,winEffect,openEffect,newSlots,scrambleSlots,free,previewable,cooldownSeconds,useLocalKey,localKey,acceptedKeys,viewType,viewConfig);
+    }
+    public boolean isScrambled() {
+        return this.scrambleSlots;
+    }
     public boolean isInjectable() {
         return this.injection;
     }

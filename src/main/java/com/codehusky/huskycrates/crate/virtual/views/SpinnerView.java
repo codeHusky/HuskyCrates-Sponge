@@ -36,6 +36,9 @@ public class SpinnerView implements Consumer<Page> {
 
     public SpinnerView(PhysicalCrate pcrate, Player player){
         this.crate = pcrate.getCrate();
+        if(this.crate.isScrambled()){
+            this.crate = pcrate.getCrate().getScrambledCrate();
+        }
         this.physicalLocation = pcrate.getLocation();
         this.config = (Config) crate.getViewConfig();
         this.variance = (int)Math.round(new Random().nextDouble() * config.getTicksToSelectionVariance());
