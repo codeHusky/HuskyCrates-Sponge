@@ -44,7 +44,6 @@ public class Item {
                 lore.add(TextSerializers.FORMATTING_CODE.serialize(text));
             });
         }
-        if(name.length() == 0) name = null;
         return new Item(
                 name,
                 stack.getType(),
@@ -59,7 +58,7 @@ public class Item {
     //TODO: builder pattern
     public Item(String name, ItemType itemType, List<String> lore, Integer count, Integer damage, Integer durability, List<Enchantment> enchantments, Map nbt){
         this.name = name;
-        if(name.length() == 0) this.name = null;
+        if(name != null && name.length() == 0) this.name = null;
         this.itemType = itemType;
         this.lore = lore;
         this.count = count;
