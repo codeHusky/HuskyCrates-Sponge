@@ -523,8 +523,9 @@ public class Registry {
             }
             dirtyPhysicalCrates.clear();
 
-            for(UUID playerUUID: dirtyVirtualKeys.keySet()){
-                for(String keyID : dirtyVirtualKeys.get(playerUUID)){
+            for(Map.Entry<UUID, HashSet<String>> entry : dirtyVirtualKeys.entrySet()){
+                UUID playerUUID = entry.getKey();
+                for(String keyID : entry.getValue()){
                     //create or update
                     PreparedStatement statement = connection.prepareStatement("SELECT * FROM KEYBALANCES WHERE userUUID = ? AND keyID = ?");
                     statement.setString(1,playerUUID.toString());
@@ -579,8 +580,9 @@ public class Registry {
             }
             dirtyKeysInCirculation.clear();
 
-            for(UUID playerUUID : dirtyLastCrateUse.keySet()){
-                for(String crateID : dirtyLastCrateUse.get(playerUUID)){
+            for(Map.Entry<UUID, HashSet<String>> entry : dirtyLastCrateUse.entrySet()){
+                UUID playerUUID = entry.getKey();
+                for(String crateID : entry.getValue()){
                     /*
                     TABLE LASTUSED (userUUID CHARACTER, crateID CHARACTER, lastUsed BIGINT)
                      */

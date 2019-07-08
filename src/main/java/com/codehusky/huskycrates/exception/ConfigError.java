@@ -15,13 +15,13 @@ public class ConfigError extends RuntimeException {
     }
 
     public static String readablePath(Object[] path){
-        String readablePath = "";
+        StringBuilder readablePath = new StringBuilder();
         for(int i = 0; i < path.length; i++){
-            readablePath += path[i];
+            readablePath.append(path[i]);
             if(i+1 < path.length){
-                readablePath += ".";
+                readablePath.append(".");
             }
         }
-        return readablePath;
+        return readablePath.toString();
     }
 }
