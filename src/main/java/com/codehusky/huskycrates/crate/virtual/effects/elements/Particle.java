@@ -144,7 +144,7 @@ public class Particle {
 
         if(!preset.isPresent()) {
             try {
-                this.compiled = ((Compilable) HuskyCrates.jsengine).compile("function HSVtoRGB(h,s,v){var r,g,b,i,f,p,q,t;if(arguments.length===1){s=h.s,v=h.v,h=h.h}i=Math.floor(h*6);f=h*6-i;p=v*(1-s);q=v*(1-f*s);t=v*(1-(1-f)*s);switch(i%6){case 0:r=v,g=t,b=p;break;case 1:r=q,g=v,b=p;break;case 2:r=p,g=v,b=t;break;case 3:r=p,g=q,b=v;break;case 4:r=t,g=p,b=v;break;case 5:r=v,g=p,b=q;break}return{r:Math.round(r*255),g:Math.round(g*255),b:Math.round(b*255)}} (function(time, num){var x = 0.0; var y = 0.0; var z = 0.0; var h; var s; var v; var r = 0; var g = 0; var b = 0; " + animationCode + "; if(h&&s&&v){var hsv = HSVtoRGB(h/255,s/255,v/255); r=hsv.r;g=hsv.g;b=hsv.b;} var result = {x:x,y:y,z:z,r:Math.round(r),g:Math.round(g),b:Math.round(b)}; return result;})(time, num);");
+                this.compiled = ((Compilable) HuskyCrates.jsengine).compile("function HSVtoRGB(h,s,v){var r,g,b,i,f,p,q,t;if(arguments.length===1){s=h.s,v=h.v,h=h.h}i=Math.floor(h*6);f=h*6-i;p=v*(1-s);q=v*(1-f*s);t=v*(1-(1-f)*s);switch(i%6){case 0:r=v,g=t,b=p;break;case 1:r=q,g=v,b=p;break;case 2:r=p,g=v,b=t;break;case 3:r=p,g=q,b=v;break;case 4:r=t,g=p,b=v;break;case 5:r=v,g=p,b=q;break}return{r:Math.round(r*255),g:Math.round(g*255),b:Math.round(b*255)}} (function(time, num){var x = 0.0; var y = 0.0; var z = 0.0; var h; var s; var v; var r = -1; var g = -1; var b = -1; " + animationCode + "; if(h&&s&&v){var hsv = HSVtoRGB(h/255,s/255,v/255); r=hsv.r;g=hsv.g;b=hsv.b;} var result = {x:x,y:y,z:z,r:Math.round(r),g:Math.round(g),b:Math.round(b)}; return result;})(time, num);");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -161,83 +161,86 @@ public class Particle {
     }
 
     public void run(long tick, Location<World> location, Player player){
-        try {
-            for(int i = 0; i < amount; i++) {
-                Vector3d particlePos = location.getPosition().clone().add(position);
-                ParticleEffect ourParticle = particle;
-                if(animationCode != null || preset.isPresent()) {
-                    Double x = 0d;
-                    Double y = 0d;
-                    Double z = 0d;
 
-                    Integer r = 0;
-                    Integer g = 0;
-                    Integer b = 0;
-                    if(!preset.isPresent()) {
-                        SimpleScriptContext sc = new SimpleScriptContext();
-                        sc.setBindings(HuskyCrates.jsengine.createBindings(), ScriptContext.GLOBAL_SCOPE);
-                        Bindings bindings = sc.getBindings(ScriptContext.GLOBAL_SCOPE);
-                        bindings.put("time", tick);
-                        bindings.put("num", i + 1);
-                        sc.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
-                        ScriptObjectMirror scriptObjectMirror = (ScriptObjectMirror) compiled.eval(sc);
+        for(int i = 0; i < amount; i++) {
+            Vector3d particlePos = location.getPosition().clone().add(position);
+            ParticleEffect ourParticle = particle;
+            Double x = 0d;
+            Double y = 0d;
+            Double z = 0d;
 
-                        x = Double.valueOf("" + scriptObjectMirror.get("x"));
-                        y = Double.valueOf("" + scriptObjectMirror.get("y"));
-                        z = Double.valueOf("" + scriptObjectMirror.get("z"));
+            Integer r = null;
+            Integer g = null;
+            Integer b = null;
+            if(animationCode != null && !preset.isPresent()) {
+                //if(!preset.isPresent()) {
+                try {
+                    SimpleScriptContext sc = new SimpleScriptContext();
+                    sc.setBindings(HuskyCrates.jsengine.createBindings(), ScriptContext.GLOBAL_SCOPE);
+                    Bindings bindings = sc.getBindings(ScriptContext.GLOBAL_SCOPE);
+                    bindings.put("time", tick);
+                    bindings.put("num", i + 1);
+                    sc.setBindings(bindings, ScriptContext.GLOBAL_SCOPE);
+                    ScriptObjectMirror scriptObjectMirror = (ScriptObjectMirror) compiled.eval(sc);
 
+                    x = Double.valueOf("" + scriptObjectMirror.get("x"));
+                    y = Double.valueOf("" + scriptObjectMirror.get("y"));
+                    z = Double.valueOf("" + scriptObjectMirror.get("z"));
+
+
+                    if( !( ((Double)scriptObjectMirror.get("r")) == -1 || ((Double)scriptObjectMirror.get("g")) == -1 || ((Double)scriptObjectMirror.get("b")) == -1 ) ) {
                         r = Math.max(0, Math.min(255, ((Double) scriptObjectMirror.get("r")).intValue()));
                         g = Math.max(0, Math.min(255, ((Double) scriptObjectMirror.get("g")).intValue()));
                         b = Math.max(0, Math.min(255, ((Double) scriptObjectMirror.get("b")).intValue()));
-                    }else{
-                        switch (preset.get().toLowerCase()){
-                            case "orbit":
-                                //this.animationCode = "x=Math.sin(time/4)*0.7; y=Math.sin((time/4)) * 0.2 ; z=Math.cos(time/4)*0.7;";
-                                x=Math.sin(tick/4.0) * 0.7;
-                                y=Math.sin(tick/4.0) * 0.2;
-                                z=Math.cos(tick/4.0) * 0.7;
-                                break;
-                            case "counterorbit":
-                                //this.animationCode = "x=Math.cos(time/4)*0.7; y=Math.sin((time/4)+ 10) * 0.2 - 0.10; z=Math.sin(time/4)*0.7;";
-                                x=Math.cos(tick/4.0) *0.7 ;
-                                y=Math.sin((tick/4.0)+ 10) * 0.2 - 0.10;
-                                z=Math.sin(tick/4.0) * 0.7;
-                                break;
-                        }
-                        if(colorPreset.isPresent()) {
-                            switch (colorPreset.get().toLowerCase()) {
-                                case "rainbow":
-                                    this.animateColor = true;
-                                    //this.animationCode += "; h=((time*5)%255) + 1; s=255; v=255;";
-                                    java.awt.Color clr = java.awt.Color.getHSBColor((((tick*5.0f)%255.0f)+1.0f)/255f,1.0f,1.0f);
-                                    r = clr.getRed();
-                                    g = clr.getGreen();
-                                    b = clr.getBlue();
-                                    break;
-                                default:
-                                    this.animateColor = false;
-                                    break;
-                            }
-                        }
                     }
-
-
-               if (this.animateColor) {
-                        ourParticle = ParticleEffect.builder()
-                                .from(ourParticle)
-                                .option(ParticleOptions.COLOR, Color.ofRgb(r, g, b))
-                                .build();
-                    }
-                    particlePos = location.getPosition().clone().add(position).add(x, y, z);
+                } catch (ScriptException e) {
+                    e.printStackTrace();
                 }
-                if(player != null){
-                    player.spawnParticles(ourParticle,particlePos);
-                }else {
-                    location.getExtent().spawnParticles(ourParticle, particlePos);
+                //}
+            }else{
+                switch (preset.get().toLowerCase()){
+                    case "orbit":
+                        //this.animationCode = "x=Math.sin(time/4)*0.7; y=Math.sin((time/4)) * 0.2 ; z=Math.cos(time/4)*0.7;";
+                        x=Math.sin(tick/4.0) * 0.7;
+                        y=Math.sin(tick/4.0) * 0.2;
+                        z=Math.cos(tick/4.0) * 0.7;
+                        break;
+                    case "counterorbit":
+                        //this.animationCode = "x=Math.cos(time/4)*0.7; y=Math.sin((time/4)+ 10) * 0.2 - 0.10; z=Math.sin(time/4)*0.7;";
+                        x=Math.cos(tick/4.0) *0.7 ;
+                        y=Math.sin((tick/4.0)+ 10) * 0.2 - 0.10;
+                        z=Math.sin(tick/4.0) * 0.7;
+                        break;
+                }
+                if(colorPreset.isPresent()) {
+                    switch (colorPreset.get().toLowerCase()) {
+                        case "rainbow":
+                            this.animateColor = true;
+                            //this.animationCode += "; h=((time*5)%255) + 1; s=255; v=255;";
+                            java.awt.Color clr = java.awt.Color.getHSBColor((((tick*5.0f)%255.0f)+1.0f)/255f,1.0f,1.0f);
+                            r = clr.getRed();
+                            g = clr.getGreen();
+                            b = clr.getBlue();
+                            break;
+                        default:
+                            this.animateColor = false;
+                            break;
+                    }
                 }
             }
-        } catch (ScriptException e) {
-            e.printStackTrace();
+            if (this.animateColor && r != null && g != null && b != null) {
+                ourParticle = ParticleEffect.builder()
+                        .from(ourParticle)
+                        .option(ParticleOptions.COLOR, Color.ofRgb(r, g, b))
+                        .build();
+            }
+            particlePos = location.getPosition().clone().add(position).add(x, y, z);
+            if(player != null){
+                player.spawnParticles(ourParticle,particlePos);
+            }else {
+                location.getExtent().spawnParticles(ourParticle, particlePos);
+            }
         }
+
     }
 }
