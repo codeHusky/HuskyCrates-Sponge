@@ -198,19 +198,21 @@ public class Particle {
                 }
                 //}
             }else{
-                switch (preset.get().toLowerCase()){
-                    case "orbit":
-                        //this.animationCode = "x=Math.sin(time/4)*0.7; y=Math.sin((time/4)) * 0.2 ; z=Math.cos(time/4)*0.7;";
-                        x=Math.sin(tick/4.0) * 0.7;
-                        y=Math.sin(tick/4.0) * 0.2;
-                        z=Math.cos(tick/4.0) * 0.7;
-                        break;
-                    case "counterorbit":
-                        //this.animationCode = "x=Math.cos(time/4)*0.7; y=Math.sin((time/4)+ 10) * 0.2 - 0.10; z=Math.sin(time/4)*0.7;";
-                        x=Math.cos(tick/4.0) *0.7 ;
-                        y=Math.sin((tick/4.0)+ 10) * 0.2 - 0.10;
-                        z=Math.sin(tick/4.0) * 0.7;
-                        break;
+                if(preset.isPresent()) {
+                    switch (preset.get().toLowerCase()) {
+                        case "orbit":
+                            //this.animationCode = "x=Math.sin(time/4)*0.7; y=Math.sin((time/4)) * 0.2 ; z=Math.cos(time/4)*0.7;";
+                            x = Math.sin(tick / 4.0) * 0.7;
+                            y = Math.sin(tick / 4.0) * 0.2;
+                            z = Math.cos(tick / 4.0) * 0.7;
+                            break;
+                        case "counterorbit":
+                            //this.animationCode = "x=Math.cos(time/4)*0.7; y=Math.sin((time/4)+ 10) * 0.2 - 0.10; z=Math.sin(time/4)*0.7;";
+                            x = Math.cos(tick / 4.0) * 0.7;
+                            y = Math.sin((tick / 4.0) + 10) * 0.2 - 0.10;
+                            z = Math.sin(tick / 4.0) * 0.7;
+                            break;
+                    }
                 }
                 if(colorPreset.isPresent()) {
                     switch (colorPreset.get().toLowerCase()) {
