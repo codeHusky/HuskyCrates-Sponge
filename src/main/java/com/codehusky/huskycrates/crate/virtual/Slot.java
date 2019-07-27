@@ -267,7 +267,7 @@ public class Slot {
                     .replace("%pxd",player.getLocation().getX() + "")
                     .replace("%pyd",player.getLocation().getY() + "")
                     .replace("%pzd",player.getLocation().getZ() + "")
-                    .replace("%R", (displayItem.getName() != null)?displayItem.getName():"<Display Item Has No Name! (CONTACT ADMINS)>")
+                    .replace("%R", (displayItem.getName() != null)?displayItem.getName():displayItem.toItemStack().getTranslation().get())
                     .replace("%a", (displayItem.getName() != null && vowels.indexOf(displayItem.getName().substring(0,1)) == 0) ? "an":"a")
                     .replace("%C", (HuskyCrates.registry.isCrate(crateid))?HuskyCrates.registry.getCrate(crateid).getName():"INVALID CRATE! (CONTACT ADMINS)");
             

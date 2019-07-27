@@ -74,6 +74,8 @@ public class HuskyCrates {
     public Path generatedItemConfigPath;
     public ConfigurationLoader<CommentedConfigurationNode> generatedItemConfig;
 
+    public static Path dupeLogPath;
+
     //TODO unused variable
     public Cause genericCause;
 
@@ -104,6 +106,7 @@ public class HuskyCrates {
         logger = LoggerFactory.getLogger(pC.getName());
         instance = this;
 
+        dupeLogPath = configDir.resolve("dupealert.log");
         crateConfigPath = configDir.resolve("crates.conf");
         keyConfigPath = configDir.resolve("keys.conf");
         generatedItemConfigPath = configDir.resolve("generateditems.conf");
@@ -126,8 +129,8 @@ public class HuskyCrates {
 
         CommentedConfigurationNode crates;
         CommentedConfigurationNode keys;
-
         CommentedConfigurationNode mainConfig;
+        checkOrInitalizeConfig(dupeLogPath,"#Here you'll find a log of information stored after an instance duplication detection!\n#File will not be read, is simply a log");
         checkOrInitalizeConfig(generatedItemConfigPath,"# This config contains generated item objects that you create in-game. This file will not be read by the plugin.\n# With the admin permission, try /hc genitem with an item in your hand, then check back here.");
         if(checkOrInitalizeConfig(crateConfigPath,generalDefaultConfig) && checkOrInitalizeConfig(keyConfigPath,generalDefaultConfig)){
             try {

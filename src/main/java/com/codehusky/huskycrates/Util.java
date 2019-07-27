@@ -12,6 +12,8 @@ import org.spongepowered.api.item.inventory.query.QueryOperationTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -41,8 +43,21 @@ public class Util {
         System.out.println("[" + DateFormat.getDateTimeInstance().format(new Date()) + "] " + logMessage);
     }
 
+    public static void dupeLog(Player badPlayer, ItemStack stack) {
+        try {
+            String p = HuskyCrates.dupeLogPath.toString();
+            String content = "Date : " + DateFormat.getDateTimeInstance().format(new Date()) + "\nName : " + badPlayer.getName() + "\nUUID : " + badPlayer.getUniqueId().toString() + "\nKey Type : " + ((Key.extractKeyId(stack) != null)? Key.extractKeyId(stack):"NO KEY ID") + "\nKey Stack Quantity : " + stack.getQuantity() + "\n--------------------------------" + "\n";
+            FileWriter fw = new FileWriter(p, true);
+            fw.write(content);
+            fw.close();
+        } catch (IOException e) {
+            System.out.println("Unable to find 'dupealert' log to write to!");
+            e.printStackTrace();
+        }
+    }
     public static void alertAdminsDupe(Player badPlayer, ItemStack stack){
-        String mainMessage =  "Player " + badPlayer.getName() + " (" + badPlayer.getUniqueId().toString() + ") tried to use a stack of " + stack.getQuantity() + " " + ((Key.extractKeyId(stack) != null)? Key.extractKeyId(stack):"NO KEY ID") + " keys.";
+        String mainMessage =  "Player " + badPlayer.getName() + " (" + badPlayer.getUniqueId().toString() + ") tried to use a stack of " + stack.getQuantity() + " " + ((Key.extractKeyId(stack) != null)? Key.extractKeyId(stack):"NO KEY ID") + " key(s).";
         alertAdmins(Text.of(TextColors.RED,"[HuskyCrates] ",TextColors.YELLOW,"Key Duplication Alert!\n",TextColors.RED,mainMessage),"[DUPE ALERT] " + mainMessage);
+        dupeLog(badPlayer, stack);
     }
 }
