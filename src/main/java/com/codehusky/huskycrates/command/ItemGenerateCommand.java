@@ -11,6 +11,7 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -26,11 +27,17 @@ public class ItemGenerateCommand implements CommandExecutor {
             Player player = (Player)src;
             if(player.getItemInHand(HandTypes.MAIN_HAND).isPresent()){
                 ItemStack stack = player.getItemInHand(HandTypes.MAIN_HAND).get();
-                Item item = Item.fromItemStack(stack);
-                try {
-                    String uuid = UUID.randomUUID().toString();
-                    CommentedConfigurationNode root = HuskyCrates.instance.generatedItemConfig.load();
-                    CommentedConfigurationNode n = root.getNode(uuid);
+                ItemStack air = ItemStack.builder().itemType(ItemTypes.AIR).build();
+
+                if(stack.isEmpty()){
+                    src.sendMessage(Text.of(TextColors.RED,"You must be holding an item to use this command."));
+                }
+                else{
+                    Item item = Item.fromItemStack(stack);
+                    try {
+                        String uuid = UUID.randomUUID().toString();
+                        CommentedConfigurationNode root = HuskyCrates.instance.generatedItemConfig.load();
+                        CommentedConfigurationNode n = root.getNode(uuid);
                     /*
 if(!node.getNode("id").isVirtual()){
     try {
@@ -79,31 +86,31 @@ if(!node.getNode("nbt").isVirtual() && node.getNode("nbt").getValue() instanceof
     this.nbt = (LinkedHashMap) node.getNode("nbt").getValue();
 }
                      */
-                    n.getNode("id").setValue(item.getItemType().getName());
-                    n.getNode("name").setValue(item.getName());
-                    n.getNode("count").setValue(item.getCount());
-                    n.getNode("damage").setValue(item.getDamage());
-                    n.getNode("durability").setValue(item.getDurability());
-                    if(item.getLore() != null && item.getLore().size() > 0){
-                        n.getNode("lore").setValue(item.getLore());
+                        n.getNode("id").setValue(item.getItemType().getName());
+                        n.getNode("name").setValue(item.getName());
+                        n.getNode("count").setValue(item.getCount());
+                        n.getNode("damage").setValue(item.getDamage());
+                        n.getNode("durability").setValue(item.getDurability());
+                        if(item.getLore() != null && item.getLore().size() > 0){
+                            n.getNode("lore").setValue(item.getLore());
+                        }
+                        if(item.getEnchantments() != null && item.getEnchantments().size() > 0){
+                            ConfigurationNode en = n.getNode("enchantments");
+                            item.getEnchantments().forEach(enchantment -> {
+                                en.getNode(enchantment.getType().getId()).setValue(enchantment.getLevel());
+                            });
+                        }
+                        if(item.getNBT() != null && item.getNBT().size() > 0){
+                            n.getNode("nbt").setValue(item.getNBT());
+                        }
+                        HuskyCrates.instance.generatedItemConfig.save(root);
+                        src.sendMessage(Text.of(TextColors.GREEN,"Item saved as UUID " + uuid + "."));
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                    if(item.getEnchantments() != null && item.getEnchantments().size() > 0){
-                        ConfigurationNode en = n.getNode("enchantments");
-                        item.getEnchantments().forEach(enchantment -> {
-                            en.getNode(enchantment.getType().getId()).setValue(enchantment.getLevel());
-                        });
-                    }
-                    if(item.getNBT() != null && item.getNBT().size() > 0){
-                        n.getNode("nbt").setValue(item.getNBT());
-                    }
-                    HuskyCrates.instance.generatedItemConfig.save(root);
-                    src.sendMessage(Text.of(TextColors.GREEN,"Item saved as UUID " + uuid + "."));
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
-            }else{
-                src.sendMessage(Text.of(TextColors.RED,"You must be holding an item to use this command."));
             }
+
         }else{
             src.sendMessage(Text.of(TextColors.RED,"You must be a player to use this command."));
         }

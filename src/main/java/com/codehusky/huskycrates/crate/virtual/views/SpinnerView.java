@@ -34,12 +34,12 @@ public class SpinnerView implements Consumer<Page> {
     private Player player;
     private Config config;
 
-    public SpinnerView(PhysicalCrate pcrate, Player player){
-        this.crate = pcrate.getCrate();
+    public SpinnerView(Crate ucrate, Player player, Location loc){
+        this.crate = ucrate;
         if(this.crate.isScrambled()){
-            this.crate = pcrate.getCrate().getScrambledCrate();
+            this.crate = ucrate.getScrambledCrate();
         }
-        this.physicalLocation = pcrate.getLocation();
+        this.physicalLocation = loc;
         this.config = (Config) crate.getViewConfig();
         this.variance = (int)Math.round(new Random().nextDouble() * config.getTicksToSelectionVariance());
         this.selectedSlot = crate.selectSlot();

@@ -1,6 +1,5 @@
 package com.codehusky.huskycrates.crate.virtual.views;
 
-import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.Crate;
 import com.codehusky.huskyui.StateContainer;
 import com.codehusky.huskyui.states.Page;
@@ -30,9 +29,9 @@ public class SimpleView implements Consumer<Page> {
     private Player player;
     private ViewConfig config;
 
-    public SimpleView(PhysicalCrate pcrate, Player player){
-        this.crate = pcrate.getCrate();
-        this.physicalLocation = pcrate.getLocation();
+    public SimpleView(Crate ucrate, Player player, Location loc){
+        this.crate = ucrate;
+        this.physicalLocation = loc;
         this.config = crate.getViewConfig();
         this.selectedSlot = crate.selectSlot();
         this.player = player;

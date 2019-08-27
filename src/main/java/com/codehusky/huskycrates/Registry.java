@@ -11,6 +11,7 @@ import com.codehusky.huskycrates.exception.DoubleRegistrationError;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -90,7 +91,24 @@ public class Registry {
         return uuid;
     }
 
-    public boolean consumeSecureKey(String keyID, UUID keyUUID, int amount){
+    public boolean validateSecureKey(ItemStack stack, int amount){
+        String keyID = Key.extractKeyId(stack);
+        UUID keyUUID = Key.extractKeyUUID(stack);
+        if(!isKey(keyID)) return false;
+
+        if(keysInCirculation.containsKey(keyUUID)){
+            if(keysInCirculation.get(keyUUID).getKey().equals(keyID)){
+                if(keysInCirculation.get(keyUUID).getValue() >= amount){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean consumeSecureKey(ItemStack stack, int amount){
+        String keyID = Key.extractKeyId(stack);
+        UUID keyUUID = Key.extractKeyUUID(stack);
         if(!isKey(keyID)) return false;
 
         if(keysInCirculation.containsKey(keyUUID)){
@@ -321,7 +339,7 @@ public class Registry {
 
         DataSource dbSource = null;
         try {
-            dbSource = Sponge.getServiceManager().provide(SqlService.class).get().getDataSource("jdbc:h2:" + HuskyCrates.instance.configDir.resolve("data"));
+            dbSource = Sponge.getServiceManager().provide(SqlService.class).get().getDataSource("jdbc:h2:" + HuskyCrates.instance.configDir.resolve("storage/data"));
             Connection connection = dbSource.getConnection();
             boolean cP = connection.getMetaData().getTables(null,null,"CRATELOCATIONS",null).next();
             boolean cKU = connection.getMetaData().getTables(null,null,"VALIDKEYS",null).next();

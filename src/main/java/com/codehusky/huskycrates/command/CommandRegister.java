@@ -1,6 +1,7 @@
 package com.codehusky.huskycrates.command;
 
 import com.codehusky.huskycrates.HuskyCrates;
+import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.command.CommandSource;
@@ -12,9 +13,12 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class CommandRegister {
     public static void register(HuskyCrates plugin) {
+//        Map crateGen = new HashMap<String, String>(){{put("item","inventory");}};
         CommandSpec mainCommand = CommandSpec.builder()
                 .child(CommandSpec.builder()
                         .executor(new BlockCommand())
@@ -27,9 +31,19 @@ public class CommandRegister {
                         .build(),"b","blk","block","chest")
                 .child(CommandSpec.builder()
                         .executor(new KeyCommand())
-                        .arguments(GenericArguments.optionalWeak(GenericArguments.literal(Text.of("virtual"),"v")),GenericArguments.firstParsing(new CrateArgument(Text.of("crate")),new KeyArgument(Text.of("key"))),GenericArguments.optional(GenericArguments.firstParsing(GenericArguments.literal(Text.of("all"),"@a"),GenericArguments.player(Text.of("player")))),GenericArguments.optionalWeak(GenericArguments.integer(Text.of("amount"))))
+                        .arguments(GenericArguments.optionalWeak(GenericArguments.literal(Text.of("virtual"),"v")),
+                                GenericArguments.firstParsing(new CrateArgument(Text.of("crate")), new KeyArgument(Text.of("key"))),
+                                GenericArguments.optional(GenericArguments.firstParsing(GenericArguments.literal(Text.of("all"),"@a"), GenericArguments.player(Text.of("player")))),
+                                GenericArguments.optionalWeak(GenericArguments.integer(Text.of("amount"))))
                         .permission("huskycrates.key.base")
                         .build(),"k","key")
+                .child(CommandSpec.builder()
+                        .executor(new OpenCommand())
+                        .arguments(GenericArguments.optionalWeak(GenericArguments.literal(Text.of("keyless"),"nokey")),
+                                new CrateArgument(Text.of("crate")),
+                                GenericArguments.optional(GenericArguments.firstParsing(GenericArguments.literal(Text.of("all"),"@a"), GenericArguments.player(Text.of("player")))))
+                        .permission("huskycrates.open.base")
+                        .build(),"o","open","use")
                 .child(CommandSpec.builder()
                         .executor(new BalanceCommand())
                         .arguments(GenericArguments.optionalWeak(GenericArguments.user(Text.of("player"))),
@@ -48,7 +62,17 @@ public class CommandRegister {
                 .child(CommandSpec.builder()
                         .executor(new ItemGenerateCommand())
                         .permission("huskycrates.admin")
-                        .build(),"genitem","generateitem","gi")
+                        .build(),"genitem","generateitem","gitem")
+                .child(CommandSpec.builder()
+                        .executor(new InventoryGenerateCommand())
+                        .permission("huskycrates.admin")
+                        .build(),"geninvent","generateinventory","ginv")
+//                .child(CommandSpec.builder()
+//                        .executor(new CrateGenerateCommand())
+//                        .permission("huskycrates.admin")
+//                        .arguments(GenericArguments.string(Text.of("name")),
+//                                GenericArguments.choices(Text.of("type"), ImmutableMap.<String, String> builder().put("item", "item").put("inventory", "inventory").build()))
+//                        .build(),"gencrate","generatecrate","gcrate")
                 .child(CommandSpec.builder()
                         .executor(new MainCommand())
                         .build(),"h","help")

@@ -35,6 +35,7 @@ import org.spongepowered.api.world.World;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
@@ -47,7 +48,7 @@ import java.util.function.Consumer;
 @Plugin(
         id="huskycrates",
         name = "HuskyCrates",
-        version = "2.0.0PRE12",
+        version = "2.1.0PRE1",
         description = "A Crate Plugin for Sponge!",
         dependencies = {@Dependency(id="huskyui",version = "0.6.0PRE4"), @Dependency(id="placeholderapi", optional = true)})
 public class HuskyCrates {
@@ -65,14 +66,19 @@ public class HuskyCrates {
     @DefaultConfig(sharedRoot = false)
     public ConfigurationLoader<CommentedConfigurationNode> config;
 
+
     public Path crateConfigPath;
-    public ConfigurationLoader<CommentedConfigurationNode> crateConfig;
+    public ConfigurationLoader<CommentedConfigurationNode> crateLoop;
 
     public Path keyConfigPath;
     public ConfigurationLoader<CommentedConfigurationNode> keyConfig;
 
     public Path generatedItemConfigPath;
     public ConfigurationLoader<CommentedConfigurationNode> generatedItemConfig;
+
+    public Path generatedInventoryConfigPath;
+    public ConfigurationLoader<CommentedConfigurationNode> generatedInventoryConfig;
+
 
     public static Path dupeLogPath;
 
@@ -100,19 +106,23 @@ public class HuskyCrates {
     private static ScriptEngineManager mgr = new ScriptEngineManager();
     public static ScriptEngine jsengine = mgr.getEngineByName("JavaScript");
 
+
+
     @Listener
     public void gameInit(GamePreInitializationEvent event){
         registry = new Registry();
         logger = LoggerFactory.getLogger(pC.getName());
         instance = this;
 
-        dupeLogPath = configDir.resolve("dupealert.log");
-        crateConfigPath = configDir.resolve("crates.conf");
-        keyConfigPath = configDir.resolve("keys.conf");
-        generatedItemConfigPath = configDir.resolve("generateditems.conf");
-        crateConfig = HoconConfigurationLoader.builder().setPath(crateConfigPath).build();
+        dupeLogPath = configDir.resolve("storage/dupealert.log");
+        crateConfigPath = configDir.resolve("crates/");
+        keyConfigPath = configDir.resolve("crates/keys.conf");
+        generatedItemConfigPath = configDir.resolve("storage/generateditems.conf");
+        generatedInventoryConfigPath = configDir.resolve("storage/generatedinventorys.conf");
+
         keyConfig = HoconConfigurationLoader.builder().setPath(keyConfigPath).build();
         generatedItemConfig = HoconConfigurationLoader.builder().setPath(generatedItemConfigPath).build();
+        generatedInventoryConfig = HoconConfigurationLoader.builder().setPath(generatedInventoryConfigPath).build();
     }
     private float cumulative = 0;
     private int iterations = 0;
@@ -127,23 +137,50 @@ public class HuskyCrates {
 
     public void loadConfig() {
 
-        CommentedConfigurationNode crates;
         CommentedConfigurationNode keys;
         CommentedConfigurationNode mainConfig;
         checkOrInitalizeConfig(dupeLogPath,"#Here you'll find a log of information stored after an instance duplication detection!\n#File will not be read, is simply a log");
         checkOrInitalizeConfig(generatedItemConfigPath,"# This config contains generated item objects that you create in-game. This file will not be read by the plugin.\n# With the admin permission, try /hc genitem with an item in your hand, then check back here.");
+        checkOrInitalizeConfig(generatedInventoryConfigPath,"# This config contains generated inventory sets that you create in-game. This file will not be read by the plugin.\n# With the admin permission, try /hc geninvent with an inventory full of items, then check back here.");
         if(checkOrInitalizeConfig(crateConfigPath,generalDefaultConfig) && checkOrInitalizeConfig(keyConfigPath,generalDefaultConfig)){
             try {
                 mainConfig = config.load();
-                crates = crateConfig.load();
                 keys = keyConfig.load();
+                for(CommentedConfigurationNode node : keys.getChildrenMap().values()){
+                    Key thisKey = new Key(node);
+                    registry.registerKey(thisKey);
+
+                }
+
+                File folder = new File(crateConfigPath.toString());
+
+                System.out.println(crateConfigPath.toString());
+
+                File[] files = folder.listFiles();
+                for (File file : files) {
+                    if (file.isFile() && file.getPath().endsWith(".crate") && file.length() > 0) {
+                        crateLoop = HoconConfigurationLoader.builder().setPath(file.toPath()).build();
+
+                        CommentedConfigurationNode crateThing;
+                        crateThing = crateLoop.load();
+
+                        if(!crateThing.getNode("secureKeys").isVirtual() && !crateThing.getNode("secureKeys").hasMapChildren()){
+                            throw new ConfigParseError("\"secureKeys\" must be removed from \""+file.getName()+ "\"!",crateThing.getNode("secureKeys").getPath());
+                        }
+
+                        for(CommentedConfigurationNode node : crateThing.getChildrenMap().values()){
+                            Crate thisCrate = new Crate(node);
+                            registry.registerCrate(thisCrate);
+                        }
+
+                        System.out.println("Crate Config File \"" + file.getName() + "\" Has been loaded!");
+
+                    }
+                }
+
 
                 if(!mainConfig.getNode("crates").isVirtual()){
                     throw new ConfigParseError("HuskyCrates.conf contains 1.x config data! Please update it using the Config Converter application!",mainConfig.getNode("crates").getPath());
-                }
-
-                if(!crates.getNode("secureKeys").isVirtual() && !crates.getNode("secureKeys").hasMapChildren()){
-                    throw new ConfigParseError("\"secureKeys\" must be removed from \"crates.conf\"!",crates.getNode("secureKeys").getPath());
                 }
 
                 if(mainConfig.getNode("secureKeys").isVirtual()){
@@ -176,16 +213,6 @@ public class HuskyCrates {
 
                 // k both work. wowowwoowow
 
-                for(CommentedConfigurationNode node : keys.getChildrenMap().values()){
-                    Key thisKey = new Key(node);
-                    registry.registerKey(thisKey);
-
-                }
-
-                for(CommentedConfigurationNode node : crates.getChildrenMap().values()){
-                    Crate thisCrate = new Crate(node);
-                    registry.registerCrate(thisCrate);
-                }
 
                 config.save(mainConfig);
                 Sponge.getEventManager().post(new CrateInjectionEvent());
@@ -223,7 +250,7 @@ public class HuskyCrates {
     }
 
     @Listener
-    public void gameStarted(GameStartedServerEvent event){
+    public void gameStarted(GameStartedServerEvent event) {
         logger.info("Loading Crates...");
         loadConfig();
 
@@ -313,7 +340,7 @@ public class HuskyCrates {
     }
 
     @Listener
-    public void gameReloaded(GameReloadEvent event){
+    public void gameReloaded(GameReloadEvent event) {
         reload();
     }
 

@@ -1,7 +1,6 @@
 package com.codehusky.huskycrates.crate.virtual;
 
 import com.codehusky.huskycrates.HuskyCrates;
-import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.effects.Effect;
 import com.codehusky.huskycrates.crate.virtual.effects.elements.Particle;
 import com.codehusky.huskycrates.crate.virtual.views.SimpleView;
@@ -29,6 +28,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.world.Location;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -274,7 +274,7 @@ public class Crate {
         }
         for(Map.Entry<String, Integer> entry : acceptedKeys.entrySet()){
             Key potential = HuskyCrates.registry.getKey(entry.getKey());
-            if(potential.testKey(stack) && stack.getQuantity() >= entry.getValue()) return true;
+            if(potential.testKey(stack)) return true;
         }
         return false;
     }
@@ -434,19 +434,21 @@ public class Crate {
         return time != null && (time + (cooldownSeconds*1000)) - System.currentTimeMillis() >= 0;
     }
 
-    public void launchView(PhysicalCrate pcrate, Player player){
+    
+
+    public void launchView(Crate ucrate, Player player, Location loc){
         HuskyCrates.registry.updateLastUse(id,player.getUniqueId());
 
         switch(viewType){
             case SPINNER:
-                new SpinnerView(pcrate,player);
+                new SpinnerView(ucrate,player,loc);
                 break;
             case INSTANT:
                 player.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, player.getPosition(), 1.0);
-                this.getSlot(selectSlot()).rewardPlayer(player,pcrate.getLocation());
+                this.getSlot(selectSlot()).rewardPlayer(player,loc);
                 break;
             case SIMPLE:
-                new SimpleView(pcrate,player);
+                new SimpleView(ucrate,player,loc);
                 break;
             default:
                 player.sendMessage(Text.of(TextColors.RED,"The view type \"" + viewType.name() + "\" is currently not supported."));
