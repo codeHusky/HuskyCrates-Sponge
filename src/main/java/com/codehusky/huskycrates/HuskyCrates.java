@@ -38,9 +38,13 @@ import javax.script.ScriptEngineManager;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -66,8 +70,7 @@ public class HuskyCrates {
     @DefaultConfig(sharedRoot = false)
     public ConfigurationLoader<CommentedConfigurationNode> config;
 
-
-    public Path crateConfigPath;
+    public Path crateDirectoryPath;
     public ConfigurationLoader<CommentedConfigurationNode> crateLoop;
 
     public Path keyConfigPath;
@@ -79,8 +82,9 @@ public class HuskyCrates {
     public Path generatedInventoryConfigPath;
     public ConfigurationLoader<CommentedConfigurationNode> generatedInventoryConfig;
 
-
     public static Path dupeLogPath;
+
+    public static Path storageDirectoryPath;
 
     //TODO unused variable
     public Cause genericCause;
@@ -114,15 +118,27 @@ public class HuskyCrates {
         logger = LoggerFactory.getLogger(pC.getName());
         instance = this;
 
+        storageDirectoryPath = configDir.resolve("storage/");
         dupeLogPath = configDir.resolve("storage/dupealert.log");
-        crateConfigPath = configDir.resolve("crates/");
-        keyConfigPath = configDir.resolve("crates/keys.conf");
         generatedItemConfigPath = configDir.resolve("storage/generateditems.conf");
         generatedInventoryConfigPath = configDir.resolve("storage/generatedinventorys.conf");
+        crateDirectoryPath = configDir.resolve("crates/");
+        keyConfigPath = configDir.resolve("crates/keys.conf");
 
         keyConfig = HoconConfigurationLoader.builder().setPath(keyConfigPath).build();
         generatedItemConfig = HoconConfigurationLoader.builder().setPath(generatedItemConfigPath).build();
         generatedInventoryConfig = HoconConfigurationLoader.builder().setPath(generatedInventoryConfigPath).build();
+
+        Path crateMigrationPath = configDir.resolve("crates.conf");
+        Path keysMigrationPath = configDir.resolve("keys.conf");
+        Path dbMigrationPath = configDir.resolve("data.mv.db");
+        Path genItemMigrationPath = configDir.resolve("generateditems.conf");
+
+        migrateConfigs(crateMigrationPath, "/crates/crates.crate");
+        migrateConfigs(keysMigrationPath, "/crates/keys.conf");
+        migrateConfigs(dbMigrationPath, "/storage/data.mv.db");
+        migrateConfigs(genItemMigrationPath, "/storage/generateditems.conf");
+
     }
     private float cumulative = 0;
     private int iterations = 0;
@@ -135,14 +151,28 @@ public class HuskyCrates {
 
     public static final String generalDefaultConfig = "# To configure HuskyCrates, please reference the documentation or use HuskyConfigurator!\n# For more information: https://discord.gg/FSETtcx";
 
+    private void migrateConfigs(Path n, String name){
+        Path conf = Paths.get(configDir.toString() + name);
+        if(n.toFile().exists()) {
+            checkOrInitalizeDirectory(crateDirectoryPath);
+            checkOrInitalizeDirectory(storageDirectoryPath);
+            try {
+                    Files.move(n,conf,StandardCopyOption.REPLACE_EXISTING);
+            }catch(Exception e){
+                e.printStackTrace();
+                logger.error("Failed to migrate a config to newer path!");
+            }
+        }
+    }
+
     public void loadConfig() {
 
         CommentedConfigurationNode keys;
         CommentedConfigurationNode mainConfig;
-        checkOrInitalizeConfig(dupeLogPath,"#Here you'll find a log of information stored after an instance duplication detection!\n#File will not be read, is simply a log");
-        checkOrInitalizeConfig(generatedItemConfigPath,"# This config contains generated item objects that you create in-game. This file will not be read by the plugin.\n# With the admin permission, try /hc genitem with an item in your hand, then check back here.");
-        checkOrInitalizeConfig(generatedInventoryConfigPath,"# This config contains generated inventory sets that you create in-game. This file will not be read by the plugin.\n# With the admin permission, try /hc geninvent with an inventory full of items, then check back here.");
-        if(checkOrInitalizeConfig(crateConfigPath,generalDefaultConfig) && checkOrInitalizeConfig(keyConfigPath,generalDefaultConfig)){
+        if(checkOrInitalizeDirectory(crateDirectoryPath) && checkOrInitalizeDirectory(storageDirectoryPath) && checkOrInitalizeConfig(keyConfigPath,generalDefaultConfig)){
+            checkOrInitalizeConfig(dupeLogPath,"#Here you'll find a log of information stored after an instance duplication detection!\n#File will not be read, is simply a log");
+            checkOrInitalizeConfig(generatedItemConfigPath,"# This config contains generated item objects that you create in-game. This file will not be read by the plugin.\n# With the admin permission, try /hc genitem with an item in your hand, then check back here.");
+            checkOrInitalizeConfig(generatedInventoryConfigPath,"# This config contains generated inventory sets that you create in-game. This file will not be read by the plugin.\n# With the admin permission, try /hc geninvent with an inventory full of items, then check back here.");
             try {
                 mainConfig = config.load();
                 keys = keyConfig.load();
@@ -152,11 +182,27 @@ public class HuskyCrates {
 
                 }
 
-                File folder = new File(crateConfigPath.toString());
-
-                System.out.println(crateConfigPath.toString());
-
+                File folder = new File(crateDirectoryPath.toString());
                 File[] files = folder.listFiles();
+                List<File> crateFiles = new ArrayList<>();
+
+                for (File file : files){
+                    if (file.getName().endsWith(".crate")){
+                        crateFiles.add(file);
+                    }
+                }
+
+                if(crateFiles.size() == 0){
+                    System.out.println("The crate directory contains no crates, pushing example config!");
+                    if(Sponge.getAssetManager().getAsset(pC, "example.crate").isPresent()){
+                        Sponge.getAssetManager().getAsset(pC, "example.crate").get().copyToFile(crateDirectoryPath.resolve("example.crate"));
+                    }
+                    else{
+                        System.out.println("Failed to read asset to copy file from!");
+                    }
+                    System.out.println(Sponge.getAssetManager().getAsset(pC, "example.crate").isPresent());
+                }
+
                 for (File file : files) {
                     if (file.isFile() && file.getPath().endsWith(".crate") && file.length() > 0) {
                         crateLoop = HoconConfigurationLoader.builder().setPath(file.toPath()).build();
@@ -171,10 +217,9 @@ public class HuskyCrates {
                         for(CommentedConfigurationNode node : crateThing.getChildrenMap().values()){
                             Crate thisCrate = new Crate(node);
                             registry.registerCrate(thisCrate);
-                        }
+                         }
 
-                        System.out.println("Crate Config File \"" + file.getName() + "\" Has been loaded!");
-
+                        logger.debug("Crate Config File \"" + file.getName() + "\" Has been loaded!");
                     }
                 }
 
@@ -245,6 +290,15 @@ public class HuskyCrates {
                 e.printStackTrace();
                 return false;
             }
+        }
+        return true;
+    }
+    private boolean checkOrInitalizeDirectory(Path path){
+        if(!path.toFile().exists()) {
+                if(!path.toFile().mkdirs()){
+                    logger.error("Failed to create new directory at " + path.toAbsolutePath().toString());
+                    return false;
+                }
         }
         return true;
     }

@@ -1,0 +1,181 @@
+example{
+    free=false
+    name="&aExample Crate"
+    slots = [
+        {
+            chance=30
+            displayItem{
+                count=16
+                id="minecraft:potato"
+                lore=[
+                    "&cHot Potatoes!"
+                ]
+            }
+            rewards=[
+                {
+                    type="servercommand"
+                    data="give %p minecraft:potato 16"
+                }
+            ]
+        },
+        {
+            chance=20
+            displayItem{
+                id="minecraft:cobblestone"
+                count=32
+                name="&5Extra Hard Stones!"
+            }
+            rewards=[
+                {
+                    type="item"
+                }
+            ]
+        },
+        {
+            chance=15
+            displayItem{
+                id="minecraft:gold_ore"
+                count=5
+                name="&e50/50 Gold or Iron!"
+            }
+            pickRandom=true
+            pickSize=1
+            rewards=[
+                [
+                    {
+                        type="servercommand"
+                        data="give %p minecraft:iron_ingot 5"
+                    },
+                    {
+                        data="You won 5 Iron Ingots!",
+                        type=usermessage
+                    },
+                    {
+                        data="%p won 5 Iron Ingots!"
+                        type=servermessage
+                    }
+                ],
+                [
+                    {
+                        type="servercommand"
+                        data="give %p minecraft:gold_ingot 5"
+                    },
+                    {
+                        data="You won 5 Gold Ingots!",
+                        type=usermessage
+                    },
+                    {
+                        data="%p won 5 Gold Ingots!"
+                        type=servermessage
+                    }
+                ]
+            ]
+        },
+        {
+            chance=10
+            displayItem{
+                id="minecraft:diamond"
+                count=5
+                name="&bLucky Diamonds!"
+                lore=[
+                    "Just some shiny Diamonds!"
+                ]
+            }
+            rewards=[
+                {
+                    type="item"
+                },
+                {
+                    data="You won %a %R&r from the %C&r!"
+                    type=usermessage
+                }
+            ]
+        },	
+        {
+            chance=5
+            displayItem{
+                id="minecraft:tripwire_hook"
+                count=1
+                name="&aExample Crate Key"
+            }
+            rewards=[
+                {
+                    type=key
+                    data="LOCALKEY_example"
+                    keyCount=1
+                }
+            ]
+        }
+    ]
+    effects {
+        idle {
+            particles=[
+                {
+                    animationPreset=orbit
+                    color=[
+                        0,
+                        255,
+                        0
+                    ]
+                    type="minecraft:redstone_dust"
+                },
+                {
+                    animationPreset=counterorbit
+                    color=[
+                        255,
+                        0,
+                        255
+                    ]
+                    type="minecraft:redstone_dust"
+                }
+            ]
+        }
+        reject {
+            duration=16
+            loop=false
+            resetOnTimeout=true
+            particles=[
+                {
+                    type="minecraft:redstone_dust"
+                    amount=10
+                    animationCode="var spin = time/3; x=Math.sin(spin + num)*0.7; y=(time/8) - 0.5; z=Math.cos(spin + num)*0.7;"
+                }
+            ]
+        }
+    }
+    hologram {
+        lines=[
+            "&aExample",
+            "&aCrate",
+            "&aBlock!"
+        ]
+        entityYOffset=0.0
+    }
+    viewType="spinner"
+    viewConfig{
+        borderItem{
+            id="minecraft:stained_glass_pane"
+            damage=6
+            count=1
+            name="&dExample Border Item!"
+        }
+        selectorItem{
+            id="minecraft:iron_door"
+            count=1
+            name="&7Example Selector Item!"
+        }
+        tickDelayMultiplier=1.025
+        ticksToSelection=75
+        ticksToSelectionVariance=5
+    }
+    previewable=true
+    useLocalKey=true
+    localKey {
+        id="minecraft:tripwire_hook"
+        name="&aExample Crate Key"
+    }
+    messages {
+        rejectionNeedKey="&cYou lack the key needed to open this crate!"
+    }
+}
+

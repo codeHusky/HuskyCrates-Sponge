@@ -11,7 +11,6 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -27,8 +26,6 @@ public class ItemGenerateCommand implements CommandExecutor {
             Player player = (Player)src;
             if(player.getItemInHand(HandTypes.MAIN_HAND).isPresent()){
                 ItemStack stack = player.getItemInHand(HandTypes.MAIN_HAND).get();
-                ItemStack air = ItemStack.builder().itemType(ItemTypes.AIR).build();
-
                 if(stack.isEmpty()){
                     src.sendMessage(Text.of(TextColors.RED,"You must be holding an item to use this command."));
                 }

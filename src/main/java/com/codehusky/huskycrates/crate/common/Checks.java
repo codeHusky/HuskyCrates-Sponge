@@ -4,7 +4,6 @@ import com.codehusky.huskycrates.HuskyCrates;
 import com.codehusky.huskycrates.Util;
 import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.Crate;
-import com.codehusky.huskycrates.crate.virtual.Item;
 import com.codehusky.huskycrates.crate.virtual.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HandTypes;
@@ -12,9 +11,7 @@ import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectTypes;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -142,7 +139,7 @@ public class Checks {
                             player.sendMessage(crate.getMessages().format(Crate.Messages.Type.RejectionNeedKey,player));
                             return false;
                         }
-                        
+
                         return true;
                     }else{
                         player.playSound(SoundTypes.ENTITY_CAT_HISS,player.getPosition(),1.0);
@@ -159,161 +156,4 @@ public class Checks {
         return false;
     }
 
-
-
-    public int keysInInventory(ItemStack stack, Player player){
-
-        Inventory playerInventory = Util.getHotbarFirst(player.getInventory());
-        inventory = new HashMap<>();
-        int i = 0;
-        int keyAmount = 0;
-        int keyAmountS = 0;
-        for (Inventory slot : playerInventory.slots())
-        {
-            Optional<ItemStack> itemslot = slot.peek();
-            if (itemslot.isPresent()){
-                if(Key.extractKeyId(itemslot.get()) != null && HuskyCrates.registry.isKey(Key.extractKeyId(itemslot.get()))){
-                    if(Key.extractKeyId(itemslot.get()).equals(Key.extractKeyId(stack))){
-                        keyAmountS = keyAmount + itemslot.get().getQuantity();
-                        keyAmount = keyAmountS;
-
-                        i++;
-                    }
-                }
-            }
-        }
-        return keyAmount;
-    }
-
-    public boolean processKeysInInventory(ItemStack stack, Player player, int consumeAmount) {
-        Inventory playerInventory = Util.getHotbarFirst(player.getInventory());
-        Iterable<Slot> slotIter = playerInventory.slots();
-        int i = 0;
-        int keysConsumed = 0;
-        int keysSeen = 0;
-        for (Slot slot : slotIter) {
-            {
-                Optional<ItemStack> itemslot = slot.peek();
-                if (itemslot.isPresent()) {
-                    if (Key.extractKeyId(itemslot.get()) != null && HuskyCrates.registry.isKey(Key.extractKeyId(itemslot.get()))) {
-                        if (Key.extractKeyId(itemslot.get()).equals(Key.extractKeyId(stack))) {
-
-                            if (keysConsumed == consumeAmount) {
-                                break;
-                            }
-                            if (itemslot.get().getQuantity() > consumeAmount) {
-                                HuskyCrates.registry.consumeSecureKey(itemslot.get(), consumeAmount);
-                                slot.set(ItemStack.builder().from(itemslot.get()).quantity(itemslot.get().getQuantity() - consumeAmount).build());
-                                break;
-
-                            } else if (itemslot.get().getQuantity() < consumeAmount) {
-                                keysConsumed = keysSeen + itemslot.get().getQuantity();
-                                keysSeen = keysConsumed;
-
-                                HuskyCrates.registry.consumeSecureKey(itemslot.get(), itemslot.get().getQuantity());
-                                slot.set(ItemStack.empty());
-                                if (keysConsumed == consumeAmount) {
-                                    System.out.println("Broke For Loop In Less-Than-Check");
-                                    break;
-                                }
-                            } else if (itemslot.get().getQuantity() == consumeAmount - keysConsumed) {
-                                HuskyCrates.registry.consumeSecureKey(itemslot.get(), consumeAmount - keysConsumed);
-                                slot.set(ItemStack.empty());
-                                break;
-                            }
-
-                            i++;
-                        }
-                    }
-                }
-            }
-        }
-
-        return false;
-    }
-    public boolean validateFutureUseSecureKeys(ItemStack stack, Player player, int consumeAmount){
-        Inventory playerInventory = Util.getHotbarFirst(player.getInventory());
-        Iterable<Slot> slotIter = playerInventory.slots();
-        int i = 0;
-        int keysConsumed = 0;
-        int keysSeen = 0;
-        for (Slot slot : slotIter) {
-            {
-                Optional<ItemStack> itemslot = slot.peek();
-                if (itemslot.isPresent()){
-                    if(Key.extractKeyId(itemslot.get()) != null && HuskyCrates.registry.isKey(Key.extractKeyId(itemslot.get()))){
-                        if(Key.extractKeyId(itemslot.get()).equals(Key.extractKeyId(stack))){
-
-                            //HuskyCrates.registry.validateSecureKey(itemslot.get(),itemslot.get().getQuantity());
-                            //if(keysConsumed == consumeAmount){
-                            //    break;
-                            //}
-                            if (itemslot.get().getQuantity() > consumeAmount) {
-                                System.out.println("---------------------------");
-                                System.out.println(HuskyCrates.registry.validateSecureKey(itemslot.get(),consumeAmount));
-                                System.out.println("---------------------------");
-                                return HuskyCrates.registry.validateSecureKey(itemslot.get(),consumeAmount);
-
-                            } else if(itemslot.get().getQuantity() < consumeAmount) {
-                                keysConsumed = keysSeen + itemslot.get().getQuantity();
-                                keysSeen = keysConsumed;
-
-
-                                System.out.println("---------------------------");
-                                System.out.println("How Many Times Do We Get Here Per Loop?");
-                                System.out.println(keysSeen+" is equal to the keysSeen variable");
-                                System.out.println("---------------------------");
-                                System.out.println(consumeAmount+" is equal to the consumeAmount variable");
-                                System.out.println("---------------------------");
-
-
-                                if(keysConsumed == consumeAmount){
-                                    System.out.println("Broke For Loop In Less-Than-Check");
-                                    return HuskyCrates.registry.validateSecureKey(itemslot.get(),itemslot.get().getQuantity());
-                                }
-                            } else if(itemslot.get().getQuantity() == consumeAmount-keysConsumed) {
-                                return HuskyCrates.registry.validateSecureKey(itemslot.get(),consumeAmount-keysConsumed);
-                            }
-
-                            i++;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    /*        inventory = new HashMap<>();
-        for (Inventory slot : playerInventory.slots())
-        {
-            Optional<ItemStack> itemslot = slot.peek();
-            if (itemslot.isPresent()){
-                if(Key.extractKeyId(itemslot.get()) != null && HuskyCrates.registry.isKey(Key.extractKeyId(itemslot.get()))){
-                    if(Key.extractKeyId(itemslot.get()).equals(Key.extractKeyId(stack))){
-
-
-                        if(keysConsumed == consumeAmount){
-                            break;
-                        }
-                        if (itemslot.get().getQuantity() > consumeAmount) {
-
-                            player.setItemInHand(HandTypes.MAIN_HAND, ItemStack.builder().from(stack).quantity(stack.getQuantity() - consumeAmount).build());
-                            break;
-                        } else if(itemslot.get().getQuantity() < consumeAmount) {
-                            keysConsumed = keysSeen + itemslot.get().getQuantity();
-                            keysSeen = keysConsumed;
-                            playerInventory.qu
-                            player.setItemInHand(HandTypes.MAIN_HAND, ItemStack.empty());
-                            if(keysConsumed == consumeAmount){
-                                System.out.println("Broke For Loop In Less-Than-Check");
-                                break;
-                            }
-                        }
-
-                        i++;
-                    }
-                }
-            }
-        }*/
 }
