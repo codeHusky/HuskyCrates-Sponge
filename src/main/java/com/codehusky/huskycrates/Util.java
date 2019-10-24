@@ -1,6 +1,7 @@
 package com.codehusky.huskycrates;
 
 import com.codehusky.huskycrates.crate.virtual.Key;
+import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.sound.SoundTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -59,5 +60,20 @@ public class Util {
         String mainMessage =  "Player " + badPlayer.getName() + " (" + badPlayer.getUniqueId().toString() + ") tried to use a stack of " + stack.getQuantity() + " " + ((Key.extractKeyId(stack) != null)? Key.extractKeyId(stack):"NO KEY ID") + " key(s).";
         alertAdmins(Text.of(TextColors.RED,"[HuskyCrates] ",TextColors.YELLOW,"Key Duplication Alert!\n",TextColors.RED,mainMessage),"[DUPE ALERT] " + mainMessage);
         dupeLog(badPlayer, stack);
+    }
+
+    public static String getJDBC() {
+        CommentedConfigurationNode db = HuskyCrates.instance.mainConfig.getNode("virtualkeydatabase");
+        if (db.getNode("useRemoteDatabase").getBoolean()){
+            return String.format("jdbc:%s://%s:%d/%s?user=%s&password=%s",
+                    db.getNode("type").getString(),
+                    db.getNode("host").getString(),
+                    db.getNode("port").getInt(),
+                    db.getNode("database").getString(),
+                    db.getNode("username").getString(),
+                    db.getNode("password").getString());
+        }else{
+            return null;
+        }
     }
 }

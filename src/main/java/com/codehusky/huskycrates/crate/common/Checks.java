@@ -15,7 +15,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
-import javax.swing.plaf.synth.SynthEditorPaneUI;
 import java.util.*;
 
 public class Checks {
@@ -56,6 +55,9 @@ public class Checks {
 
             if(physicalCrate.getCrate().testVirtualKey(player.getUniqueId())){
                 physicalCrate.getCrate().consumeVirtualKeys(player.getUniqueId());
+                if(HuskyCrates.instance.virtualKeyDB){
+                    HuskyCrates.registry.pushDirtyVirtualKeys();
+                }
                 physicalCrate.getCrate().launchView(physicalCrate.getCrate(), player, physicalCrate.getLocation());
                 return;
             }
@@ -106,6 +108,9 @@ public class Checks {
 
             if(crate.testVirtualKey(player.getUniqueId())){
                 crate.consumeVirtualKeys(player.getUniqueId());
+                if(HuskyCrates.instance.virtualKeyDB){
+                    HuskyCrates.registry.pushDirtyVirtualKeys();
+                }
                 crate.launchView(crate, player, player.getLocation());
                 return;
             }

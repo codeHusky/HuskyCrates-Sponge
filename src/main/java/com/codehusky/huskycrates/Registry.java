@@ -232,6 +232,17 @@ public class Registry {
         return addVirtualKeys(playerUUID,keyID,-amount);
     }
 
+    public boolean setVirtualKeysNoDirty(UUID playerUUID, String keyID, Integer amount){
+        if(isKey(keyID)){
+            HashMap<String, Integer> balances = virtualKeys.getOrDefault(playerUUID,new HashMap<>());
+            balances.put(keyID,amount);
+            virtualKeys.put(playerUUID,balances);
+
+            return true;
+        }
+        return false;
+    }
+
     public boolean setVirtualKeys(UUID playerUUID, String keyID, Integer amount){
         if(isKey(keyID)){
             HashMap<String, Integer> balances = virtualKeys.getOrDefault(playerUUID,new HashMap<>());
@@ -334,9 +345,7 @@ public class Registry {
             crate.postInjectionChecks();
         });
     }
-
     private Connection getConnection() {
-
         DataSource dbSource = null;
         try {
             dbSource = Sponge.getServiceManager().provide(SqlService.class).get().getDataSource("jdbc:h2:" + HuskyCrates.instance.configDir.resolve("storage/data"));
@@ -365,9 +374,36 @@ public class Registry {
         }
     }
 
+    private Connection getVirtualKeySQLConnection() {
+        DataSource dbSource = null;
+        try {
+            dbSource = Sponge.getServiceManager().provide(SqlService.class).get().getDataSource(HuskyCrates.instance, Objects.requireNonNull(Util.getJDBC()));
+            Connection connection = dbSource.getConnection();
+            boolean kB = connection.getMetaData().getTables(null,null,"KEYBALANCES",null).next();
+            if(!kB){
+                connection.prepareStatement("CREATE TABLE KEYBALANCES (userUUID CHAR(36), keyID CHAR(100), amount INT)").executeUpdate();
+            }
+            return connection;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Connection getAppropriateVirtualKeyConnection() {
+        if(HuskyCrates.instance.virtualKeyDB){
+            return getVirtualKeySQLConnection();
+        }
+        else{
+            return getConnection();
+        }
+    }
+
     public void loadFromDatabase(){
         Connection connection = getConnection();
-        if(connection == null) {
+        Connection virtualKeyConnection = getAppropriateVirtualKeyConnection();
+
+        if(connection == null || virtualKeyConnection == null) {
             HuskyCrates.instance.logger.error("SQL LOAD FAILURE");
             return;
         }
@@ -430,7 +466,7 @@ public class Registry {
                 }
             }
 
-            ResultSet keyBalances = connection.prepareStatement("SELECT * FROM KEYBALANCES").executeQuery();
+            ResultSet keyBalances = virtualKeyConnection.prepareStatement("SELECT * FROM KEYBALANCES").executeQuery();
             //HuskyCrates.instance.logger.info("wasNull: " + keyBalances.wasNull());
             //HuskyCrates.instance.logger.info("isClosed: " + keyBalances.isClosed());
             while(keyBalances.next()){
@@ -447,7 +483,7 @@ public class Registry {
                     this.virtualKeys.put(userUUID, t);
                 }else{
                     HuskyCrates.instance.logger.warn("A Key Balance for UUID " + userUUID + " provides an invalid key ID. Removing from table.");
-                    Statement removal = connection.createStatement();
+                    Statement removal = virtualKeyConnection.createStatement();
                     removal.executeQuery("SELECT  * FROM KEYBALANCES WHERE USERUUID='" + userUUID.toString() + "'");
                     removal.executeUpdate("DELETE FROM KEYBALANCES");
                     removal.close();
@@ -483,6 +519,7 @@ public class Registry {
                 }
             }
             connection.close();
+            virtualKeyConnection.close();
             cleanAll();
             HuskyCrates.instance.logger.info("End Database Load.");
         }catch (SQLException e){
@@ -490,8 +527,52 @@ public class Registry {
             HuskyCrates.instance.logger.error("SQL LOAD QUERY FAILURE");
             try {
                 connection.close();
+                virtualKeyConnection.close();
             } catch (SQLException ignored){}
         }
+    }
+
+    public void pushDirtyVirtualKeys() {
+        Connection virtualKeyConnection = getAppropriateVirtualKeyConnection();
+        if(virtualKeyConnection == null) {
+            HuskyCrates.instance.logger.error("SQL DIRTY PUSH FAILURE");
+            return;
+        }
+        try{
+            for(Map.Entry<UUID, HashSet<String>> entry : dirtyVirtualKeys.entrySet()){
+                UUID playerUUID = entry.getKey();
+                for(String keyID : entry.getValue()){
+                    //create or update
+                    PreparedStatement statement = virtualKeyConnection.prepareStatement("SELECT * FROM KEYBALANCES WHERE userUUID = ? AND keyID = ?");
+                    statement.setString(1,playerUUID.toString());
+                    statement.setString(2,keyID);
+                    ResultSet results = statement.executeQuery();
+                    boolean exists = results.next();
+                    if(!exists){
+                        PreparedStatement insertStatement = virtualKeyConnection.prepareStatement("INSERT INTO KEYBALANCES(userUUID,keyID,amount) VALUES(?,?,?)");
+                        insertStatement.setString(1,playerUUID.toString());
+                        insertStatement.setString(2,keyID);
+                        insertStatement.setInt(3,virtualKeys.get(playerUUID).get(keyID));
+
+                        insertStatement.executeUpdate();
+                    }else{
+                        PreparedStatement uState = virtualKeyConnection.prepareStatement("UPDATE KEYBALANCES SET amount = ? WHERE userUUID = ? AND keyID = ?");
+                        uState.setInt(1,virtualKeys.get(playerUUID).get(keyID));
+                        uState.setString(2,playerUUID.toString());
+                        uState.setString(3,keyID);
+                        uState.executeUpdate();
+                    }
+                }
+            }
+        virtualKeyConnection.close();
+        }catch (SQLException e){
+            e.printStackTrace();
+            HuskyCrates.instance.logger.error("SQL DIRTY PUSH UPDATE FAILURE");
+        try {
+            virtualKeyConnection.close();
+        } catch (SQLException ignored){}
+        }
+        dirtyVirtualKeys.clear();
     }
 
     public void pushDirty() {
@@ -500,6 +581,7 @@ public class Registry {
                 dirtyPhysicalCrates.isEmpty()) return;
 
         Connection connection = getConnection();
+
         if(connection == null) {
             HuskyCrates.instance.logger.error("SQL DIRTY PUSH FAILURE");
             return;
@@ -541,32 +623,7 @@ public class Registry {
             }
             dirtyPhysicalCrates.clear();
 
-            for(Map.Entry<UUID, HashSet<String>> entry : dirtyVirtualKeys.entrySet()){
-                UUID playerUUID = entry.getKey();
-                for(String keyID : entry.getValue()){
-                    //create or update
-                    PreparedStatement statement = connection.prepareStatement("SELECT * FROM KEYBALANCES WHERE userUUID = ? AND keyID = ?");
-                    statement.setString(1,playerUUID.toString());
-                    statement.setString(2,keyID);
-                    ResultSet results = statement.executeQuery();
-                    boolean exists = results.next();
-                    if(!exists){
-                        PreparedStatement insertStatement = connection.prepareStatement("INSERT INTO KEYBALANCES(userUUID,keyID,amount) VALUES(?,?,?)");
-                        insertStatement.setString(1,playerUUID.toString());
-                        insertStatement.setString(2,keyID);
-                        insertStatement.setInt(3,virtualKeys.get(playerUUID).get(keyID));
-
-                        insertStatement.executeUpdate();
-                    }else{
-                        PreparedStatement uState = connection.prepareStatement("UPDATE KEYBALANCES SET amount = ? WHERE userUUID = ? AND keyID = ?");
-                        uState.setInt(1,virtualKeys.get(playerUUID).get(keyID));
-                        uState.setString(2,playerUUID.toString());
-                        uState.setString(3,keyID);
-                        uState.executeUpdate();
-                    }
-                }
-            }
-            dirtyVirtualKeys.clear();
+            pushDirtyVirtualKeys();
 
             for(UUID keyUUID: dirtyKeysInCirculation){
                 if(keysInCirculation.containsKey(keyUUID)){

@@ -4,7 +4,8 @@ import com.codehusky.huskycrates.command.BalanceCommand;
 import com.codehusky.huskycrates.command.BlockCommand;
 import com.codehusky.huskycrates.command.CommandRegister;
 import com.codehusky.huskycrates.command.KeyCommand;
-import com.codehusky.huskycrates.crate.CrateListeners;
+import com.codehusky.huskycrates.crate.listeners.CrateListeners;
+import com.codehusky.huskycrates.crate.listeners.SQLUpdateListener;
 import com.codehusky.huskycrates.crate.physical.EffectInstance;
 import com.codehusky.huskycrates.crate.physical.PhysicalCrate;
 import com.codehusky.huskycrates.crate.virtual.Crate;
@@ -69,12 +70,14 @@ public class HuskyCrates {
     @Inject
     @DefaultConfig(sharedRoot = false)
     public ConfigurationLoader<CommentedConfigurationNode> config;
+    public CommentedConfigurationNode mainConfig;
 
     public Path crateDirectoryPath;
     public ConfigurationLoader<CommentedConfigurationNode> crateLoop;
 
     public Path keyConfigPath;
     public ConfigurationLoader<CommentedConfigurationNode> keyConfig;
+    public CommentedConfigurationNode keys;
 
     public Path generatedItemConfigPath;
     public ConfigurationLoader<CommentedConfigurationNode> generatedItemConfig;
@@ -110,6 +113,7 @@ public class HuskyCrates {
     private static ScriptEngineManager mgr = new ScriptEngineManager();
     public static ScriptEngine jsengine = mgr.getEngineByName("JavaScript");
 
+    public boolean virtualKeyDB = false;
 
 
     @Listener
@@ -149,7 +153,7 @@ public class HuskyCrates {
         Sponge.getEventManager().registerListeners(this,crateListeners);
     }
 
-    public static final String generalDefaultConfig = "# To configure HuskyCrates, please reference the documentation or use HuskyConfigurator!\n# For more information: https://discord.gg/FSETtcx";
+    public static final String generalDefaultConfig = "# To configure HuskyCrates, please reference the documentation, use the \"/hc generatecrate\" command, or use the HuskyConfigurator!\n\n# For more information: https://discord.gg/FSETtcx";
 
     private void migrateConfigs(Path n, String name){
         Path conf = Paths.get(configDir.toString() + name);
@@ -157,7 +161,7 @@ public class HuskyCrates {
             checkOrInitalizeDirectory(crateDirectoryPath);
             checkOrInitalizeDirectory(storageDirectoryPath);
             try {
-                    Files.move(n,conf,StandardCopyOption.REPLACE_EXISTING);
+                Files.move(n,conf,StandardCopyOption.REPLACE_EXISTING);
             }catch(Exception e){
                 e.printStackTrace();
                 logger.error("Failed to migrate a config to newer path!");
@@ -166,16 +170,19 @@ public class HuskyCrates {
     }
 
     public void loadConfig() {
-
-        CommentedConfigurationNode keys;
-        CommentedConfigurationNode mainConfig;
         if(checkOrInitalizeDirectory(crateDirectoryPath) && checkOrInitalizeDirectory(storageDirectoryPath) && checkOrInitalizeConfig(keyConfigPath,generalDefaultConfig)){
             checkOrInitalizeConfig(dupeLogPath,"#Here you'll find a log of information stored after an instance duplication detection!\n#File will not be read, is simply a log");
             checkOrInitalizeConfig(generatedItemConfigPath,"# This config contains generated item objects that you create in-game. This file will not be read by the plugin.\n# With the admin permission, try /hc genitem with an item in your hand, then check back here.");
             checkOrInitalizeConfig(generatedInventoryConfigPath,"# This config contains generated inventory sets that you create in-game. This file will not be read by the plugin.\n# With the admin permission, try /hc geninvent with an inventory full of items, then check back here.");
             try {
                 mainConfig = config.load();
+                virtualKeyDB = mainConfig.getNode("virtualkeydatabase").getNode("useRemoteDatabase").getBoolean();
                 keys = keyConfig.load();
+
+                if(virtualKeyDB){
+                    Sponge.getEventManager().registerListeners(this, new SQLUpdateListener());
+                }
+
                 for(CommentedConfigurationNode node : keys.getChildrenMap().values()){
                     Key thisKey = new Key(node);
                     registry.registerKey(thisKey);
@@ -193,14 +200,15 @@ public class HuskyCrates {
                 }
 
                 if(crateFiles.size() == 0){
-                    System.out.println("The crate directory contains no crates, pushing example config!");
+                    HuskyCrates.instance.logger.debug("The crate directory contains no crates, pushing example config!");
+                    //System.out.println("The crate directory contains no crates, pushing example config!");
                     if(Sponge.getAssetManager().getAsset(pC, "example.crate").isPresent()){
                         Sponge.getAssetManager().getAsset(pC, "example.crate").get().copyToFile(crateDirectoryPath.resolve("example.crate"));
                     }
                     else{
-                        System.out.println("Failed to read asset to copy file from!");
+                        HuskyCrates.instance.logger.error("Failed to read asset to copy file from!");
+                        //System.out.println("Failed to read asset to copy file from!");
                     }
-                    System.out.println(Sponge.getAssetManager().getAsset(pC, "example.crate").isPresent());
                 }
 
                 for (File file : files) {
@@ -223,6 +231,16 @@ public class HuskyCrates {
                     }
                 }
 
+                if(mainConfig.getNode("virtualkeydatabase").isVirtual()){
+                    CommentedConfigurationNode db = mainConfig.getNode("virtualkeydatabase");
+                    db.getNode("useRemoteDatabase").setValue(false);
+                    db.getNode("type").setValue("mysql");
+                    db.getNode("host").setValue("127.0.0.1");
+                    db.getNode("port").setValue(3306);
+                    db.getNode("database").setValue("huskycrates");
+                    db.getNode("username").setValue("root");
+                    db.getNode("password").setValue("");
+                }
 
                 if(!mainConfig.getNode("crates").isVirtual()){
                     throw new ConfigParseError("HuskyCrates.conf contains 1.x config data! Please update it using the Config Converter application!",mainConfig.getNode("crates").getPath());
@@ -307,7 +325,6 @@ public class HuskyCrates {
     public void gameStarted(GameStartedServerEvent event) {
         logger.info("Loading Crates...");
         loadConfig();
-
 
 
 

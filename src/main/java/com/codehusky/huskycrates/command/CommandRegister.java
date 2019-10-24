@@ -13,12 +13,9 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 public class CommandRegister {
     public static void register(HuskyCrates plugin) {
-//        Map crateGen = new HashMap<String, String>(){{put("item","inventory");}};
         CommandSpec mainCommand = CommandSpec.builder()
                 .child(CommandSpec.builder()
                         .executor(new BlockCommand())
@@ -67,12 +64,12 @@ public class CommandRegister {
                         .executor(new InventoryGenerateCommand())
                         .permission("huskycrates.admin")
                         .build(),"geninvent","generateinventory","ginv")
-//                .child(CommandSpec.builder()
-//                        .executor(new CrateGenerateCommand())
-//                        .permission("huskycrates.admin")
-//                        .arguments(GenericArguments.string(Text.of("name")),
-//                                GenericArguments.choices(Text.of("type"), ImmutableMap.<String, String> builder().put("item", "item").put("inventory", "inventory").build()))
-//                        .build(),"gencrate","generatecrate","gcrate")
+                .child(CommandSpec.builder()
+                        .executor(new CrateGenerateCommand())
+                        .permission("huskycrates.admin")
+                        .arguments(GenericArguments.string(Text.of("name")),
+                                GenericArguments.choices(Text.of("type"), ImmutableMap.<String, String> builder().put("item", "item").put("inventory", "inventory").build()))
+                        .build(),"gencrate","generatecrate","gcrate")
                 .child(CommandSpec.builder()
                         .executor(new MainCommand())
                         .build(),"h","help")

@@ -54,6 +54,7 @@ public class Crate {
     private Boolean free;
 
     private boolean previewable;
+    private Boolean previewShowsRewardCount;
 
     private long cooldownSeconds;
 
@@ -196,8 +197,9 @@ public class Crate {
         }
 
         this.previewable = node.getNode("previewable").getBoolean(false);
+        this.previewShowsRewardCount = node.getNode("previewShowsRewardCount").getBoolean(true);
     }
-    public Crate(String id, String name, Hologram hologram, Effect idleEffect, Effect rejectEffect, Effect winEffect, Effect openEffect, List<Slot> slots, boolean scrambleSlots, boolean free, boolean previewable, long cooldownSeconds, boolean useLocalKey, Key localKey, HashMap<String, Integer> acceptedKeys, ViewType viewType, ViewConfig viewConfig){
+    public Crate(String id, String name, Hologram hologram, Effect idleEffect, Effect rejectEffect, Effect winEffect, Effect openEffect, List<Slot> slots, boolean scrambleSlots, boolean free, boolean previewable, boolean previewRewardCount, long cooldownSeconds, boolean useLocalKey, Key localKey, HashMap<String, Integer> acceptedKeys, ViewType viewType, ViewConfig viewConfig){
         this.id = id;
         this.name = name;
         this.hologram = hologram;
@@ -213,9 +215,10 @@ public class Crate {
         if(slots.size() == 0){
             throw new ConfigParseError("Crates must have associated slots!", Lists.newArrayList("Injected!!!").toArray());
         }
-        this.scrambleSlots =scrambleSlots;
+        this.scrambleSlots = scrambleSlots;
         this.free = free;
         this.previewable = previewable;
+        this.previewShowsRewardCount = previewRewardCount;
         this.cooldownSeconds = cooldownSeconds;
         this.useLocalKey = useLocalKey;
         this.localKey = localKey;
@@ -227,7 +230,7 @@ public class Crate {
     public Crate getScrambledCrate() {
         ArrayList<Slot> newSlots = new ArrayList<>(slots);
         Collections.shuffle(newSlots);
-        return new Crate(id,name,hologram,idleEffect,rejectEffect,winEffect,openEffect,newSlots,scrambleSlots,free,previewable,cooldownSeconds,useLocalKey,localKey,acceptedKeys,viewType,viewConfig);
+        return new Crate(id,name,hologram,idleEffect,rejectEffect,winEffect,openEffect,newSlots,scrambleSlots,free,previewable,previewShowsRewardCount,cooldownSeconds,useLocalKey,localKey,acceptedKeys,viewType,viewConfig);
     }
     public boolean isScrambled() {
         return this.scrambleSlots;
@@ -294,8 +297,7 @@ public class Crate {
                 String keyID = entry.getKey();
                 int consumed = entry.getValue();
                 if(HuskyCrates.registry.getVirtualKeyBalance(playerUUID,keyID) >= consumed){
-                    HuskyCrates.registry.removeVirtualKeys(playerUUID,keyID,consumed);
-                    System.out.println(consumed);
+                        HuskyCrates.registry.removeVirtualKeys(playerUUID,keyID,consumed);
                     if(Sponge.getServer().getPlayer(playerUUID).isPresent()) {
                         Player player = Sponge.getServer().getPlayer(playerUUID).get();
                         player.sendMessage(
@@ -338,6 +340,7 @@ public class Crate {
     public boolean isPreviewable() {
         return previewable;
     }
+    public boolean previewShowsRewards() {return previewShowsRewardCount; }
 
     public ItemStack getCratePlacementBlock(ItemType itemType, int damage) {
         ItemStack stack = ItemStack.builder()
@@ -467,8 +470,10 @@ public class Crate {
             List<Text> oldLore = orig.getOrElse(Keys.ITEM_LORE,new ArrayList<>());
             double val = ((double)slots.get(j).getChance()/(double)slotChanceMax)*100;
             BigDecimal occurance = new BigDecimal(val).setScale(2,BigDecimal.ROUND_HALF_UP);
-            oldLore.add(Text.of(TextStyles.NONE,TextColors.GRAY,"Occurrence: " + ((val < 0.01)?"< 0.01":occurance.toString()) + "%"));
-            oldLore.add(Text.of(TextStyles.NONE,TextColors.GRAY,"Rewards: " + slots.get(j).getRewards().size()));
+            if (previewShowsRewardCount) {
+                oldLore.add(Text.of(TextStyles.NONE,TextColors.GRAY,"Rewards: " + slots.get(j).getRewards().size()));
+            }
+                oldLore.add(Text.of(TextStyles.NONE,TextColors.GRAY,"Occurrence: " + ((val < 0.01)?"< 0.01":occurance.toString()) + "%"));
             builder.addElement(new Element(ItemStack.builder().from(orig).add(Keys.ITEM_LORE,oldLore).build()));
         }
         Page built = builder.build("preview");
