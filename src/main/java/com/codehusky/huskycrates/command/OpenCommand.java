@@ -42,15 +42,12 @@ public class OpenCommand implements CommandExecutor {
                 return CommandResult.success();
             }
             else if(all.isPresent()){
-                int attemptedvalue = 0;
                 for(Player p : Sponge.getServer().getOnlinePlayers()){
                     if (keyLess){
                         crateU.launchView(crateU, p, p.getLocation());
-                        attemptedvalue++;
                     }
                     else{
                         commonChecks.tryCrateFromCrate(crateU, p);
-                        attemptedvalue++;
                     }
                 }
                 return CommandResult.success();
@@ -59,7 +56,6 @@ public class OpenCommand implements CommandExecutor {
                 crateU.launchView(crateU,playerToOpen, playerToOpen.getLocation());
                 return CommandResult.success();
             }
-            System.out.println("You Opened it from the SOURCE CAUSE");
             commonChecks.tryCrateFromCrate(crateU,playerToOpen);
         }
         else {

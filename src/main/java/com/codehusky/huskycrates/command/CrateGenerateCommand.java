@@ -142,7 +142,7 @@ public class CrateGenerateCommand implements CommandExecutor {
                             }
                         }catch(Exception e){
                             e.printStackTrace();
-                            System.out.println("Failed to create crate file!");
+                            HuskyCrates.instance.logger.error("Failed to create crate file!");
                             player.sendMessage(Text.of(TextColors.RED,"Failed to create crate file!"));
                         }
                     }
@@ -248,7 +248,7 @@ public class CrateGenerateCommand implements CommandExecutor {
 
                         }catch(Exception e){
                             e.printStackTrace();
-                            System.out.println("Failed to create crate file!");
+                            HuskyCrates.instance.logger.error("Failed to create crate file!");
                             player.sendMessage(Text.of(TextColors.RED,"Failed to create crate file!"));
                         }
                     }
