@@ -53,7 +53,7 @@ import java.util.function.Consumer;
 @Plugin(
         id="huskycrates",
         name = "HuskyCrates",
-        version = "2.0.0RC2",
+        version = "2.0.0RC3",
         description = "A Crate Plugin for Sponge!",
         dependencies = {@Dependency(id="huskyui",version = "0.6.0PRE4"), @Dependency(id="placeholderapi", optional = true)})
 public class HuskyCrates {

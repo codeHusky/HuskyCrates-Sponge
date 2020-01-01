@@ -27,6 +27,12 @@ public class CommandRegister {
                         .permission("huskycrates.block.base")
                         .build(),"b","blk","block","chest")
                 .child(CommandSpec.builder()
+                        .executor(new BlockCommand())
+                        .arguments(new CrateArgument(Text.of("crate")),
+                                GenericArguments.optionalWeak(GenericArguments.player(Text.of("player"))))
+                        .permission("huskycrates.wand.base")
+                        .build(),"w","wand")
+                .child(CommandSpec.builder()
                         .executor(new KeyCommand())
                         .arguments(GenericArguments.optionalWeak(GenericArguments.literal(Text.of("virtual"),"v")),
                                 GenericArguments.firstParsing(new CrateArgument(Text.of("crate")), new KeyArgument(Text.of("key"))),

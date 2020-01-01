@@ -352,6 +352,16 @@ public class Crate {
                 .build();
     }
 
+    public ItemStack getWandItem() {
+        ItemStack stack = ItemStack.builder()
+                .itemType(itemType)
+                .add(Keys.DISPLAY_NAME, Text.of(TextSerializers.FORMATTING_CODE.deserialize((this.name != null)?this.name:this.id)," Placement Block"))
+                .build();
+        return ItemStack.builder()
+                .fromContainer(stack.toContainer().set(DataQuery.of("UnsafeData","HCCRATEID"),this.id).set(DataQuery.of("UnsafeDamage"),damage))
+                .build();
+    }
+
     public ItemStack getCratePlacementBlock(int damage) {
         return this.getCratePlacementBlock(ItemTypes.CHEST,damage);
     }
