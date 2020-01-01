@@ -144,7 +144,7 @@ public class Checks {
                             player.sendMessage(crate.getMessages().format(Crate.Messages.Type.RejectionNeedKey,player));
                             return false;
                         }
-
+                        HuskyCrates.registry.consumeSecureKey(stack,toConsume);
                         return true;
                     }else{
                         player.playSound(SoundTypes.ENTITY_CAT_HISS,player.getPosition(),1.0);
