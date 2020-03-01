@@ -27,7 +27,7 @@ public class CommandRegister {
                         .permission("huskycrates.block.base")
                         .build(),"b","blk","block","chest")
                 .child(CommandSpec.builder()
-                        .executor(new BlockCommand())
+                        .executor(new WandCommand())
                         .arguments(new CrateArgument(Text.of("crate")),
                                 GenericArguments.optionalWeak(GenericArguments.player(Text.of("player"))))
                         .permission("huskycrates.wand.base")

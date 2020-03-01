@@ -354,11 +354,12 @@ public class Crate {
 
     public ItemStack getWandItem() {
         ItemStack stack = ItemStack.builder()
-                .itemType(itemType)
-                .add(Keys.DISPLAY_NAME, Text.of(TextSerializers.FORMATTING_CODE.deserialize((this.name != null)?this.name:this.id)," Placement Block"))
+                .itemType(ItemTypes.BLAZE_ROD)
+                .add(Keys.DISPLAY_NAME, Text.of(TextSerializers.FORMATTING_CODE.deserialize((this.name != null)?this.name:this.id)," Wand"))
+                .add(Keys.ITEM_LORE, Arrays.asList(Text.of("Right click to set entity"),Text.of("or crate. You can also remove"),Text.of("crates from entities or crates with this.")))
                 .build();
         return ItemStack.builder()
-                .fromContainer(stack.toContainer().set(DataQuery.of("UnsafeData","HCCRATEID"),this.id).set(DataQuery.of("UnsafeDamage"),damage))
+                .fromContainer(stack.toContainer().set(DataQuery.of("UnsafeData","HCCRATEID"),this.id))
                 .build();
     }
 
