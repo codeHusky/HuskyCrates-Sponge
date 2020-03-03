@@ -24,9 +24,15 @@ public class MainCommand implements CommandExecutor {
             }
             src.sendMessages(Text.of(TextColors.GOLD,"HuskyCrates Commands"),
                     Text.of(TextColors.YELLOW,"/hc reload"),
-                    Text.of(TextColors.YELLOW,"/hc block <crate> [block id] [user]"),
+                    Text.of(TextColors.YELLOW,"/hc block <crate> [block id] [user] [amount] [data value]"),
+                    Text.of(TextColors.YELLOW,"/hc wand <crate>"),
+                    Text.of(TextColors.YELLOW,"/hc open [\"nokey\"] <crate> [\"all\"/player]"),
                     Text.of(TextColors.YELLOW,"/hc key [v] <key/crate> [amount] [user or @a]"),
                     Text.of(TextColors.YELLOW,"/hc bal [user]"),
+                    Text.of(TextColors.YELLOW,"/hc nbt - prints NBT info of item in hand"),
+                    Text.of(TextColors.YELLOW,"/hc genitem - outputs config-formatted item of hand item data to file"),
+                    Text.of(TextColors.YELLOW,"/hc geninv - outputs config-formatted item of all inv items data to file"),
+                    Text.of(TextColors.YELLOW,"/hc gencrate - outputs config-formatted item of hand item data to file as crate"),
                     Text.of(TextColors.GRAY,"For more information or command aliases, review the documentation ",Text.builder().onClick(TextActions.openUrl(new URL("https://huskycrates.readthedocs.io/"))).append(Text.of(TextStyles.UNDERLINE,"here")).onHover(TextActions.showText(Text.of("https://huskycrates.readthedocs.io/"))).build(),"."));
         } catch (MalformedURLException e) {
             e.printStackTrace();
