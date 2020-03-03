@@ -42,9 +42,13 @@ public class CommandRegister {
                         .build(),"k","key")
                 .child(CommandSpec.builder()
                         .executor(new OpenCommand())
-                        .arguments(GenericArguments.optionalWeak(GenericArguments.literal(Text.of("keyless"),"nokey")),
+                        .arguments(
+                                GenericArguments.optionalWeak(GenericArguments.literal(Text.of("keyless"),"nokey")),
                                 new CrateArgument(Text.of("crate")),
-                                GenericArguments.optional(GenericArguments.firstParsing(GenericArguments.literal(Text.of("all"),"@a"), GenericArguments.player(Text.of("player")))))
+                                GenericArguments.optional(
+                                        GenericArguments.firstParsing(
+                                                GenericArguments.literal(Text.of("all"),"@a"),
+                                                GenericArguments.player(Text.of("player")))))
                         .permission("huskycrates.open.base")
                         .build(),"o","open","use")
                 .child(CommandSpec.builder()

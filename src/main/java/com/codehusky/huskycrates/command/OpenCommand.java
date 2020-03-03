@@ -32,10 +32,17 @@ public class OpenCommand implements CommandExecutor {
                 src.sendMessage(Text.of(TextColors.RED,"You do not have permission to open crates without consuming keys!"));
                 return CommandResult.success();
             }
-            Player playerToOpen = otherPlayer.orElse((Player) src);
+            if(!(src instanceof Player) && (!otherPlayer.isPresent())){
+                src.sendMessage(Text.of(TextColors.RED,"No valid player was specified. Only players can open crates via commands."));
+                return CommandResult.success();
+            }
+
+            Player playerToOpen;
             if(otherPlayer.isPresent() && !src.hasPermission("huskycrates.open.others")){
                 src.sendMessage(Text.of(TextColors.RED,"You do not have permission to open the crate for others!"));
                 return CommandResult.success();
+            }else {
+                playerToOpen = otherPlayer.orElseGet(() -> (Player) src);
             }
             if(all.isPresent() && !src.hasPermission("huskycrates.open.others.all")){
                 src.sendMessage(Text.of(TextColors.RED,"You do not have permission to open the crate for all players!"));
