@@ -8,6 +8,8 @@ import com.codehusky.huskycrates.crate.virtual.Key;
 import com.codehusky.huskycrates.crate.virtual.Slot;
 import com.codehusky.huskycrates.crate.virtual.effects.Effect;
 import com.codehusky.huskycrates.exception.DoubleRegistrationError;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.living.player.Player;
@@ -28,17 +30,17 @@ public class Registry {
     private HashMap<String, Crate> crates = new HashMap<>();
 
     private HashMap<UUID, HashMap<String, Integer>> virtualKeys = new HashMap<>();
-    private HashMap<UUID, HashSet<String>> dirtyVirtualKeys = new HashMap<>();
+    private Map<UUID, HashSet<String>> dirtyVirtualKeys = Maps.newConcurrentMap();
 
     private HashMap<UUID, Map.Entry<String,Integer>> keysInCirculation = new HashMap<>();
-    private HashSet<UUID> dirtyKeysInCirculation = new HashSet<>();
+    private Set<UUID> dirtyKeysInCirculation = Sets.newConcurrentHashSet();
 
     private HashMap<UUID, HashMap<String, Long>> lastCrateUse = new HashMap<>();
-    private HashMap<UUID, HashSet<String>> dirtyLastCrateUse = new HashMap<>();
+    private Map<UUID, HashSet<String>> dirtyLastCrateUse = Maps.newConcurrentMap();
 
     private HashMap<Location<World>, PhysicalCrate> physicalCrates = new HashMap<>();
 
-    private HashSet<Location<World>> dirtyPhysicalCrates = new HashSet<>();
+    private Set<Location<World>> dirtyPhysicalCrates = Sets.newConcurrentHashSet();
 
     private ArrayList<EffectInstance> effects = new ArrayList<>();
 
@@ -290,7 +292,7 @@ public class Registry {
      * methods for use in database management
      * @return
      */
-    public HashSet<Location<World>> getDirtyPhysicalCrates() {
+    public Set<Location<World>> getDirtyPhysicalCrates() {
         return dirtyPhysicalCrates;
     }
 
@@ -563,6 +565,7 @@ public class Registry {
                         uState.executeUpdate();
                     }
                 }
+                dirtyVirtualKeys.remove(entry);
             }
         virtualKeyConnection.close();
         }catch (SQLException e){
@@ -572,7 +575,6 @@ public class Registry {
             virtualKeyConnection.close();
         } catch (SQLException ignored){}
         }
-        dirtyVirtualKeys.clear();
     }
 
     public void pushDirty() {
@@ -620,8 +622,8 @@ public class Registry {
                     delState.setDouble(4,dcl.getZ());
                     delState.executeUpdate();
                 }
+                dirtyPhysicalCrates.remove(dcl);
             }
-            dirtyPhysicalCrates.clear();
 
             pushDirtyVirtualKeys();
 
@@ -646,14 +648,14 @@ public class Registry {
 
                         insertStatement.executeUpdate();
                     }
-                }else{
+                }else {
                     //removal
                     PreparedStatement delState = connection.prepareStatement("DELETE FROM VALIDKEYS WHERE keyUUID = ?");
-                    delState.setString(1,keyUUID.toString());
+                    delState.setString(1, keyUUID.toString());
                     delState.executeUpdate();
                 }
+                dirtyKeysInCirculation.remove(keyUUID);
             }
-            dirtyKeysInCirculation.clear();
 
             for(Map.Entry<UUID, HashSet<String>> entry : dirtyLastCrateUse.entrySet()){
                 UUID playerUUID = entry.getKey();
@@ -681,6 +683,7 @@ public class Registry {
                         insertStatement.executeUpdate();
                     }
                 }
+                dirtyLastCrateUse.remove(entry);
             }
 
             connection.close();

@@ -372,6 +372,7 @@ public class HuskyCrates {
         }).intervalTicks(1).async().submit(this);
 
         Sponge.getScheduler().createTaskBuilder()
+                .async()
                 .execute(registry::pushDirty)
                 .interval(1, TimeUnit.MINUTES)
                 .submit(this);
