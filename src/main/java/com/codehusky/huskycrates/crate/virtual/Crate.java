@@ -37,6 +37,8 @@ import java.util.*;
 public class Crate {
     private String id;
     private String name;
+    private String previewTextOccurrence;
+    private String previewTextRewardCount;
 
     private Hologram hologram;
 
@@ -197,9 +199,11 @@ public class Crate {
         }
 
         this.previewable = node.getNode("previewable").getBoolean(false);
+        this.previewTextOccurrence=node.getNode("previewTextOccurrence").getString("Occurrence: ");
+        this.previewTextRewardCount=node.getNode("previewTextRewardCount").getString("Rewards: ");
         this.previewShowsRewardCount = node.getNode("previewShowsRewardCount").getBoolean(true);
     }
-    public Crate(String id, String name, Hologram hologram, Effect idleEffect, Effect rejectEffect, Effect winEffect, Effect openEffect, List<Slot> slots, boolean scrambleSlots, boolean free, boolean previewable, boolean previewRewardCount, long cooldownSeconds, boolean useLocalKey, Key localKey, HashMap<String, Integer> acceptedKeys, ViewType viewType, ViewConfig viewConfig){
+    public Crate(String id, String name, Hologram hologram, Effect idleEffect, Effect rejectEffect, Effect winEffect, Effect openEffect, List<Slot> slots, boolean scrambleSlots, boolean free, boolean previewable, boolean previewRewardCount, long cooldownSeconds, boolean useLocalKey, Key localKey, HashMap<String, Integer> acceptedKeys, ViewType viewType, ViewConfig viewConfig,String previewTextOccurrence,String previewTextRewardCount){
         this.id = id;
         this.name = name;
         this.hologram = hologram;
@@ -225,12 +229,14 @@ public class Crate {
         this.acceptedKeys = acceptedKeys;
         this.viewType = viewType;
         this.viewConfig = viewConfig;
+        this.previewTextOccurrence=previewTextOccurrence;
+        this.previewTextRewardCount=previewTextRewardCount;
     }
 
     public Crate getScrambledCrate() {
         ArrayList<Slot> newSlots = new ArrayList<>(slots);
         Collections.shuffle(newSlots);
-        return new Crate(id,name,hologram,idleEffect,rejectEffect,winEffect,openEffect,newSlots,scrambleSlots,free,previewable,previewShowsRewardCount,cooldownSeconds,useLocalKey,localKey,acceptedKeys,viewType,viewConfig);
+        return new Crate(id,name,hologram,idleEffect,rejectEffect,winEffect,openEffect,newSlots,scrambleSlots,free,previewable,previewShowsRewardCount,cooldownSeconds,useLocalKey,localKey,acceptedKeys,viewType,viewConfig,previewTextOccurrence,previewTextRewardCount);
     }
     public boolean isScrambled() {
         return this.scrambleSlots;
@@ -482,9 +488,9 @@ public class Crate {
             double val = ((double)slots.get(j).getChance()/(double)slotChanceMax)*100;
             BigDecimal occurance = new BigDecimal(val).setScale(2,BigDecimal.ROUND_HALF_UP);
             if (previewShowsRewardCount) {
-                oldLore.add(Text.of(TextStyles.NONE,TextColors.GRAY,"Rewards: " + slots.get(j).getRewards().size()));
+                oldLore.add(TextSerializers.FORMATTING_CODE.deserialize("&r&7"+previewTextRewardCount + slots.get(j).getRewards().size()));
             }
-                oldLore.add(Text.of(TextStyles.NONE,TextColors.GRAY,"Occurrence: " + ((val < 0.01)?"< 0.01":occurance.toString()) + "%"));
+            oldLore.add(TextSerializers.FORMATTING_CODE.deserialize("&r&7"+previewTextOccurrence + ((val < 0.01)?"< 0.01":occurance.toString()) + "%"));
             builder.addElement(new Element(ItemStack.builder().from(orig).add(Keys.ITEM_LORE,oldLore).build()));
         }
         Page built = builder.build("preview");
