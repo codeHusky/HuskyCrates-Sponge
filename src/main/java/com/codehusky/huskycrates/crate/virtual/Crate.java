@@ -121,7 +121,7 @@ public class Crate {
             if(!node.getNode("localKey").isVirtual()){
                 this.localKey = new Key("LOCALKEY_" + this.id, new Item(node.getNode("localKey")),localKeyLaunchesCrate);
             }else{
-                this.localKey = new Key("LOCALKEY_" + this.id, new Item("&8" + this.name + " Key", ItemTypes.NETHER_STAR, null, 1, null, null, null, null),localKeyLaunchesCrate);
+                this.localKey = new Key("LOCALKEY_" + this.id, new Item("&8" + this.name + " Key", ItemTypes.NETHER_STAR, null, 1, null, null, null, null, null, null, null, null, null, null, null),localKeyLaunchesCrate);
             }
         }else if(aKeyNode.isVirtual() && !this.free){
             throw new ConfigParseError("Non-free crate has no accepted keys!",node.getPath());
