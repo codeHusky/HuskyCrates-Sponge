@@ -31,6 +31,14 @@ public class Item {
     private Integer count;
     private Integer damage; // or metadata or meta
     private Integer durability; // amount of durability left on tool, weapon, armor, etc.
+    private Boolean unbreakable; // never loss durability
+    private Boolean hideAttributes; //Hide attributes like damage (sword example)
+    private Boolean hideEnchantments; //Hide enchantments, this is for create effect enchant without showing the enchantment
+    private Boolean hideUnbreakable; //Hide unbreakable value
+    //Mainly put for rol/mmorpg servers
+    private Boolean hideCanDestroy; //For hand items. Example -> Pickaxe only can break stone.
+    private Boolean hideCanPlace; //For hand items. Example -> ladder only can place into iron_blocks
+    private Boolean hideMiscellaneous; //JD sponge is down. unknown
 
     private List<Enchantment> enchantments;
     private Map nbt;
@@ -52,11 +60,18 @@ public class Item {
                 stack.toContainer().getInt(DataQuery.of("UnsafeDamage")).orElse(null),
                 stack.get(Keys.ITEM_DURABILITY).orElse(null),
                 stack.get(Keys.ITEM_ENCHANTMENTS).orElse(null),
+                stack.get(Keys.UNBREAKABLE).orElse(null),
+                stack.get(Keys.HIDE_ATTRIBUTES).orElse(null),
+                stack.get(Keys.HIDE_CAN_DESTROY).orElse(null),
+                stack.get(Keys.HIDE_CAN_PLACE).orElse(null),
+                stack.get(Keys.HIDE_ENCHANTMENTS).orElse(null),
+                stack.get(Keys.HIDE_MISCELLANEOUS).orElse(null),
+                stack.get(Keys.HIDE_UNBREAKABLE).orElse(null),
                 stack.toContainer().getMap(DataQuery.of("UnsafeData")).orElse(null)
                 );
     }
     //TODO: builder pattern
-    public Item(String name, ItemType itemType, List<String> lore, Integer count, Integer damage, Integer durability, List<Enchantment> enchantments, Map nbt){
+    public Item(String name, ItemType itemType, List<String> lore, Integer count, Integer damage, Integer durability, List<Enchantment> enchantments, Boolean unbreakable,Boolean hideAttributes, Boolean hideCanDestroy, Boolean hideCanPlace, Boolean hideEnchantments, Boolean hideMiscellaneous, Boolean hideUnbreakable, Map nbt){
         this.name = name;
         if(name != null && name.length() == 0) this.name = null;
         this.itemType = itemType;
@@ -65,6 +80,13 @@ public class Item {
         this.damage = damage;
         this.durability = durability;
         this.enchantments = enchantments;
+        this.unbreakable = unbreakable;
+        this.hideAttributes= hideAttributes;
+        this.hideCanDestroy=hideCanDestroy;
+        this.hideCanPlace=hideCanPlace;
+        this.hideEnchantments=hideEnchantments;
+        this.hideMiscellaneous=hideMiscellaneous;
+        this.hideUnbreakable=hideUnbreakable;
         this.nbt = nbt;
         if(this.nbt instanceof ImmutableMap){
             this.nbt = Maps.newHashMap(this.nbt);
@@ -89,6 +111,13 @@ public class Item {
         this.count = node.getNode("count").getInt(1);
         this.damage = node.getNode("damage").getInt(node.getNode("meta").getInt(node.getNode("metadata").getInt()));
         this.durability = node.getNode("durability").getInt();
+        this.unbreakable=node.getNode("unbreakable").getBoolean();
+        this.hideAttributes=node.getNode("hide_attributes").getBoolean();
+        this.hideCanDestroy=node.getNode("hide_can_destroy").getBoolean();
+        this.hideCanPlace=node.getNode("hide_can_place").getBoolean();
+        this.hideEnchantments=node.getNode("hide_enchantments").getBoolean();
+        this.hideMiscellaneous=node.getNode("hide_miscellaneous").getBoolean();
+        this.hideUnbreakable=node.getNode("hide_unbreakable").getBoolean();
 
         if(!node.getNode("lore").isVirtual()){
             try {
@@ -140,6 +169,27 @@ public class Item {
         }
         if(this.enchantments != null){
             stack.offer(Keys.ITEM_ENCHANTMENTS,enchantments);
+            if(this.hideEnchantments != null){
+                stack.offer(Keys.HIDE_ENCHANTMENTS,hideEnchantments);
+            }
+        }
+        if(this.unbreakable != null){
+            stack.offer(Keys.UNBREAKABLE,false);
+            if(this.hideUnbreakable != null){
+                stack.offer(Keys.HIDE_UNBREAKABLE,hideUnbreakable);
+            }
+        }
+        if(this.hideAttributes != null){
+            stack.offer(Keys.HIDE_ATTRIBUTES,hideUnbreakable);
+        }
+        if(this.hideMiscellaneous != null){
+            stack.offer(Keys.HIDE_MISCELLANEOUS,hideMiscellaneous);
+        }
+        if(this.hideCanDestroy != null){
+            stack.offer(Keys.HIDE_CAN_DESTROY,hideCanDestroy);
+        }
+        if(this.hideCanPlace != null){
+            stack.offer(Keys.HIDE_CAN_PLACE,hideCanPlace);
         }
         if(this.nbt != null){
             DataContainer container = stack.toContainer();
