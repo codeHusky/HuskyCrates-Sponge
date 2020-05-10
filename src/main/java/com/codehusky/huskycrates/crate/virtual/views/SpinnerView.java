@@ -182,7 +182,7 @@ public class SpinnerView implements Consumer<Page> {
             if(!node.getNode("selectorItem").isVirtual()) {
                 this.selectorItem = new Item(node.getNode("selectorItem"));
             }else{
-                this.selectorItem = new Item("&6HuskyCrates", ItemTypes.REDSTONE_TORCH,null,1,null,null,null,null);
+                this.selectorItem = new Item("&6HuskyCrates", ItemTypes.REDSTONE_TORCH,null,1,null,null,null,null,null,null,null,null,null,null,null);
             }
             System.out.println(node.getNode("ticksToSelection").getValue());
             this.ticksToSelection = node.getNode("ticksToSelection").getInt(30);

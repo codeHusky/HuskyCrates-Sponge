@@ -10,7 +10,7 @@ public class ViewConfig {
         if(!node.getNode("borderItem").isVirtual())
             this.borderItem = new Item(node.getNode("borderItem"));
         else
-            this.borderItem = new Item("&6HuskyCrates", ItemTypes.STAINED_GLASS_PANE,null,1,15,null,null,null);
+            this.borderItem = new Item("&6HuskyCrates", ItemTypes.STAINED_GLASS_PANE,null,1,15,null,null,null,null,null,null,null,null,null,null);
     }
 
     public Item getBorderItem() {
