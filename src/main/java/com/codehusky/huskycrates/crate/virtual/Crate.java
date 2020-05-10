@@ -126,7 +126,7 @@ public class Crate {
         }else if(aKeyNode.isVirtual() && !this.free){
             throw new ConfigParseError("Non-free crate has no accepted keys!",node.getPath());
         }
-
+        
 
         if(node.getNode("slots").isVirtual()){
             if(!this.injection) {
