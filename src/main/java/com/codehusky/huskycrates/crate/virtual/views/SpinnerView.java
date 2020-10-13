@@ -184,7 +184,6 @@ public class SpinnerView implements Consumer<Page> {
             }else{
                 this.selectorItem = new Item("&6HuskyCrates", ItemTypes.REDSTONE_TORCH,null,1,null,null,null,null);
             }
-            System.out.println(node.getNode("ticksToSelection").getValue());
             this.ticksToSelection = node.getNode("ticksToSelection").getInt(30);
             this.tickDelayMultiplier = node.getNode("tickDelayMultiplier").getDouble(1.08);
             this.ticksToSelectionVariance = node.getNode("ticksToSelectionVariance").getInt(0);
