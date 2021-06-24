@@ -65,7 +65,6 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
         dependencies = {@Dependency(id="huskyui",version = "0.6.0PRE4"), @Dependency(id="placeholderapi", optional = true)})
 public class HuskyCrates {
 	// Added blockplace event to prevent keys to be placed 
-	// Added world load if world is not loaded (prevent hc being loaded before the worlds are, possible fix crates not recognized) 
 	
     //@Inject
     public Logger logger;
@@ -335,12 +334,6 @@ public class HuskyCrates {
     @Listener
     public void gameStarted(GameStartedServerEvent event) {
         logger.info("Loading Crates...");
-        // load unloaded worlds. ( try to avoid the invalid world error) 
-        Sponge.getServer().getWorlds().forEach(w -> {
-        	if(!w.isLoaded()) {
-        		Sponge.getServer().loadWorld(w.getUniqueId());
-        	}
-        });
         loadConfig();
 
 
