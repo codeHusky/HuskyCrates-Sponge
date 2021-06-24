@@ -56,7 +56,13 @@ public class SpinnerView implements Consumer<Page> {
                 .setInterrupt(() -> {
                     if(rewardGiven) return;
                     try {
-                        crate.getSlot(selectedSlot).rewardPlayer(player, this.physicalLocation);
+                    	// check if player has won, otherwise give the slot of selected slot + 4 (start from 1 if max is succeeded) 
+                    	// prevents player from picking their reward
+                    	if(hasWon) {
+                    		crate.getSlot(selectedSlot).rewardPlayer(player, this.physicalLocation);
+                    	}else {
+                    		crate.getSlot(selectedSlot+4 %crate.getSlots().size()).rewardPlayer(player, this.physicalLocation);
+                    	}
                         player.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, player.getLocation().getPosition(), 0.5);
                     }catch (Exception e){
                         e.printStackTrace();

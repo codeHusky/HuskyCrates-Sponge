@@ -12,6 +12,7 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -27,7 +28,7 @@ public class KeyCommand implements CommandExecutor {
         Optional<Integer> pamount = args.getOne(Text.of("amount"));
         boolean isVirtual = args.getOne(Text.of("virtual")).isPresent();
 
-        Optional<Player> player = args.getOne(Text.of("player"));
+        User player = (User)args.getOne(Text.of("player")).orElse(null);
         Optional<String> all = args.getOne(Text.of("all"));
 
         Key workingWith = null;
@@ -79,7 +80,7 @@ public class KeyCommand implements CommandExecutor {
             }
             src.sendMessage(HuskyCrates.keyCommandMessages.getMassKeyDeliverySuccess(deliveredTo,amount));
 
-        }else if(player.isPresent()){ /** Deliver keys to a player **/
+        }else if(player!=null){ /** Deliver keys to a player **/
             if(!src.hasPermission("huskycrates.key.others")){
                 src.sendMessage(Text.of(TextColors.RED,"You do not have permission to give others keys."));
                 return CommandResult.success();
@@ -87,15 +88,25 @@ public class KeyCommand implements CommandExecutor {
             InventoryTransactionResult result = null;
 
             if(!isVirtual)
-                result = Util.getHotbarFirst(player.get().getInventory()).offer(workingWith.getKeyItemStack(amount));
+            	result = Util.getHotbarFirst(player.getInventory()).offer(workingWith.getKeyItemStack(amount));	
             else
-                HuskyCrates.registry.addVirtualKeys(player.get().getUniqueId(),workingWith.getId(),amount);
+                HuskyCrates.registry.addVirtualKeys(player.getUniqueId(),workingWith.getId(),amount);
 
             if(!isVirtual && result.getType() != InventoryTransactionResult.Type.SUCCESS){
-                src.sendMessage(HuskyCrates.keyCommandMessages.getKeyDeliveryFail(player.get().getName(),amount));
+            	// on fail, check if it's full space and add not enough space if inventory full, making more clear if target has full inventory
+            	if(player.getInventory().first().canFit(workingWith.getKeyItemStack(amount))) {
+                    src.sendMessage(HuskyCrates.keyCommandMessages.getKeyDeliveryFail(player.getName(),amount).concat(Text.of(" (Not enough space)")));
+            	}else {
+                    src.sendMessage(HuskyCrates.keyCommandMessages.getKeyDeliveryFail(player.getName(),amount));
+
+            	}
             }else{
-                player.get().sendMessage(HuskyCrates.keyCommandMessages.getReceivedKey(keyName,amount));
-                src.sendMessage(HuskyCrates.keyCommandMessages.getKeyDeliverySuccess(player.get().getName(),amount));
+            	if(player.isOnline() ){ // Send message if player (user) is online
+            		player.getPlayer().get().sendMessage(HuskyCrates.keyCommandMessages.getReceivedKey(keyName,amount));
+            	}
+                HuskyCrates.registry.addVirtualKeys(player.getUniqueId(),workingWith.getId(),amount);
+
+                src.sendMessage(HuskyCrates.keyCommandMessages.getKeyDeliverySuccess(player.getName(),amount));
             }
 
         }else if(src instanceof Player) { /** Deliver keys to self **/
