@@ -23,6 +23,7 @@ import java.util.Optional;
 public class KeyCommand implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+    	// change player to user and add "(not enough space)" to getKeyDeliveryFail when issue of not giving key is full inventory
         Optional<Crate> crate = args.getOne(Text.of("crate"));
         Optional<Key> key = args.getOne(Text.of("key"));
         Optional<Integer> pamount = args.getOne(Text.of("amount"));

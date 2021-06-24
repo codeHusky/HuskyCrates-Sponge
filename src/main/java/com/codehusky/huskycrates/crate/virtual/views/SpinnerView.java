@@ -35,6 +35,7 @@ public class SpinnerView implements Consumer<Page> {
     private Config config;
 
     public SpinnerView(Crate ucrate, Player player, Location loc){
+    	// Added if-clause at interrupt, to prevent players from "picking" a reward by closing gui
         this.crate = ucrate;
         if(this.crate.isScrambled()){
             this.crate = ucrate.getScrambledCrate();
@@ -56,12 +57,12 @@ public class SpinnerView implements Consumer<Page> {
                 .setInterrupt(() -> {
                     if(rewardGiven) return;
                     try {
-                    	// check if player has won, otherwise give the slot of selected slot + 4 (start from 1 if max is succeeded) 
+                    	// check if player has won, otherwise give the slot of selected slot + 4 (restarts when max slots is succeeded)
                     	// prevents player from picking their reward
                     	if(hasWon) {
                     		crate.getSlot(selectedSlot).rewardPlayer(player, this.physicalLocation);
                     	}else {
-                    		crate.getSlot(selectedSlot+4 %crate.getSlots().size()).rewardPlayer(player, this.physicalLocation);
+                    		crate.getSlot(selectedSlot+4 %(crate.getSlots().size()-1)).rewardPlayer(player, this.physicalLocation);
                     	}
                         player.playSound(SoundTypes.ENTITY_EXPERIENCE_ORB_PICKUP, player.getLocation().getPosition(), 0.5);
                     }catch (Exception e){

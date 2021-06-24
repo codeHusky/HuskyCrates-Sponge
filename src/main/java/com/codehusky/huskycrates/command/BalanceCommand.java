@@ -24,11 +24,8 @@ import java.util.UUID;
 public class BalanceCommand implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-        /*
-         .arguments(GenericArguments.optionalWeak(GenericArguments.user(Text.of("player"))),
-                    GenericArguments.optionalWeak(GenericArguments.uuid(Text.of("uuid"))),
-                    GenericArguments.optionalWeak(GenericArguments.string(Text.of("username"))))
-         */
+
+    	// Added bal others + fix username + change player to user
         User user = (User)args.getOne(Text.of("player")).orElse(null); // default null
         UUID uuid = (UUID)args.getOne(Text.of("uuid")).orElse(null); // default null
         String username = (String)args.getOne(Text.of("username")).orElse(null);

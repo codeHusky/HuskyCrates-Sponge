@@ -64,6 +64,9 @@ import ninja.leaping.configurate.loader.ConfigurationLoader;
         description = "A Crate Plugin for Sponge!",
         dependencies = {@Dependency(id="huskyui",version = "0.6.0PRE4"), @Dependency(id="placeholderapi", optional = true)})
 public class HuskyCrates {
+	// Added blockplace event to prevent keys to be placed 
+	// Added world load if world is not loaded (prevent hc being loaded before the worlds are, possible fix crates not recognized) 
+	
     //@Inject
     public Logger logger;
 

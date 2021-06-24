@@ -35,6 +35,8 @@ import java.math.BigDecimal;
 import java.util.*;
 
 public class Crate {
+	
+	// change slotChanceMax to double, prevent wrong chances being displayed
     private String id;
     private String name;
 
