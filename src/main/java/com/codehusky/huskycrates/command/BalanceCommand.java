@@ -2,6 +2,8 @@ package com.codehusky.huskycrates.command;
 
 import com.codehusky.huskycrates.HuskyCrates;
 import ninja.leaping.configurate.ConfigurationNode;
+
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -9,6 +11,7 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.serializer.TextSerializers;
@@ -21,38 +24,53 @@ import java.util.UUID;
 public class BalanceCommand implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-        /*
-         .arguments(GenericArguments.optionalWeak(GenericArguments.user(Text.of("player"))),
-                    GenericArguments.optionalWeak(GenericArguments.uuid(Text.of("uuid"))),
-                    GenericArguments.optionalWeak(GenericArguments.string(Text.of("username"))))
-         */
-        Optional<User> user = args.getOne(Text.of("player"));
-        Optional<UUID> uuid = args.getOne(Text.of("uuid"));
-        Optional<String> username = args.getOne(Text.of("username"));
+
+    	// Added bal others + fix username + change player to user
+        User user = (User)args.getOne(Text.of("player")).orElse(null); // default null
+        UUID uuid = (UUID)args.getOne(Text.of("uuid")).orElse(null); // default null
+        String username = (String)args.getOne(Text.of("username")).orElse(null);
 
         UUID balanceToUse = (src instanceof Player)?((Player) src).getUniqueId():null;
 
-        if(user.isPresent()){
+        if(user != null){ 
             if(!src.hasPermission("huskycrates.bal.others")){
                 src.sendMessage(Text.of(TextColors.RED,"You do not have permission to view the balance of others."));
                 return CommandResult.success();
             }
-
-            src.sendMessage(HuskyCrates.balanceCommandMessages.getOtherBalanceHeader(user.get().getName()));
-        }else if(uuid.isPresent()){
+            // overwrite balance to check
+            balanceToUse = user.getUniqueId();
+            src.sendMessage(HuskyCrates.balanceCommandMessages.getOtherBalanceHeader(user.getName()));
+        }else if(uuid != null){
             if(!src.hasPermission("huskycrates.bal.others")){
                 src.sendMessage(Text.of(TextColors.RED,"You do not have permission to view the balance of others."));
                 return CommandResult.success();
             }
-
-            src.sendMessage(HuskyCrates.balanceCommandMessages.getUUIDBalanceHeader(uuid.get().toString()));
-        }else if(username.isPresent()){
+            // overwrite balance to check
+            balanceToUse = uuid;
+            src.sendMessage(HuskyCrates.balanceCommandMessages.getUUIDBalanceHeader(uuid.toString()));
+        }else if(username != null){
             if(!src.hasPermission("huskycrates.bal.others")){
                 src.sendMessage(Text.of(TextColors.RED,"You do not have permission to view the balance of others."));
                 return CommandResult.success();
             }
+            
+            // Get user by (last known) username
+            Optional<UserStorageService> service = Sponge.getServiceManager().provide(UserStorageService.class);
+            if( service.get() != null&& service.isPresent() ) {
+            	User us = service.get().get(username).isPresent()?service.get().get(username).get():null;
+            	if(us == null) { // user does not exist
+                    src.sendMessage(HuskyCrates.balanceCommandMessages.getUserNotExist(username));
+                    return CommandResult.success();
+            	}
+            	// user does exist
+                src.sendMessage(HuskyCrates.balanceCommandMessages.getUUIDBalanceHeader(us.getName()));
+                // overwrite balance to check
+                balanceToUse = us.getUniqueId();
+            }else { // no service, so no user
+                src.sendMessage(HuskyCrates.balanceCommandMessages.getUserNotExist(username));
+                return CommandResult.success();
+            }
 
-            src.sendMessage(HuskyCrates.balanceCommandMessages.getUserNotExist(username.get()));
             return CommandResult.success();
         }else{
             src.sendMessage(HuskyCrates.balanceCommandMessages.getSelfBalanceHeader());
@@ -66,8 +84,10 @@ public class BalanceCommand implements CommandExecutor {
         HashMap<String, Integer> balances = HuskyCrates.registry.getVirtualKeyBalances(balanceToUse);
 
         for(Map.Entry<String, Integer> entry : balances.entrySet()){
-            String keyID = entry.getKey();
-            src.sendMessage(HuskyCrates.balanceCommandMessages.getBalanceRow(HuskyCrates.registry.getKey(keyID).getName(),keyID,entry.getValue()));
+        	if(entry.getValue() > 0) { // decrease huge lists with 0 keys
+                String keyID = entry.getKey();
+                src.sendMessage(HuskyCrates.balanceCommandMessages.getBalanceRow(HuskyCrates.registry.getKey(keyID).getName(),keyID,entry.getValue()));
+        	}
         }
 
         if(balances.size() == 0){

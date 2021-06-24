@@ -36,7 +36,8 @@ public class CommandRegister {
                         .executor(new KeyCommand())
                         .arguments(GenericArguments.optionalWeak(GenericArguments.literal(Text.of("virtual"),"v")),
                                 GenericArguments.firstParsing(new CrateArgument(Text.of("crate")), new KeyArgument(Text.of("key"))),
-                                GenericArguments.optional(GenericArguments.firstParsing(GenericArguments.literal(Text.of("all"),"@a"), GenericArguments.player(Text.of("player")))),
+                                // user to check offline players balances
+                                GenericArguments.optional(GenericArguments.firstParsing(GenericArguments.literal(Text.of("all"),"@a"), GenericArguments.user(Text.of("player")))),
                                 GenericArguments.optionalWeak(GenericArguments.integer(Text.of("amount"))))
                         .permission("huskycrates.key.base")
                         .build(),"k","key")
@@ -53,6 +54,7 @@ public class CommandRegister {
                         .build(),"o","open","use")
                 .child(CommandSpec.builder()
                         .executor(new BalanceCommand())
+                        // change player to user for offline user
                         .arguments(GenericArguments.optionalWeak(GenericArguments.user(Text.of("player"))),
                                 GenericArguments.optionalWeak(GenericArguments.uuid(Text.of("uuid"))),
                                 GenericArguments.optionalWeak(GenericArguments.string(Text.of("username"))))

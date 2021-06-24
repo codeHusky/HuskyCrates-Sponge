@@ -35,6 +35,8 @@ import java.math.BigDecimal;
 import java.util.*;
 
 public class Crate {
+	
+	// change slotChanceMax to double, prevent wrong chances being displayed
     private String id;
     private String name;
 
@@ -47,7 +49,7 @@ public class Crate {
 
     private List<Slot> slots;
 
-    private int slotChanceMax = 0;
+    private double slotChanceMax = 0;
 
     private Boolean scrambleSlots;
 
@@ -260,7 +262,7 @@ public class Crate {
 
     public int selectSlot() {
         int chanceCuml = 0;
-        int selection = new Random().nextInt(slotChanceMax+1);
+        int selection = new Random().nextInt((int)Math.floor(slotChanceMax+1));
         for(int i = 0; i < slots.size(); i++){
             chanceCuml += slots.get(i).getChance();
             if(selection <= chanceCuml){
@@ -479,7 +481,7 @@ public class Crate {
         for(int j = 0; j  < slots.size(); j++) {
             ItemStack orig = slots.get(j).getDisplayItem().toItemStack();
             List<Text> oldLore = orig.getOrElse(Keys.ITEM_LORE,new ArrayList<>());
-            double val = ((double)slots.get(j).getChance()/(double)slotChanceMax)*100;
+            double val = (slots.get(j).getChance() / slotChanceMax)*100;
             BigDecimal occurance = new BigDecimal(val).setScale(2,BigDecimal.ROUND_HALF_UP);
             if (previewShowsRewardCount) {
                 oldLore.add(Text.of(TextStyles.NONE,TextColors.GRAY,"Rewards: " + slots.get(j).getRewards().size()));

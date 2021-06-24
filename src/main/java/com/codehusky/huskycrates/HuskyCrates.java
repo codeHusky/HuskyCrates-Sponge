@@ -1,5 +1,43 @@
 package com.codehusky.huskycrates;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.config.DefaultConfig;
+import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.game.GameReloadEvent;
+import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
+import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStartedServerEvent;
+import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.plugin.Dependency;
+import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+
 import com.codehusky.huskycrates.command.BalanceCommand;
 import com.codehusky.huskycrates.command.BlockCommand;
 import com.codehusky.huskycrates.command.CommandRegister;
@@ -13,41 +51,10 @@ import com.codehusky.huskycrates.crate.virtual.Key;
 import com.codehusky.huskycrates.event.CrateInjectionEvent;
 import com.codehusky.huskycrates.exception.ConfigParseError;
 import com.google.inject.Inject;
+
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.config.ConfigDir;
-import org.spongepowered.api.config.DefaultConfig;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.game.GameReloadEvent;
-import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
-import org.spongepowered.api.event.game.state.GameStartedServerEvent;
-import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
-import org.spongepowered.api.plugin.Dependency;
-import org.spongepowered.api.plugin.Plugin;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 
 @Plugin(
@@ -57,6 +64,8 @@ import java.util.function.Consumer;
         description = "A Crate Plugin for Sponge!",
         dependencies = {@Dependency(id="huskyui",version = "0.6.0PRE4"), @Dependency(id="placeholderapi", optional = true)})
 public class HuskyCrates {
+	// Added blockplace event to prevent keys to be placed 
+	
     //@Inject
     public Logger logger;
 
@@ -148,7 +157,8 @@ public class HuskyCrates {
     private int iterations = 0;
     private long lastMessage = 0;
     @Listener
-    public void gamePostInit(GamePreInitializationEvent event){
+    // pre to post, prevent hc from being loaded before worlds are loaded
+    public void gamePostInit(GamePostInitializationEvent event){ 
         crateListeners = new CrateListeners();
         Sponge.getEventManager().registerListeners(this,crateListeners);
     }
@@ -421,4 +431,25 @@ public class HuskyCrates {
         logger.info("HuskyCrates has shut down.");
     }
 
+/**
+ * 
+ * Prevent block placement if block is a (potential) key (no accidental loss in keys by placement (lever, tripwire-hook ... ) )
+ * @param e
+ * 
+ */
+	@Listener
+	public void onBlockPlaced(ChangeBlockEvent.Place e) {
+		if (e.getSource() instanceof Player) { 
+			ItemStackSnapshot item = e.getCause().getContext().get(EventContextKeys.USED_ITEM).orElse(null); // get item placed
+			if (item == null) { //check if item not null (prevent possible issues by wrong place detection) 
+				return;
+			}
+
+			if (item.toContainer().get(DataQuery.of("UnsafeData", "HCKEYID")).isPresent()) { // check if item is a key
+				e.setCancelled(true); // cancel the block placement.
+			}
+
+
+		}
+	}
 }
